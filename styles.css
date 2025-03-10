@@ -56,7 +56,7 @@ body {
     justify-content: center;
     align-items: center;
     position: absolute;
-    bottom: 20px;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
@@ -130,6 +130,8 @@ button {
 .order-list {
     width: 100%;
     margin-bottom: 70px;
+    overflow-y: scroll;
+    margin-top: 20px;
 }
 
 .order-item {
@@ -469,7 +471,6 @@ button {
     border: 2px solid #ffd700;
     border-radius: 10px;
     padding: 20px;
-    margin: 20px 0;
     max-width: 600px;
     width: 100%;
 }
@@ -509,8 +510,12 @@ button {
     width: 200px;
 }
 
+h2 {
+    text-align: center;
+    margin-top: 5px;
+}
+
 #saveSettingsBtn {
-    margin: 20px 0;
     width: 100%;
     padding: 15px;
 }

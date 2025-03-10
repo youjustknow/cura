@@ -62,9 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backToMainBtn = document.getElementById('backToMainBtn');
     const showSettingsBtn = document.getElementById('showSettingsBtn');
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-    const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
-    const exitRouteBtn = document.getElementById('exitRouteBtn');
-    const exitFormBtn = document.getElementById('exitFormBtn');
 
     // Контейнеры для списков заказов
     const orderList = document.getElementById('orderList');
@@ -329,6 +326,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция для геокодирования адреса с подробной обработкой ошибок
     async function geocodeAddress(address) {
+        address = `Нижний Новгород, ${address}`;
+
         try {
             console.log(`Отправка запроса геокодирования для адреса: ${address}`);
 
@@ -581,29 +580,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (backFromSettingsBtn) {
-        backFromSettingsBtn.addEventListener('click', () => {
-            showScreen('initial');
-        });
-    }
-
-    // Обработчик для кнопки выхода из маршрута
-    if (exitRouteBtn) {
-        exitRouteBtn.addEventListener('click', async () => {
-            const confirmed = await showConfirm('Вы уверены, что хотите выйти из текущего маршрута? Прогресс будет сохранен.');
-            if (confirmed) {
-                showScreen('orderList');
-            }
-        });
-    }
-
-    // Обработчик для кнопки выхода из формы
-    if (exitFormBtn) {
-        exitFormBtn.addEventListener('click', () => {
-            showScreen('orderList');
-        });
-    }
-
     // Функции для работы с модальными окнами
     function showAlert(message) {
         const modal = document.getElementById('alertModal');
@@ -641,25 +617,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.classList.add('hidden');
                 resolve(false);
             };
-        });
-    }
-
-    // Обработчик для кнопки сброса сессии
-    const resetSessionBtn = document.getElementById('resetSessionBtn');
-    if (resetSessionBtn) {
-        resetSessionBtn.addEventListener('click', async () => {
-            const confirmed = await showConfirm('Вы уверены, что хотите сбросить текущую сессию? Все несохраненные данные будут потеряны.');
-            if (confirmed) {
-                localStorage.removeItem('currentRouteStartTime');
-                localStorage.removeItem('currentRoute');
-                routeHistory = [];
-                localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
-                showAlert('Сессия успешно сброшена').then(() => {
-                    setActiveMenuButton(showMainBtn);
-                    showScreen('initial');
-                    sidebar.classList.remove('open');
-                });
-            }
         });
     }
 
@@ -960,13 +917,6 @@ document.addEventListener('DOMContentLoaded', function() {
             orders = [];
             routeStartTime = null;
 
-            showScreen('initial');
-        });
-    }
-
-    // Обработчик для кнопки возврата на главный экран
-    if (backToMainBtn) {
-        backToMainBtn.addEventListener('click', () => {
             showScreen('initial');
         });
     }
