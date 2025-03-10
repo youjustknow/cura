@@ -247,8 +247,29 @@
                 </div>
 
                 <div class="stats-section">
-                    <h3>График доходов по дням</h3>
-                    <div id="earningsChart" class="stats-chart"></div>
+                    <h3>График доходов</h3>
+                    <div class="stats-chart">
+                        <canvas id="earningsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <h3>Статистика по дням недели</h3>
+                    <div class="stats-chart">
+                        <canvas id="weekdayChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <h3>Распределение заказов</h3>
+                    <div class="stats-grid">
+                        <div class="stats-chart" style="height: 250px;">
+                            <canvas id="ordersDistributionChart"></canvas>
+                        </div>
+                        <div class="stats-chart" style="height: 250px;">
+                            <canvas id="weightDistributionChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -378,6 +399,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

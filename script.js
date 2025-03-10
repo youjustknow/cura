@@ -1536,62 +1536,289 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('bestShift').textContent = bestShiftDate ? 
             `${bestShiftDate.toLocaleDateString()} (${bestShiftEarnings}₽)` : '-';
 
-        // Отрисовка графика
+        // Отрисовка графиков
         renderEarningsChart(dailyEarnings);
+        renderWeekdayChart(completedShifts);
+        renderOrdersDistributionChart(completedShifts);
+        renderWeightDistributionChart(completedShifts);
     }
 
     // Функция отрисовки графика доходов
     function renderEarningsChart(dailyEarnings) {
-        const chartContainer = document.getElementById('earningsChart');
-        chartContainer.innerHTML = '';
-
+        const ctx = document.getElementById('earningsChart').getContext('2d');
+        
         // Получаем последние 7 дней
         const dates = Object.keys(dailyEarnings).sort().slice(-7);
-        const maxEarnings = Math.max(...Object.values(dailyEarnings));
+        const earnings = dates.map(date => dailyEarnings[date] || 0);
 
-        // Создаем график
-        const chart = document.createElement('div');
-        chart.style.display = 'flex';
-        chart.style.alignItems = 'flex-end';
-        chart.style.height = '100%';
-        chart.style.gap = '10px';
-        chart.style.padding = '10px';
+        // Уничтожаем предыдущий график, если он существует
+        if (window.earningsChart instanceof Chart) {
+            window.earningsChart.destroy();
+        }
 
-        dates.forEach(date => {
-            const earnings = dailyEarnings[date] || 0;
-            const height = (earnings / maxEarnings * 100) || 0;
+        window.earningsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates.map(date => new Date(date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+                datasets: [{
+                    label: 'Доход',
+                    data: earnings,
+                    backgroundColor: '#ffd700',
+                    borderColor: '#ffd700',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#555'
+                        },
+                        ticks: {
+                            color: '#ccc',
+                            callback: value => `${value}₽`
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#ccc'
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-            const bar = document.createElement('div');
-            bar.style.flex = '1';
-            bar.style.display = 'flex';
-            bar.style.flexDirection = 'column';
-            bar.style.alignItems = 'center';
-            bar.style.gap = '5px';
-
-            const barValue = document.createElement('div');
-            barValue.textContent = `${earnings}₽`;
-            barValue.style.color = '#ccc';
-            barValue.style.fontSize = '12px';
-
-            const barColumn = document.createElement('div');
-            barColumn.style.width = '100%';
-            barColumn.style.height = `${height}%`;
-            barColumn.style.backgroundColor = '#ffd700';
-            barColumn.style.borderRadius = '4px';
-            barColumn.style.transition = 'height 0.3s ease';
-
-            const barDate = document.createElement('div');
-            barDate.textContent = new Date(date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-            barDate.style.color = '#ccc';
-            barDate.style.fontSize = '12px';
-
-            bar.appendChild(barValue);
-            bar.appendChild(barColumn);
-            bar.appendChild(barDate);
-            chart.appendChild(bar);
+    // Функция отрисовки графика по дням недели
+    function renderWeekdayChart(completedShifts) {
+        const ctx = document.getElementById('weekdayChart').getContext('2d');
+        
+        // Подготавливаем данные по дням недели
+        const weekdayData = Array(7).fill(0);
+        const weekdayCounts = Array(7).fill(0);
+        
+        completedShifts.forEach(shift => {
+            const dayOfWeek = shift.startTime.getDay();
+            weekdayData[dayOfWeek] += shift.totalIncome;
+            weekdayCounts[dayOfWeek]++;
         });
 
-        chartContainer.appendChild(chart);
+        // Рассчитываем средний доход по дням недели
+        const averageWeekdayData = weekdayData.map((total, index) => 
+            weekdayCounts[index] > 0 ? Math.round(total / weekdayCounts[index]) : 0
+        );
+
+        const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+        // Уничтожаем предыдущий график, если он существует
+        if (window.weekdayChart instanceof Chart) {
+            window.weekdayChart.destroy();
+        }
+
+        window.weekdayChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weekdays,
+                datasets: [{
+                    label: 'Средний доход',
+                    data: averageWeekdayData,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#555'
+                        },
+                        ticks: {
+                            color: '#ccc',
+                            callback: value => `${value}₽`
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#ccc'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Функция отрисовки графика распределения заказов
+    function renderOrdersDistributionChart(completedShifts) {
+        const ctx = document.getElementById('ordersDistributionChart').getContext('2d');
+        
+        // Подготавливаем данные о количестве заказов по часам
+        const hourlyOrders = Array(24).fill(0);
+        
+        completedShifts.forEach(shift => {
+            shift.routes.forEach(route => {
+                route.orders.forEach(order => {
+                    const hour = new Date(route.startTime).getHours();
+                    hourlyOrders[hour]++;
+                });
+            });
+        });
+
+        // Уничтожаем предыдущий график, если он существует
+        if (window.ordersDistributionChart instanceof Chart) {
+            window.ordersDistributionChart.destroy();
+        }
+
+        window.ordersDistributionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Количество заказов',
+                    data: hourlyOrders,
+                    backgroundColor: '#2196F3',
+                    borderColor: '#2196F3',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Распределение заказов по часам',
+                        color: '#ccc',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#555'
+                        },
+                        ticks: {
+                            color: '#ccc'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#ccc',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Функция отрисовки графика распределения веса
+    function renderWeightDistributionChart(completedShifts) {
+        const ctx = document.getElementById('weightDistributionChart').getContext('2d');
+        
+        // Подготавливаем данные о весе заказов
+        const weightRanges = {
+            '0-1': 0,
+            '1-3': 0,
+            '3-5': 0,
+            '5-10': 0,
+            '10+': 0
+        };
+        
+        completedShifts.forEach(shift => {
+            shift.routes.forEach(route => {
+                route.orders.forEach(order => {
+                    const weight = order.weight;
+                    if (weight <= 1) weightRanges['0-1']++;
+                    else if (weight <= 3) weightRanges['1-3']++;
+                    else if (weight <= 5) weightRanges['3-5']++;
+                    else if (weight <= 10) weightRanges['5-10']++;
+                    else weightRanges['10+']++;
+                });
+            });
+        });
+
+        // Уничтожаем предыдущий график, если он существует
+        if (window.weightDistributionChart instanceof Chart) {
+            window.weightDistributionChart.destroy();
+        }
+
+        window.weightDistributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(weightRanges).map(range => `${range} кг`),
+                datasets: [{
+                    data: Object.values(weightRanges),
+                    backgroundColor: [
+                        '#4CAF50',
+                        '#8BC34A',
+                        '#CDDC39',
+                        '#FFEB3B',
+                        '#FFC107'
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#333'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#ccc',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Распределение заказов по весу',
+                        color: '#ccc',
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // Инициализация
