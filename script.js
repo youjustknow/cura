@@ -114,6 +114,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const executionTimeElement = document.getElementById('executionTime');
     const totalIncomeElement = document.getElementById('totalIncome');
 
+    // Добавляем новые элементы интерфейса
+    const shiftInfoBtn = document.getElementById('shiftInfoBtn');
+    const shiftInfoModal = document.getElementById('shiftInfoModal');
+    const shiftInfoCloseBtn = document.getElementById('shiftInfoCloseBtn');
+    const shiftStartTime = document.getElementById('shiftStartTime');
+    const shiftDuration = document.getElementById('shiftDuration');
+    const currentShiftIncome = document.getElementById('currentShiftIncome');
+    const currentHourlyIncome = document.getElementById('currentHourlyIncome');
+    const predictedIncome = document.getElementById('predictedIncome');
+
+    // Добавляем новые элементы интерфейса для выбора времени
+    const shiftTimeModal = document.getElementById('shiftTimeModal');
+    const shiftStartTimeInput = document.getElementById('shiftStartTimeInput');
+    const shiftEndTimeInput = document.getElementById('shiftEndTimeInput');
+    const confirmShiftTimeBtn = document.getElementById('confirmShiftTimeBtn');
+    const cancelShiftTimeBtn = document.getElementById('cancelShiftTimeBtn');
+
     // Данные приложения
     let orders = [];
     let routeStartTime = null;
@@ -1046,12 +1063,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция начала смены
     function startShift() {
+        const now = new Date();
+        const [startHours, startMinutes] = shiftStartTimeInput.value.split(':');
+        const [endHours, endMinutes] = shiftEndTimeInput.value.split(':');
+
+        // Устанавливаем время начала и конца смены
+        const startTime = new Date(now);
+        startTime.setHours(parseInt(startHours), parseInt(startMinutes), 0);
+
+        const endTime = new Date(now);
+        endTime.setHours(parseInt(endHours), parseInt(endMinutes), 0);
+
+        // Если конец смены раньше начала, добавляем день к концу
+        if (endTime < startTime) {
+            endTime.setDate(endTime.getDate() + 1);
+        }
+
         currentShift = {
             id: shiftsHistory.length + 1,
-            startTime: new Date(),
+            startTime: startTime,
+            plannedEndTime: endTime,
             routes: [],
             totalIncome: 0
         };
+
         localStorage.setItem('currentShift', JSON.stringify(currentShift));
         updateShiftControls();
     }
@@ -1085,10 +1120,12 @@ document.addEventListener('DOMContentLoaded', function() {
             startShiftBtn.classList.add('hidden');
             endShiftBtn.classList.remove('hidden');
             addOrderBtn.classList.remove('hidden');
+            shiftInfoBtn.classList.remove('hidden');
         } else {
             startShiftBtn.classList.remove('hidden');
             endShiftBtn.classList.add('hidden');
             addOrderBtn.classList.add('hidden');
+            shiftInfoBtn.classList.add('hidden');
         }
     }
 
@@ -1096,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderShiftsHistory() {
         shiftsHistoryList.innerHTML = '';
 
-        shiftsHistory.sort((a, b) => b.startTime - a.startTime).forEach(shift => {
+        shiftsHistory.sort((a, b) => b.endTime - a.endTime).forEach(shift => {
             const shiftElement = document.createElement('div');
             shiftElement.className = 'shift-group';
 
@@ -1212,8 +1249,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчики для кнопок управления сменой
     if (startShiftBtn) {
         startShiftBtn.addEventListener('click', () => {
-            startShift();
-            showAlert('Смена начата');
+            shiftTimeModal.classList.remove('hidden');
         });
     }
 
@@ -1231,6 +1267,87 @@ document.addEventListener('DOMContentLoaded', function() {
             renderShiftsHistory();
             showScreen('shiftsHistory');
             sidebar.classList.remove('open');
+        });
+    }
+
+    // Функция для форматирования длительности
+    function formatDuration(milliseconds) {
+        const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+        const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}ч ${minutes}м`;
+    }
+
+    // Обновляем функцию расчета информации о смене
+    function calculateShiftInfo() {
+        if (!currentShift) return null;
+
+        const now = new Date();
+        const duration = now - currentShift.startTime;
+        const durationHours = duration / (1000 * 60 * 60);
+        
+        // Расчет текущего дохода
+        const currentIncome = currentShift.routes.reduce((sum, route) => sum + route.income, 0);
+        
+        // Расчет дохода в час
+        const hourlyIncome = durationHours > 0 ? Math.round(currentIncome / durationHours) : 0;
+        
+        // Расчет прогноза с учетом запланированного времени
+        let predictedShiftIncome = 0;
+        if (durationHours > 0) {
+            const totalPlannedHours = (currentShift.plannedEndTime - currentShift.startTime) / (1000 * 60 * 60);
+            // Если смена длится менее 2 часов, применяем коэффициент оптимизма
+            const optimismMultiplier = durationHours < 2 ? 1.2 : 1;
+            predictedShiftIncome = Math.round(hourlyIncome * optimismMultiplier * totalPlannedHours);
+        }
+
+        return {
+            startTime: currentShift.startTime,
+            duration: formatDuration(duration),
+            currentIncome,
+            hourlyIncome,
+            predictedShiftIncome
+        };
+    }
+
+    // Функция обновления информации о смене
+    function updateShiftInfo() {
+        const info = calculateShiftInfo();
+        if (info) {
+            shiftStartTime.textContent = info.startTime.toLocaleTimeString();
+            shiftDuration.textContent = info.duration;
+            currentShiftIncome.textContent = `${info.currentIncome}₽`;
+            currentHourlyIncome.textContent = `${info.hourlyIncome}₽/час`;
+            predictedIncome.textContent = `${info.predictedShiftIncome}₽`;
+        }
+    }
+
+    // Обработчик для кнопки информации о смене
+    if (shiftInfoBtn) {
+        shiftInfoBtn.addEventListener('click', () => {
+            updateShiftInfo();
+            shiftInfoModal.classList.remove('hidden');
+        });
+    }
+
+    // Обработчик для закрытия модального окна
+    if (shiftInfoCloseBtn) {
+        shiftInfoCloseBtn.addEventListener('click', () => {
+            shiftInfoModal.classList.add('hidden');
+        });
+    }
+
+    // Обработчики для кнопок управления сменой
+    if (confirmShiftTimeBtn) {
+        confirmShiftTimeBtn.addEventListener('click', () => {
+            startShift();
+            shiftTimeModal.classList.add('hidden');
+            showAlert('Смена начата');
+        });
+    }
+
+    if (cancelShiftTimeBtn) {
+        cancelShiftTimeBtn.addEventListener('click', () => {
+            shiftTimeModal.classList.add('hidden');
         });
     }
 

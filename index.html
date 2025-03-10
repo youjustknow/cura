@@ -54,6 +54,10 @@
             <div class="shift-controls">
                 <button id="startShiftBtn" class="shift-button">Начать смену</button>
                 <button id="endShiftBtn" class="shift-button hidden">Завершить смену</button>
+                <button id="shiftInfoBtn" class="shift-info-button hidden">
+                    <span class="material-icons">info</span>
+                    Информация о смене
+                </button>
             </div>
             <button id="addOrderBtn" class="add-order-button hidden">
                 <span class="plus-icon">+</span>
@@ -200,6 +204,68 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно информации о смене -->
+    <div id="shiftInfoModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Информация о текущей смене</h3>
+            </div>
+            <div class="modal-body">
+                <div class="shift-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Время начала:</span>
+                        <span id="shiftStartTime" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Длительность:</span>
+                        <span id="shiftDuration" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Текущий доход:</span>
+                        <span id="currentShiftIncome" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Доход в час:</span>
+                        <span id="currentHourlyIncome" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Прогноз дохода за смену:</span>
+                        <span id="predictedIncome" class="info-value"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="shiftInfoCloseBtn" class="modal-btn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора времени смены -->
+    <div id="shiftTimeModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Время смены</h3>
+            </div>
+            <div class="modal-body">
+                <div class="shift-time-grid">
+                    <div class="time-input-group">
+                        <label for="shiftStartTimeInput">Время начала:</label>
+                        <input type="time" id="shiftStartTimeInput" value="09:00">
+                    </div>
+                    <div class="time-input-group">
+                        <label for="shiftEndTimeInput">Время окончания:</label>
+                        <input type="time" id="shiftEndTimeInput" value="21:00">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmShiftTimeBtn" class="modal-btn">Начать смену</button>
+                <button id="cancelShiftTimeBtn" class="modal-btn modal-btn-secondary">Отмена</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

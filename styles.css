@@ -197,6 +197,7 @@ button {
     padding: 20px;
     width: 90%;
     margin: 0 auto;
+    margin-top: 20px;
     text-align: center;
 }
 
@@ -835,5 +836,95 @@ h2 {
 }
 
 .hidden {
-    display: none;
+    display: none!important;
+}
+
+/* Стили для кнопки информации о смене */
+.shift-info-button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: linear-gradient(to bottom right, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.shift-info-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.shift-info-button .material-icons {
+    font-size: 20px;
+}
+
+/* Стили для информации о смене */
+.shift-info-grid {
+    display: grid;
+    gap: 15px;
+    padding: 10px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #555;
+    border-radius: 5px;
+}
+
+.info-label {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#predictedIncome {
+    color: #2196F3;
+}
+
+/* Стили для выбора времени смены */
+.shift-time-grid {
+    display: grid;
+    gap: 20px;
+    padding: 10px;
+}
+
+.time-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-input-group label {
+    color: #ccc;
+    font-size: 16px;
+}
+
+.time-input-group input[type="time"] {
+    padding: 10px;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    font-size: 16px;
+    width: 100%;
+}
+
+.time-input-group input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
 }
