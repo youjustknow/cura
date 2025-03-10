@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приложение для курьера</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Начальный экран с кнопкой добавления -->
+        <div id="initialScreen" class="screen">
+            <button id="addOrderBtn" class="add-order-button">
+                <span class="plus-icon">+</span>
+            </button>
+            <button id="showHistoryBtn" class="history-button">История</button>
+            <button id="resetSessionBtn" class="reset-button">Сбросить сессию</button>
+        </div>
+
+        <!-- Экран формы добавления заказа -->
+        <div id="orderFormScreen" class="screen hidden">
+            <div class="order-form">
+                <div class="form-group">
+                    <label for="startLocation">Начальная точка</label>
+                    <input type="text" id="startLocation" autocomplete="off">
+                    <ul id="startLocationSuggestions" class="suggestions hidden"></ul>
+                    <button id="setStartLocationBtn" class="secondary-button">Установить</button>
+                </div>
+                <div class="form-group">
+                    <label for="clientAddress">Адрес клиента</label>
+                    <input type="text" id="clientAddress" autocomplete="off">
+                    <ul id="addressSuggestions" class="suggestions hidden"></ul>
+                </div>
+                <div class="form-group">
+                    <label for="orderWeight">Вес заказа</label>
+                    <input type="number" id="orderWeight" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="highPriceDelivery">Повышенная стоимость выдачи</label>
+                    <input type="checkbox" id="highPriceDelivery">
+                </div>
+                <button id="submitOrderBtn">Добавить</button>
+            </div>
+            <button id="formAddOrderBtn" class="add-order-button">
+                <span class="plus-icon">+</span>
+            </button>
+        </div>
+
+        <!-- Экран со списком заказов -->
+        <div id="orderListScreen" class="screen hidden">
+            <div id="orderList" class="order-list"></div>
+            <button id="listAddOrderBtn" class="add-order-button">
+                <span class="plus-icon">+</span>
+            </button>
+            <button id="startRouteBtn" class="action-button">Начать</button>
+        </div>
+
+        <!-- Экран выполнения маршрута -->
+        <div id="routeExecutionScreen" class="screen hidden">
+            <div id="executionOrderList" class="order-list"></div>
+            <button id="finishRouteBtn" class="action-button">Завершить</button>
+        </div>
+
+        <!-- Экран завершения маршрута -->
+        <div id="routeCompletionScreen" class="screen hidden">
+            <div class="completion-container">
+                <h2>Маршрут завершён</h2>
+                <div class="completion-details">
+                    <div class="detail-row">
+                        <span>Время выполнения</span>
+                        <span id="executionTime"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Доход</span>
+                        <span id="totalIncome"></span>
+                    </div>
+                </div>
+                <button id="okBtn" class="action-button">ОК</button>
+            </div>
+        </div>
+        <!-- Экран истории маршрутов -->
+        <div id="routeHistoryScreen" class="screen hidden">
+            <h2>История маршрутов</h2>
+            <div id="routeHistoryList" class="history-list"></div>
+            <button id="backToMainBtn" class="action-button">Назад</button>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
