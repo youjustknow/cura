@@ -1611,8 +1611,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         completedShifts.forEach(shift => {
             const dayOfWeek = shift.startTime.getDay();
-            weekdayData[dayOfWeek] += shift.totalIncome;
-            weekdayCounts[dayOfWeek]++;
+            weekdayData[dayOfWeek == 0 ? 6 : dayOfWeek - 1] += shift.totalIncome;
+            weekdayCounts[dayOfWeek == 0 ? 6 : dayOfWeek - 1]++;
         });
 
         // Рассчитываем средний доход по дням недели
@@ -1620,7 +1620,7 @@ document.addEventListener('DOMContentLoaded', function() {
             weekdayCounts[index] > 0 ? Math.round(total / weekdayCounts[index]) : 0
         );
 
-        const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
         // Уничтожаем предыдущий график, если он существует
         if (window.weekdayChart instanceof Chart) {
@@ -1678,13 +1678,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Подготавливаем данные о количестве заказов по часам и дням недели
         const weekdayData = {
-            0: Array(24).fill(0), // Воскресенье
-            1: Array(24).fill(0), // Понедельник
-            2: Array(24).fill(0), // Вторник
-            3: Array(24).fill(0), // Среда
-            4: Array(24).fill(0), // Четверг
-            5: Array(24).fill(0), // Пятница
-            6: Array(24).fill(0)  // Суббота
+            0: Array(15).fill(0), // Понедельник    
+            1: Array(15).fill(0), // Вторник
+            2: Array(15).fill(0), // Среда
+            3: Array(15).fill(0), // Четверг
+            4: Array(15).fill(0), // Пятница
+            5: Array(15).fill(0), // Суббота
+            6: Array(15).fill(0), // Воскресенье
         };
         
         completedShifts.forEach(shift => {
@@ -1692,7 +1692,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dayOfWeek = new Date(route.startTime).getDay();
                 route.orders.forEach(order => {
                     const hour = new Date(route.startTime).getHours();
-                    weekdayData[dayOfWeek][hour]++;
+                    if (hour >= 8 && hour < 22) {
+                        weekdayData[dayOfWeek == 0 ? 6 : dayOfWeek - 1][hour - 8]++;
+                    }
                 });
             });
         });
@@ -1702,13 +1704,13 @@ document.addEventListener('DOMContentLoaded', function() {
             window.ordersDistributionChart.destroy();
         }
 
-        const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         const colors = ['#FF6384', '#36A2EB', '#4CAF50', '#FFC107', '#9C27B0', '#FF5722', '#607D8B'];
 
         window.ordersDistributionChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                labels: Array.from({length: 15}, (_, i) => `${i + 8}:00`),
                 datasets: Object.entries(weekdayData).map(([dayIndex, data], i) => ({
                     label: weekdays[dayIndex],
                     data: data,
