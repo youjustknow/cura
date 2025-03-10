@@ -1,6 +1,48 @@
 var orderId = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Глобальные переменные для элементов интерфейса смены
+    let shiftStartTimeInput = document.getElementById('shiftStartTimeInput');
+    let shiftEndTimeInput = document.getElementById('shiftEndTimeInput');
+    let shiftTimeModal = document.getElementById('shiftTimeModal');
+    let confirmShiftTimeBtn = document.getElementById('confirmShiftTimeBtn');
+    let cancelShiftTimeBtn = document.getElementById('cancelShiftTimeBtn');
+
+    // Данные приложения
+    let orders = [];
+    let routeStartTime = null;
+    let nextOrderId = 1;
+    let startLocation = null;
+    const API_KEY = '5b3ce3597851110001cf624892de0fe27ec54ee0afc5e65a6fff3c5c'; // Замените на свой ключ API
+
+
+    // Добавляем новые элементы интерфейса
+    const shiftInfoModal = document.getElementById('shiftInfoModal');
+    const shiftInfoCloseBtn = document.getElementById('shiftInfoCloseBtn');
+    const shiftStartTime = document.getElementById('shiftStartTime');
+    const shiftDuration = document.getElementById('shiftDuration');
+    const currentShiftIncome = document.getElementById('currentShiftIncome');
+    const currentHourlyIncome = document.getElementById('currentHourlyIncome');
+    const predictedIncome = document.getElementById('predictedIncome');
+
+    // Кнопки управления сменой
+    const startShiftBtn = document.getElementById('startShiftBtn');
+    const endShiftBtn = document.getElementById('endShiftBtn');
+    const shiftInfoBtn = document.getElementById('shiftInfoBtn');
+    const addOrderBtn = document.getElementById('addOrderBtn');
+
+    // Элементы интерфейса
+    const screens = {
+        initial: document.getElementById('initialScreen'),
+        orderForm: document.getElementById('orderFormScreen'),
+        orderList: document.getElementById('orderListScreen'),
+        routeExecution: document.getElementById('routeExecutionScreen'),
+        routeCompletion: document.getElementById('routeCompletionScreen'),
+        routeHistory: document.getElementById('routeHistoryScreen'),
+        settings: document.getElementById('settingsScreen'),
+        shiftsHistory: document.getElementById('shiftsHistoryScreen')
+    };
+
     // Глобальные переменные для смен
     let currentShift = null;
     let shiftsHistory = [];
@@ -26,10 +68,48 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             currentShift = JSON.parse(savedCurrentShift);
             currentShift.startTime = new Date(currentShift.startTime);
+            currentShift.plannedEndTime = new Date(currentShift.plannedEndTime);
             if (currentShift.endTime) {
                 currentShift.endTime = new Date(currentShift.endTime);
             }
+            
+            // Восстанавливаем значения в полях ввода времени
+            if (shiftStartTimeInput && shiftEndTimeInput) {
+                const startHours = currentShift.startTime.getHours().toString().padStart(2, '0');
+                const startMinutes = currentShift.startTime.getMinutes().toString().padStart(2, '0');
+                const endHours = currentShift.plannedEndTime.getHours().toString().padStart(2, '0');
+                const endMinutes = currentShift.plannedEndTime.getMinutes().toString().padStart(2, '0');
+                
+                shiftStartTimeInput.value = `${startHours}:${startMinutes}`;
+                shiftEndTimeInput.value = `${endHours}:${endMinutes}`;
+            }
+
+            // Восстанавливаем текущие заказы, если есть незавершенный маршрут
+            const savedOrders = localStorage.getItem('currentRoute');
+            if (savedOrders && !currentShift.endTime) {
+                try {
+                    orders = JSON.parse(savedOrders);
+                    routeStartTime = new Date(localStorage.getItem('currentRouteStartTime'));
+                    if (routeStartTime) {
+                        showScreen('routeExecution');
+                        renderOrderList();
+                    }
+                } catch (error) {
+                    console.error('Ошибка при восстановлении заказов:', error);
+                    orders = [];
+                    routeStartTime = null;
+                }
+            }
+            
             updateShiftControls();
+            
+            // Показываем информацию о текущей смене
+            if (!currentShift.endTime) {
+                shiftInfoBtn.classList.remove('hidden');
+                endShiftBtn.classList.remove('hidden');
+                startShiftBtn.classList.add('hidden');
+                addOrderBtn.classList.remove('hidden');
+            }
         } catch (error) {
             console.error('Ошибка при загрузке текущей смены:', error);
             currentShift = null;
@@ -67,18 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSettings();
     console.log('Настройки загружены при старте:', settings);
 
-    // Элементы интерфейса
-    const screens = {
-        initial: document.getElementById('initialScreen'),
-        orderForm: document.getElementById('orderFormScreen'),
-        orderList: document.getElementById('orderListScreen'),
-        routeExecution: document.getElementById('routeExecutionScreen'),
-        routeCompletion: document.getElementById('routeCompletionScreen'),
-        routeHistory: document.getElementById('routeHistoryScreen'),
-        settings: document.getElementById('settingsScreen'),
-        shiftsHistory: document.getElementById('shiftsHistoryScreen')
-    };
-
     // Элементы бокового меню
     const sidebar = document.querySelector('.sidebar');
     const menuToggle = document.querySelector('.menu-toggle');
@@ -87,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Кнопки
     const addOrderBtns = {
-        initial: document.getElementById('addOrderBtn'),
+        initial: addOrderBtn,
         form: document.getElementById('formAddOrderBtn'),
         list: document.getElementById('listAddOrderBtn')
     };
@@ -100,8 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backToMainBtn = document.getElementById('backToMainBtn');
     const showSettingsBtn = document.getElementById('showSettingsBtn');
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-    const startShiftBtn = document.getElementById('startShiftBtn');
-    const endShiftBtn = document.getElementById('endShiftBtn');
     const showShiftsHistoryBtn = document.getElementById('showShiftsHistoryBtn');
 
     // Контейнеры для списков заказов
@@ -114,29 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const executionTimeElement = document.getElementById('executionTime');
     const totalIncomeElement = document.getElementById('totalIncome');
 
-    // Добавляем новые элементы интерфейса
-    const shiftInfoBtn = document.getElementById('shiftInfoBtn');
-    const shiftInfoModal = document.getElementById('shiftInfoModal');
-    const shiftInfoCloseBtn = document.getElementById('shiftInfoCloseBtn');
-    const shiftStartTime = document.getElementById('shiftStartTime');
-    const shiftDuration = document.getElementById('shiftDuration');
-    const currentShiftIncome = document.getElementById('currentShiftIncome');
-    const currentHourlyIncome = document.getElementById('currentHourlyIncome');
-    const predictedIncome = document.getElementById('predictedIncome');
-
     // Добавляем новые элементы интерфейса для выбора времени
-    const shiftTimeModal = document.getElementById('shiftTimeModal');
-    const shiftStartTimeInput = document.getElementById('shiftStartTimeInput');
-    const shiftEndTimeInput = document.getElementById('shiftEndTimeInput');
-    const confirmShiftTimeBtn = document.getElementById('confirmShiftTimeBtn');
-    const cancelShiftTimeBtn = document.getElementById('cancelShiftTimeBtn');
-
-    // Данные приложения
-    let orders = [];
-    let routeStartTime = null;
-    let nextOrderId = 1;
-    let startLocation = null;
-    const API_KEY = '5b3ce3597851110001cf624892de0fe27ec54ee0afc5e65a6fff3c5c'; // Замените на свой ключ API
+    // Переменные уже объявлены в начале файла
 
     // Функция для переключения активного состояния кнопок меню
     function setActiveMenuButton(activeButton) {
@@ -1116,12 +1161,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция обновления элементов управления сменой
     function updateShiftControls() {
-        if (currentShift && !currentShift.endTime) {
-            startShiftBtn.classList.add('hidden');
-            endShiftBtn.classList.remove('hidden');
-            addOrderBtn.classList.remove('hidden');
-            shiftInfoBtn.classList.remove('hidden');
+        if (currentShift) {
+            if (!currentShift.endTime) {
+                // Активная смена
+                startShiftBtn.classList.add('hidden');
+                endShiftBtn.classList.remove('hidden');
+                addOrderBtn.classList.remove('hidden');
+                shiftInfoBtn.classList.remove('hidden');
+
+                // Обновляем информацию о смене
+                updateShiftInfo();
+            } else {
+                // Завершенная смена
+                startShiftBtn.classList.remove('hidden');
+                endShiftBtn.classList.add('hidden');
+                addOrderBtn.classList.add('hidden');
+                shiftInfoBtn.classList.add('hidden');
+            }
         } else {
+            // Нет смены
             startShiftBtn.classList.remove('hidden');
             endShiftBtn.classList.add('hidden');
             addOrderBtn.classList.add('hidden');
