@@ -1,6 +1,41 @@
 var orderId = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Глобальные переменные для смен
+    let currentShift = null;
+    let shiftsHistory = [];
+
+    // Загрузка истории смен
+    const savedShifts = localStorage.getItem('shiftsHistory');
+    if (savedShifts) {
+        try {
+            shiftsHistory = JSON.parse(savedShifts).map(shift => ({
+                ...shift,
+                startTime: new Date(shift.startTime),
+                endTime: shift.endTime ? new Date(shift.endTime) : null
+            }));
+        } catch (error) {
+            console.error('Ошибка при загрузке истории смен:', error);
+            shiftsHistory = [];
+        }
+    }
+
+    // Проверка текущей смены
+    const savedCurrentShift = localStorage.getItem('currentShift');
+    if (savedCurrentShift) {
+        try {
+            currentShift = JSON.parse(savedCurrentShift);
+            currentShift.startTime = new Date(currentShift.startTime);
+            if (currentShift.endTime) {
+                currentShift.endTime = new Date(currentShift.endTime);
+            }
+            updateShiftControls();
+        } catch (error) {
+            console.error('Ошибка при загрузке текущей смены:', error);
+            currentShift = null;
+        }
+    }
+
     // Глобальная переменная для истории маршрутов
     let routeHistory = [];
     let startLocationData = null;
@@ -40,7 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
         routeExecution: document.getElementById('routeExecutionScreen'),
         routeCompletion: document.getElementById('routeCompletionScreen'),
         routeHistory: document.getElementById('routeHistoryScreen'),
-        settings: document.getElementById('settingsScreen')
+        settings: document.getElementById('settingsScreen'),
+        shiftsHistory: document.getElementById('shiftsHistoryScreen')
     };
 
     // Элементы бокового меню
@@ -64,11 +100,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const backToMainBtn = document.getElementById('backToMainBtn');
     const showSettingsBtn = document.getElementById('showSettingsBtn');
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const startShiftBtn = document.getElementById('startShiftBtn');
+    const endShiftBtn = document.getElementById('endShiftBtn');
+    const showShiftsHistoryBtn = document.getElementById('showShiftsHistoryBtn');
 
     // Контейнеры для списков заказов
     const orderList = document.getElementById('orderList');
     const executionOrderList = document.getElementById('executionOrderList');
     const routeHistoryList = document.getElementById('routeHistoryList');
+    const shiftsHistoryList = document.getElementById('shiftsHistoryList');
 
     // Элементы экрана завершения
     const executionTimeElement = document.getElementById('executionTime');
@@ -892,33 +932,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Расчет дохода
                 const income = orders.reduce((sum, order) => sum + order.price, 0);
 
-                // Сохраняем данные о маршруте в историю с точным временем
+                // Создаем объект маршрута
                 const completedRoute = {
                     id: routeHistory.length + 1,
                     date: new Date(),
                     startTime: routeStartTime,
-                    startTimeFormatted: routeStartTime.toLocaleTimeString(),
                     endTime: endTime,
-                    endTimeFormatted: endTime.toLocaleTimeString(),
                     executionTime: formattedTime,
                     executionTimeMs: diff,
                     income: income,
-                    orders: [...orders] // Копируем все заказы
+                    orders: [...orders]
                 };
 
-                routeHistory.push(completedRoute);
+                // Добавляем маршрут в текущую смену
+                if (currentShift) {
+                    currentShift.routes.push(completedRoute);
+                    currentShift.totalIncome += income;
+                    localStorage.setItem('currentShift', JSON.stringify(currentShift));
+                }
 
-                // Сохраняем историю в localStorage
+                routeHistory.push(completedRoute);
                 localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
-                // Удаляем запись о текущем маршруте
                 localStorage.removeItem('currentRouteStartTime');
                 localStorage.removeItem('currentRoute');
 
-                console.log(`Маршрут завершен. Начало: ${completedRoute.startTimeFormatted}, Конец: ${completedRoute.endTimeFormatted}`);
-                console.log(`Время выполнения: ${formattedTime}, доход: ${income}р`);
-
                 if (executionTimeElement) executionTimeElement.textContent = formattedTime;
-                if (totalIncomeElement) totalIncomeElement.textContent = `${income}р`;
+                if (totalIncomeElement) totalIncomeElement.textContent = `${income}₽`;
 
                 showScreen('routeCompletion');
             }
@@ -1005,6 +1044,149 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Функция начала смены
+    function startShift() {
+        currentShift = {
+            id: shiftsHistory.length + 1,
+            startTime: new Date(),
+            routes: [],
+            totalIncome: 0
+        };
+        localStorage.setItem('currentShift', JSON.stringify(currentShift));
+        updateShiftControls();
+    }
+
+    // Функция завершения смены
+    async function endShift() {
+        if (!currentShift) return;
+
+        const confirmed = await showConfirm('Вы уверены, что хотите завершить смену?');
+        if (!confirmed) return;
+
+        currentShift.endTime = new Date();
+        currentShift.totalIncome = currentShift.routes.reduce((sum, route) => sum + route.income, 0);
+        
+        // Расчет дохода в час
+        const shiftDuration = (currentShift.endTime - currentShift.startTime) / (1000 * 60 * 60); // в часах
+        currentShift.hourlyIncome = Math.round(currentShift.totalIncome / shiftDuration);
+
+        shiftsHistory.push({...currentShift});
+        localStorage.setItem('shiftsHistory', JSON.stringify(shiftsHistory));
+        localStorage.removeItem('currentShift');
+        
+        currentShift = null;
+        updateShiftControls();
+        await showAlert('Смена завершена');
+    }
+
+    // Функция обновления элементов управления сменой
+    function updateShiftControls() {
+        if (currentShift && !currentShift.endTime) {
+            startShiftBtn.classList.add('hidden');
+            endShiftBtn.classList.remove('hidden');
+            addOrderBtn.classList.remove('hidden');
+        } else {
+            startShiftBtn.classList.remove('hidden');
+            endShiftBtn.classList.add('hidden');
+            addOrderBtn.classList.add('hidden');
+        }
+    }
+
+    // Функция отображения истории смен
+    function renderShiftsHistory() {
+        shiftsHistoryList.innerHTML = '';
+
+        shiftsHistory.sort((a, b) => b.startTime - a.startTime).forEach(shift => {
+            const shiftElement = document.createElement('div');
+            shiftElement.className = 'shift-group';
+
+            const header = document.createElement('div');
+            header.className = 'shift-header';
+            
+            const shiftDuration = shift.endTime 
+                ? ((shift.endTime - shift.startTime) / (1000 * 60 * 60)).toFixed(1)
+                : 'Не завершена';
+
+            header.innerHTML = `
+                <div class="shift-info">
+                    <div class="shift-time">
+                        <span class="shift-label">Начало</span>
+                        <span class="shift-value">${shift.startTime.toLocaleString()}</span>
+                        <span class="shift-label">Конец</span>
+                        <span class="shift-value">${shift.endTime ? shift.endTime.toLocaleString() : 'Не завершена'}</span>
+                        <span class="shift-label">Длительность</span>
+                        <span class="shift-value">${shiftDuration} ч</span>
+                    </div>
+                    <div class="shift-income">
+                        <span class="shift-label">Доход за смену</span>
+                        <span class="shift-value">${shift.totalIncome}₽</span>
+                        <span class="shift-label">Доход в час</span>
+                        <span class="shift-value">${shift.hourlyIncome}₽/час</span>
+                    </div>
+                </div>
+            `;
+
+            const routesContainer = document.createElement('div');
+            routesContainer.className = 'shift-routes hidden';
+
+            // Отображение маршрутов внутри смены
+            shift.routes.forEach(route => {
+                const routeElement = createRouteElement(route);
+                routesContainer.appendChild(routeElement);
+            });
+
+            header.addEventListener('click', () => {
+                routesContainer.classList.toggle('hidden');
+            });
+
+            shiftElement.appendChild(header);
+            shiftElement.appendChild(routesContainer);
+            shiftsHistoryList.appendChild(shiftElement);
+        });
+    }
+
+    // Функция создания элемента маршрута для истории смен
+    function createRouteElement(route) {
+        const routeElement = document.createElement('div');
+        routeElement.className = 'route-item';
+
+        const routeHeader = document.createElement('div');
+        routeHeader.className = 'route-header';
+        routeHeader.innerHTML = `
+            <span>Маршрут #${route.id}</span>
+            <span>${route.executionTime}</span>
+            <span>${route.income}₽</span>
+        `;
+
+        const routeDetails = document.createElement('div');
+        routeDetails.className = 'route-details hidden';
+
+        route.orders.forEach(order => {
+            const orderElement = document.createElement('div');
+            orderElement.className = 'history-order-item';
+            orderElement.innerHTML = `
+                <div class="order-info">
+                    <span>${order.id}</span>
+                    <span>${order.address}</span>
+                    <span>${order.weight}кг</span>
+                    <span>${order.price}₽</span>
+                </div>
+                <div class="order-distance">
+                    <span>Расстояние: ${order.distance} км</span>
+                </div>
+            `;
+            routeDetails.appendChild(orderElement);
+        });
+
+        routeHeader.addEventListener('click', () => {
+            routeDetails.classList.toggle('hidden');
+        });
+
+        routeElement.appendChild(routeHeader);
+        routeElement.appendChild(routeDetails);
+        return routeElement;
+    }
+
     // Обновляем функцию показа экрана
     function showScreen(screenId) {
         Object.values(screens).forEach(screen => {
@@ -1019,9 +1201,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 setActiveMenuButton(showHistoryBtn);
             } else if (screenId === 'settings') {
                 setActiveMenuButton(showSettingsBtn);
+            } else if (screenId === 'shiftsHistory') {
+                setActiveMenuButton(showShiftsHistoryBtn);
             } else {
                 setActiveMenuButton(null);
             }
         }
     }
+
+    // Обработчики для кнопок управления сменой
+    if (startShiftBtn) {
+        startShiftBtn.addEventListener('click', () => {
+            startShift();
+            showAlert('Смена начата');
+        });
+    }
+
+    if (endShiftBtn) {
+        endShiftBtn.addEventListener('click', () => {
+            endShift();
+        });
+        
+    }
+
+    // Обработчик для кнопки истории смен
+    if (showShiftsHistoryBtn) {
+        showShiftsHistoryBtn.addEventListener('click', () => {
+            setActiveMenuButton(showShiftsHistoryBtn);
+            renderShiftsHistory();
+            showScreen('shiftsHistory');
+            sidebar.classList.remove('open');
+        });
+    }
+
+    // Инициализация
+    updateShiftControls();
 });

@@ -24,7 +24,13 @@
                     <li>
                         <button id="showHistoryBtn" class="menu-btn">
                             <span class="material-icons">history</span>
-                            История
+                            История маршрутов
+                        </button>
+                    </li>
+                    <li>
+                        <button id="showShiftsHistoryBtn" class="menu-btn">
+                            <span class="material-icons">work_history</span>
+                            История смен
                         </button>
                     </li>
                     <li>
@@ -45,7 +51,11 @@
 
         <!-- Начальный экран с кнопкой добавления -->
         <div id="initialScreen" class="screen">
-            <button id="addOrderBtn" class="add-order-button">
+            <div class="shift-controls">
+                <button id="startShiftBtn" class="shift-button">Начать смену</button>
+                <button id="endShiftBtn" class="shift-button hidden">Завершить смену</button>
+            </div>
+            <button id="addOrderBtn" class="add-order-button hidden">
                 <span class="plus-icon">+</span>
             </button>
         </div>
@@ -119,6 +129,12 @@
         <div id="routeHistoryScreen" class="screen hidden">
             <h2>История маршрутов</h2>
             <div id="routeHistoryList" class="history-list"></div>
+        </div>
+
+        <!-- Экран истории смен -->
+        <div id="shiftsHistoryScreen" class="screen hidden">
+            <h2>История смен</h2>
+            <div id="shiftsHistoryList" class="history-list"></div>
         </div>
 
         <!-- Экран настроек -->

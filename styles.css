@@ -28,9 +28,7 @@ body {
     padding: 20px;
 }
 
-.hidden {
-    display: none;
-}
+
 
 .reset-button {
     position: absolute;
@@ -754,4 +752,88 @@ h2 {
     word-wrap: normal;
     direction: ltr;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Стили для управления сменой */
+.shift-controls {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.shift-button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: linear-gradient(to bottom right, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.shift-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#endShiftBtn {
+    background: linear-gradient(to bottom right, #f44336, #d32f2f);
+}
+
+/* Стили для истории смен */
+.shift-group {
+    margin-bottom: 30px;
+    background-color: #444;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.shift-header {
+    background-color: #333;
+    padding: 20px;
+    border-bottom: 2px solid #4CAF50;
+    cursor: pointer;
+}
+
+.shift-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.shift-time, .shift-income {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.shift-label {
+    color: #888;
+    font-size: 14px;
+}
+
+.shift-value {
+    color: #fff;
+    font-size: 16px;
+}
+
+.shift-income .shift-value {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.shift-routes {
+    padding: 15px;
+    background-color: #383838;
+}
+
+.hidden {
+    display: none;
 }
