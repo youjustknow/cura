@@ -1676,14 +1676,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderOrdersDistributionChart(completedShifts) {
         const ctx = document.getElementById('ordersDistributionChart').getContext('2d');
         
-        // Подготавливаем данные о количестве заказов по часам
-        const hourlyOrders = Array(24).fill(0);
+        // Подготавливаем данные о количестве заказов по часам и дням недели
+        const weekdayData = {
+            0: Array(24).fill(0), // Воскресенье
+            1: Array(24).fill(0), // Понедельник
+            2: Array(24).fill(0), // Вторник
+            3: Array(24).fill(0), // Среда
+            4: Array(24).fill(0), // Четверг
+            5: Array(24).fill(0), // Пятница
+            6: Array(24).fill(0)  // Суббота
+        };
         
         completedShifts.forEach(shift => {
             shift.routes.forEach(route => {
+                const dayOfWeek = new Date(route.startTime).getDay();
                 route.orders.forEach(order => {
                     const hour = new Date(route.startTime).getHours();
-                    hourlyOrders[hour]++;
+                    weekdayData[dayOfWeek][hour]++;
                 });
             });
         });
@@ -1693,29 +1702,39 @@ document.addEventListener('DOMContentLoaded', function() {
             window.ordersDistributionChart.destroy();
         }
 
+        const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        const colors = ['#FF6384', '#36A2EB', '#4CAF50', '#FFC107', '#9C27B0', '#FF5722', '#607D8B'];
+
         window.ordersDistributionChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-                datasets: [{
-                    label: 'Количество заказов',
-                    data: hourlyOrders,
-                    backgroundColor: '#2196F3',
-                    borderColor: '#2196F3',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }]
+                datasets: Object.entries(weekdayData).map(([dayIndex, data], i) => ({
+                    label: weekdays[dayIndex],
+                    data: data,
+                    borderColor: colors[i],
+                    backgroundColor: colors[i] + '20',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }))
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#ccc',
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
                     },
                     title: {
                         display: true,
-                        text: 'Распределение заказов по часам',
+                        text: 'Распределение заказов по часам и дням недели',
                         color: '#ccc',
                         font: {
                             size: 14
@@ -1820,6 +1839,91 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Функция генерации тестовых данных
+    function generateTestData() {
+        const now = new Date();
+        const testShifts = [];
+        
+        // Генерируем данные за последние 30 дней
+        for (let i = 0; i < 30; i++) {
+            const shiftDate = new Date(now);
+            shiftDate.setDate(now.getDate() - i);
+            
+            // Случайное время начала смены (между 8 и 11 утра)
+            shiftDate.setHours(8 + Math.floor(Math.random() * 3), Math.floor(Math.random() * 60), 0);
+            
+            const shift = {
+                id: testShifts.length + 1,
+                startTime: new Date(shiftDate),
+                endTime: new Date(shiftDate),
+                routes: [],
+                totalIncome: 0
+            };
+            
+            // Устанавливаем время окончания (8-12 часов после начала)
+            shift.endTime.setHours(shift.startTime.getHours() + 8 + Math.floor(Math.random() * 4));
+            
+            // Генерируем 2-4 маршрута за смену
+            const routesCount = 2 + Math.floor(Math.random() * 3);
+            let routeStartTime = new Date(shift.startTime);
+            
+            for (let j = 0; j < routesCount; j++) {
+                const route = {
+                    id: j + 1,
+                    startTime: new Date(routeStartTime),
+                    endTime: new Date(routeStartTime),
+                    orders: [],
+                    income: 0
+                };
+                
+                // Генерируем 3-7 заказов на маршрут
+                const ordersCount = 3 + Math.floor(Math.random() * 5);
+                
+                for (let k = 0; k < ordersCount; k++) {
+                    const order = {
+                        id: k + 1,
+                        address: `Тестовый адрес ${k + 1}`,
+                        weight: 1 + Math.random() * 9, // вес от 1 до 10 кг
+                        price: 200 + Math.floor(Math.random() * 800), // цена от 200 до 1000
+                        distance: 1 + Math.random() * 4, // расстояние от 1 до 5 км
+                        completed: true
+                    };
+                    route.income += order.price;
+                    route.orders.push(order);
+                }
+                
+                // Добавляем 1-2 часа на выполнение маршрута
+                route.endTime.setHours(route.startTime.getHours() + 1 + Math.floor(Math.random() * 2));
+                routeStartTime = new Date(route.endTime);
+                
+                shift.routes.push(route);
+                shift.totalIncome += route.income;
+            }
+            
+            testShifts.push(shift);
+        }
+        
+        // Сохраняем тестовые данные
+        shiftsHistory = testShifts;
+        localStorage.setItem('shiftsHistory', JSON.stringify(shiftsHistory));
+        
+        // Обновляем статистику
+        updateStatistics();
+        showAlert('Тестовые данные успешно сгенерированы');
+    }
+
+    // Добавляем обработчик для кнопки генерации тестовых данных
+    const generateTestDataBtn = document.createElement('button');
+    generateTestDataBtn.textContent = 'Сгенерировать тестовые данные';
+    generateTestDataBtn.className = 'modal-btn';
+    generateTestDataBtn.style.position = 'fixed';
+    generateTestDataBtn.style.bottom = '20px';
+    generateTestDataBtn.style.right = '20px';
+    generateTestDataBtn.style.zIndex = '1000';
+    
+    generateTestDataBtn.addEventListener('click', generateTestData);
+    document.body.appendChild(generateTestDataBtn);
 
     // Инициализация
     updateShiftControls();
