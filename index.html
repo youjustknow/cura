@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приложение для курьера</title>
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA мета-теги -->
+    <meta name="theme-color" content="#ffd700">
+    <meta name="description" content="Приложение для управления заказами курьера">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Курьер">
+    
+    <!-- PWA иконки -->
+    <link rel="icon" type="image/png" sizes="196x196" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- PWA манифест -->
+    <link rel="manifest" href="manifest.json">
+    
+    <script>
+        // Регистрация service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker зарегистрирован:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Ошибка регистрации ServiceWorker:', error);
+                    });
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="app">
