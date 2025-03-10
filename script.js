@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
         routeCompletion: document.getElementById('routeCompletionScreen'),
         routeHistory: document.getElementById('routeHistoryScreen'),
         settings: document.getElementById('settingsScreen'),
-        shiftsHistory: document.getElementById('shiftsHistoryScreen')
+        shiftsHistory: document.getElementById('shiftsHistoryScreen'),
+        statsScreen: document.getElementById('statsScreen')
     };
 
     // Глобальные переменные для смен
@@ -1357,6 +1358,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Обработчик для кнопки статистики
+    const showStatsBtn = document.getElementById('showStatsBtn');
+    if (showStatsBtn) {
+        showStatsBtn.addEventListener('click', () => {
+            setActiveMenuButton(showStatsBtn);
+            updateStatistics();
+            showScreen('statsScreen');
+            sidebar.classList.remove('open');
+        });
+    }
+
     // Функция для форматирования длительности
     function formatDuration(milliseconds) {
         const hours = Math.floor(milliseconds / (1000 * 60 * 60));
@@ -1436,6 +1448,150 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelShiftTimeBtn.addEventListener('click', () => {
             shiftTimeModal.classList.add('hidden');
         });
+    }
+
+    // Функция обновления статистики
+    function updateStatistics() {
+        // Получаем все завершенные смены
+        const completedShifts = shiftsHistory.filter(shift => shift.endTime);
+
+        // Общая статистика
+        const totalShifts = completedShifts.length;
+        const totalEarnings = completedShifts.reduce((sum, shift) => sum + shift.totalIncome, 0);
+        const averageShiftEarnings = totalShifts > 0 ? Math.round(totalEarnings / totalShifts) : 0;
+
+        // Расчет среднего дохода в час
+        let totalHours = 0;
+        completedShifts.forEach(shift => {
+            totalHours += (shift.endTime - shift.startTime) / (1000 * 60 * 60);
+        });
+        const averageHourlyEarnings = totalHours > 0 ? Math.round(totalEarnings / totalHours) : 0;
+
+        // Статистика по заказам
+        let totalOrders = 0;
+        let totalOrderPrice = 0;
+        let totalDistance = 0;
+        let totalWeight = 0;
+
+        completedShifts.forEach(shift => {
+            shift.routes.forEach(route => {
+                totalOrders += route.orders.length;
+                route.orders.forEach(order => {
+                    totalOrderPrice += order.price;
+                    totalDistance += parseFloat(order.distance);
+                    totalWeight += order.weight;
+                });
+            });
+        });
+
+        const averageOrderPrice = totalOrders > 0 ? Math.round(totalOrderPrice / totalOrders) : 0;
+        const averageDistance = totalOrders > 0 ? Math.round(totalDistance / totalOrders * 10) / 10 : 0;
+        const averageWeight = totalOrders > 0 ? Math.round(totalWeight / totalOrders * 10) / 10 : 0;
+
+        // Временная статистика
+        const averageShiftDuration = totalShifts > 0 ? Math.round(totalHours / totalShifts * 10) / 10 : 0;
+        const averageOrderTime = totalOrders > 0 ? Math.round(totalHours * 60 / totalOrders) : 0;
+
+        // Поиск лучшего дня и смены
+        let bestDayEarnings = 0;
+        let bestDayDate = null;
+        let bestShiftEarnings = 0;
+        let bestShiftDate = null;
+
+        // Группируем смены по дням
+        const dailyEarnings = {};
+        completedShifts.forEach(shift => {
+            const dateKey = shift.startTime.toLocaleDateString();
+            dailyEarnings[dateKey] = (dailyEarnings[dateKey] || 0) + shift.totalIncome;
+
+            // Проверяем на лучшую смену
+            if (shift.totalIncome > bestShiftEarnings) {
+                bestShiftEarnings = shift.totalIncome;
+                bestShiftDate = shift.startTime;
+            }
+        });
+
+        // Находим лучший день
+        Object.entries(dailyEarnings).forEach(([date, earnings]) => {
+            if (earnings > bestDayEarnings) {
+                bestDayEarnings = earnings;
+                bestDayDate = date;
+            }
+        });
+
+        // Обновляем значения на странице
+        document.getElementById('totalShifts').textContent = totalShifts;
+        document.getElementById('totalEarnings').textContent = `${totalEarnings}₽`;
+        document.getElementById('averageShiftEarnings').textContent = `${averageShiftEarnings}₽`;
+        document.getElementById('averageHourlyEarnings').textContent = `${averageHourlyEarnings}₽/час`;
+
+        document.getElementById('totalOrders').textContent = totalOrders;
+        document.getElementById('averageOrderPrice').textContent = `${averageOrderPrice}₽`;
+        document.getElementById('averageDistance').textContent = `${averageDistance} км`;
+        document.getElementById('averageWeight').textContent = `${averageWeight} кг`;
+
+        document.getElementById('averageShiftDuration').textContent = `${averageShiftDuration}ч`;
+        document.getElementById('averageOrderTime').textContent = `${averageOrderTime}мин`;
+        document.getElementById('bestDay').textContent = bestDayDate ? `${bestDayDate} (${bestDayEarnings}₽)` : '-';
+        document.getElementById('bestShift').textContent = bestShiftDate ? 
+            `${bestShiftDate.toLocaleDateString()} (${bestShiftEarnings}₽)` : '-';
+
+        // Отрисовка графика
+        renderEarningsChart(dailyEarnings);
+    }
+
+    // Функция отрисовки графика доходов
+    function renderEarningsChart(dailyEarnings) {
+        const chartContainer = document.getElementById('earningsChart');
+        chartContainer.innerHTML = '';
+
+        // Получаем последние 7 дней
+        const dates = Object.keys(dailyEarnings).sort().slice(-7);
+        const maxEarnings = Math.max(...Object.values(dailyEarnings));
+
+        // Создаем график
+        const chart = document.createElement('div');
+        chart.style.display = 'flex';
+        chart.style.alignItems = 'flex-end';
+        chart.style.height = '100%';
+        chart.style.gap = '10px';
+        chart.style.padding = '10px';
+
+        dates.forEach(date => {
+            const earnings = dailyEarnings[date] || 0;
+            const height = (earnings / maxEarnings * 100) || 0;
+
+            const bar = document.createElement('div');
+            bar.style.flex = '1';
+            bar.style.display = 'flex';
+            bar.style.flexDirection = 'column';
+            bar.style.alignItems = 'center';
+            bar.style.gap = '5px';
+
+            const barValue = document.createElement('div');
+            barValue.textContent = `${earnings}₽`;
+            barValue.style.color = '#ccc';
+            barValue.style.fontSize = '12px';
+
+            const barColumn = document.createElement('div');
+            barColumn.style.width = '100%';
+            barColumn.style.height = `${height}%`;
+            barColumn.style.backgroundColor = '#ffd700';
+            barColumn.style.borderRadius = '4px';
+            barColumn.style.transition = 'height 0.3s ease';
+
+            const barDate = document.createElement('div');
+            barDate.textContent = new Date(date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+            barDate.style.color = '#ccc';
+            barDate.style.fontSize = '12px';
+
+            bar.appendChild(barValue);
+            bar.appendChild(barColumn);
+            bar.appendChild(barDate);
+            chart.appendChild(bar);
+        });
+
+        chartContainer.appendChild(chart);
     }
 
     // Инициализация
