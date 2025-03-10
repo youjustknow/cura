@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     orderElement.className = 'history-order-item';
                     orderElement.innerHTML = `
                         <div class="order-info">
-                            <span>№${order.id}</span>
+                            <span>${order.id}</span>
                             <span>${order.address}</span>
                             <span>${order.weight}кг</span>
                             <span>${order.price}₽</span>
