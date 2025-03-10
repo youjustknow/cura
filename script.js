@@ -16,6 +16,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Текущие настройки
     let settings = { ...defaultSettings };
 
+    // Поля формы
+    const clientAddressInput = document.getElementById('clientAddress');
+    const orderWeightInput = document.getElementById('orderWeight');
+    const highPriceDeliveryCheckbox = document.getElementById('highPriceDelivery');
+    const addressSuggestions = document.getElementById('addressSuggestions');
+    const startLocationInput = document.getElementById('startLocation');
+    const startLocationSuggestions = document.getElementById('startLocationSuggestions');
+    const setStartLocationBtn = document.getElementById('setStartLocationBtn');
+    const startLocationInfo = document.getElementById('startLocationInfo');
+
+    // Загружаем настройки сразу при старте
+    loadSettings();
+    console.log('Настройки загружены при старте:', settings);
+
     // Элементы интерфейса
     const screens = {
         initial: document.getElementById('initialScreen'),
@@ -51,16 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
     const exitRouteBtn = document.getElementById('exitRouteBtn');
     const exitFormBtn = document.getElementById('exitFormBtn');
-
-    // Поля формы
-    const clientAddressInput = document.getElementById('clientAddress');
-    const orderWeightInput = document.getElementById('orderWeight');
-    const highPriceDeliveryCheckbox = document.getElementById('highPriceDelivery');
-    const addressSuggestions = document.getElementById('addressSuggestions');
-    const startLocationInput = document.getElementById('startLocation');
-    const startLocationSuggestions = document.getElementById('startLocationSuggestions');
-    const setStartLocationBtn = document.getElementById('setStartLocationBtn');
-    const startLocationInfo = document.getElementById('startLocationInfo');
 
     // Контейнеры для списков заказов
     const orderList = document.getElementById('orderList');
@@ -228,12 +232,14 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const parsed = JSON.parse(savedSettings);
                 settings = { ...defaultSettings, ...parsed };
+                console.log('Загружены настройки:', settings);
             } catch (error) {
                 console.error('Ошибка при загрузке настроек:', error);
                 settings = { ...defaultSettings };
             }
         }
         updateSettingsForm();
+        applyDefaultStartLocation();
     }
 
     // Функция сохранения настроек
@@ -248,6 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         localStorage.setItem('settings', JSON.stringify(settings));
+        console.log('Настройки сохранены:', settings);
     }
 
     // Функция обновления формы настроек
@@ -258,6 +265,56 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('pickupRate').value = settings.pickupRate;
         document.getElementById('deliveryRate').value = settings.deliveryRate;
         document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
+    }
+
+    // Функция применения начальной точки из настроек
+    async function applyDefaultStartLocation() {
+        if (settings.defaultStartLocation) {
+            startLocationInput.value = settings.defaultStartLocation;
+            try {
+                const coordinates = await geocodeAddress(settings.defaultStartLocation);
+                if (coordinates) {
+                    startLocation = coordinates;
+                    startLocationData = {
+                        address: settings.defaultStartLocation,
+                        coordinates: coordinates,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('startLocation', JSON.stringify(startLocationData));
+                    updateStartLocationInfo();
+                    console.log('Начальная точка установлена из настроек:', startLocationData);
+                }
+            } catch (error) {
+                console.error('Ошибка при установке начальной точки из настроек:', error);
+            }
+        }
+    }
+
+    // Обработчик для кнопки установки начальной точки по умолчанию
+    const setDefaultLocationBtn = document.getElementById('setDefaultLocationBtn');
+    if (setDefaultLocationBtn) {
+        setDefaultLocationBtn.addEventListener('click', async () => {
+            const address = document.getElementById('defaultStartLocation').value.trim();
+            if (address) {
+                try {
+                    const coordinates = await geocodeAddress(address);
+                    if (coordinates) {
+                        settings.defaultStartLocation = address;
+                        saveSettings();
+                        await showAlert('Начальная точка по умолчанию установлена');
+                        // Применяем новую начальную точку
+                        startLocationInput.value = address;
+                        await applyDefaultStartLocation();
+                    } else {
+                        await showAlert('Не удалось найти координаты для указанного адреса');
+                    }
+                } catch (error) {
+                    await showAlert(`Ошибка при установке начальной точки: ${error.message}`);
+                }
+            } else {
+                await showAlert('Введите адрес начальной точки');
+            }
+        });
     }
 
     // Обновляем функцию расчета цены
@@ -429,11 +486,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Функция для заполнения начальной точки
+    function fillStartLocation() {
+        if (startLocationData && startLocationData.address) {
+            startLocationInput.value = startLocationData.address;
+            startLocation = startLocationData.coordinates;
+            console.log('Начальная точка автоматически заполнена:', startLocationData.address);
+        } else if (settings.defaultStartLocation) {
+            startLocationInput.value = settings.defaultStartLocation;
+            console.log('Начальная точка заполнена из настроек:', settings.defaultStartLocation);
+        }
+    }
+
     // Обработчики событий для кнопок добавления заказа
     Object.values(addOrderBtns).forEach(btn => {
         if (btn) {
             btn.addEventListener('click', () => {
                 showScreen('orderForm');
+                fillStartLocation(); // Заполняем начальную точку
                 clientAddressInput.focus();
             });
         }
@@ -618,6 +688,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Проверка незавершенного маршрута при загрузке
     function checkForUnfinishedRoute() {
         const savedStartTime = localStorage.getItem('currentRouteStartTime');
+        const savedOrders = localStorage.getItem('currentRoute');
+        
         if (savedStartTime) {
             const startTime = new Date(savedStartTime);
             const now = new Date();
@@ -629,31 +701,44 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(result => {
                         if (result) {
                             routeStartTime = startTime;
+                            
+                            // Восстанавливаем заказы из localStorage
+                            if (savedOrders) {
+                                try {
+                                    orders = JSON.parse(savedOrders);
+                                    console.log('Заказы восстановлены из localStorage:', orders);
+                                } catch (error) {
+                                    console.error('Ошибка при восстановлении заказов:', error);
+                                }
+                            }
+                            
                             showScreen('routeExecution');
+                            renderOrderList(); // Отображаем восстановленные заказы
                             return true;
                         } else {
                             localStorage.removeItem('currentRouteStartTime');
+                            localStorage.removeItem('currentRoute');
                             return false;
                         }
                     });
             } else {
                 localStorage.removeItem('currentRouteStartTime');
+                localStorage.removeItem('currentRoute');
             }
         }
         return Promise.resolve(false);
     }
 
     // Инициализация приложения
-    document.addEventListener('DOMContentLoaded', function() {
+    //document.addEventListener('DOMContentLoaded', function() {
         loadRouteHistory();
-        loadSettings();
         loadStartLocation();
         checkForUnfinishedRoute().then(restored => {
             if (!restored) {
                 showScreen('initial');
             }
         });
-    });
+    //});
 
     // Обработчик отправки формы заказа
     if (submitOrderBtn) {
@@ -808,6 +893,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 routeStartTime = new Date();
                 // Добавим запись в localStorage о начале маршрута
                 localStorage.setItem('currentRouteStartTime', routeStartTime.toISOString());
+                // Сохраняем текущие заказы в localStorage
+                localStorage.setItem('currentRoute', JSON.stringify(orders));
                 console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()}`);
                 showScreen('routeExecution');
                 renderOrderList();
@@ -853,6 +940,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
                 // Удаляем запись о текущем маршруте
                 localStorage.removeItem('currentRouteStartTime');
+                localStorage.removeItem('currentRoute');
 
                 console.log(`Маршрут завершен. Начало: ${completedRoute.startTimeFormatted}, Конец: ${completedRoute.endTimeFormatted}`);
                 console.log(`Время выполнения: ${formattedTime}, доход: ${income}р`);
