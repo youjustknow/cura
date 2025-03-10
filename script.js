@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.menu-toggle');
     const menuButtons = document.querySelectorAll('.menu-btn');
     const showMainBtn = document.getElementById('showMainBtn');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
 
     // Кнопки
     const addOrderBtns = {
@@ -193,14 +194,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Функция для открытия/закрытия меню
+    function toggleMenu() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('active');
+    }
+
     // Обработчик для переключения меню
     if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
         });
     }
 
-    // Обработчик для кнопки "Главная"
+    // Обработчик клика по оверлею
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', () => {
+            toggleMenu();
+        });
+    }
+
+    // Обработчик клика по меню (предотвращаем закрытие при клике внутри)
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Обновляем обработчики кнопок меню
+    menuButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            toggleMenu(); // Закрываем меню при клике на пункт
+        });
+    });
+
+    // Обновляем обработчик для кнопки "Главная"
     if (showMainBtn) {
         showMainBtn.addEventListener('click', () => {
             setActiveMenuButton(showMainBtn);
