@@ -258,41 +258,97 @@ button {
 
 .date-group {
     margin-bottom: 20px;
+    background-color: #444;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.date-group h3 {
+.date-header {
     background-color: #333;
-    padding: 10px;
-    margin: 0;
+    padding: 15px;
     border-bottom: 2px solid #ffd700;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.date-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    margin-right: 15px;
+}
+
+.date-text {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.date-income {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.date-toggle {
+    color: #ffd700;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.routes-container {
+    padding: 10px;
+}
+
+.routes-container.hidden {
+    display: none;
 }
 
 .route-item {
-    background-color: #444;
+    background-color: #555;
     margin: 5px 0;
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .route-header {
-    padding: 10px;
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     cursor: pointer;
+    background-color: #4a4a4a;
+    transition: background-color 0.2s ease;
+}
+
+.route-header:hover {
+    background-color: #666;
 }
 
 .route-details {
     padding: 10px;
     border-top: 1px solid #666;
+    background-color: #555;
+}
+
+.route-details.hidden {
+    display: none;
 }
 
 .history-order-item {
-    padding: 5px;
+    padding: 10px;
     margin: 5px 0;
-    background-color: #555;
-    border-radius: 3px;
+    background-color: #444;
+    border-radius: 5px;
 }
 
 .order-info {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.order-distance {
+    color: #ccc;
+    font-size: 14px;
 }

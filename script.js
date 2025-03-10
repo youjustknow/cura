@@ -116,9 +116,13 @@ document.addEventListener('DOMContentLoaded', function() {
         routeHistory.forEach(route => {
             const dateKey = route.date.toLocaleDateString();
             if (!groupedRoutes[dateKey]) {
-                groupedRoutes[dateKey] = [];
+                groupedRoutes[dateKey] = {
+                    routes: [],
+                    totalIncome: 0
+                };
             }
-            groupedRoutes[dateKey].push(route);
+            groupedRoutes[dateKey].routes.push(route);
+            groupedRoutes[dateKey].totalIncome += route.income;
         });
 
         // Отображаем маршруты, сгруппированные по датам
@@ -128,56 +132,71 @@ document.addEventListener('DOMContentLoaded', function() {
             const dateGroup = document.createElement('div');
             dateGroup.className = 'date-group';
 
-            const dateHeader = document.createElement('h3');
-            dateHeader.textContent = dateKey;
+            const dateHeader = document.createElement('div');
+            dateHeader.className = 'date-header';
+            dateHeader.innerHTML = `
+                <div class="date-info">
+                    <span class="date-text">${dateKey}</span>
+                    <span class="date-income">Заработок: ${groupedRoutes[dateKey].totalIncome}₽</span>
+                </div>
+                <div class="date-toggle">▼</div>
+            `;
             dateGroup.appendChild(dateHeader);
 
-            groupedRoutes[dateKey].forEach(route => {
+            const routesContainer = document.createElement('div');
+            routesContainer.className = 'routes-container hidden';
+
+            groupedRoutes[dateKey].routes.forEach(route => {
                 const routeItem = document.createElement('div');
                 routeItem.className = 'route-item';
 
                 const routeHeader = document.createElement('div');
                 routeHeader.className = 'route-header';
                 routeHeader.innerHTML = `
-                <span>Маршрут #${route.id}</span>
-                <span>${route.executionTime}</span>
-                <span>${route.income}р</span>
+                    <span>Маршрут #${route.id}</span>
+                    <span>${route.executionTime}</span>
+                    <span>${route.income}₽</span>
                 `;
 
-                routeItem.appendChild(routeHeader);
+                const routeDetails = document.createElement('div');
+                routeDetails.className = 'route-details hidden';
 
-                // Добавляем возможность раскрыть детали маршрута
-                routeHeader.addEventListener('click', () => {
-                    const detailsElement = routeItem.querySelector('.route-details');
-                    if (detailsElement) {
-                        detailsElement.classList.toggle('hidden');
-                    } else {
-                        const details = document.createElement('div');
-                        details.className = 'route-details';
-
-                        // Отображаем все заказы в маршруте
-                        route.orders.forEach(order => {
-                            const orderElement = document.createElement('div');
-                            orderElement.className = 'history-order-item';
-                            orderElement.innerHTML = `
-                            <div class="order-info">
+                // Отображаем все заказы в маршруте
+                route.orders.forEach(order => {
+                    const orderElement = document.createElement('div');
+                    orderElement.className = 'history-order-item';
+                    orderElement.innerHTML = `
+                        <div class="order-info">
                             <span>№${order.id}</span>
                             <span>${order.address}</span>
                             <span>${order.weight}кг</span>
-                            <span>${order.price}р</span>
-                            </div>
-                            <div class="order-distance">
+                            <span>${order.price}₽</span>
+                        </div>
+                        <div class="order-distance">
                             <span>Расстояние: ${order.distance} км</span>
-                            </div>
-                            `;
-                            details.appendChild(orderElement);
-                        });
-
-                        routeItem.appendChild(details);
-                    }
+                        </div>
+                    `;
+                    routeDetails.appendChild(orderElement);
                 });
 
-                dateGroup.appendChild(routeItem);
+                routeItem.appendChild(routeHeader);
+                routeItem.appendChild(routeDetails);
+
+                // Обработчик клика по заголовку маршрута
+                routeHeader.addEventListener('click', () => {
+                    routeDetails.classList.toggle('hidden');
+                });
+
+                routesContainer.appendChild(routeItem);
+            });
+
+            dateGroup.appendChild(routesContainer);
+
+            // Обработчик клика по заголовку даты
+            dateHeader.addEventListener('click', () => {
+                routesContainer.classList.toggle('hidden');
+                const toggle = dateHeader.querySelector('.date-toggle');
+                toggle.textContent = routesContainer.classList.contains('hidden') ? '▼' : '▲';
             });
 
             routeHistoryList.appendChild(dateGroup);
@@ -332,8 +351,8 @@ if (document.getElementById('resetSessionBtn')) {
             // Сбрасываем текущие заказы
             orders = [];
             
-            routeHistory = [];
-            localStorage.removeItem('routeHistory');
+            //routeHistory = [];
+            //localStorage.removeItem('routeHistory');
             
             // Сбрасываем время начала маршрута
             routeStartTime = null;
