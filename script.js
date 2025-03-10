@@ -1914,7 +1914,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Добавляем обработчик для кнопки генерации тестовых данных
-    const generateTestDataBtn = document.createElement('button');
+    /*const generateTestDataBtn = document.createElement('button');
     generateTestDataBtn.textContent = 'Сгенерировать тестовые данные';
     generateTestDataBtn.className = 'modal-btn';
     generateTestDataBtn.style.position = 'fixed';
@@ -1923,7 +1923,7 @@ document.addEventListener('DOMContentLoaded', function() {
     generateTestDataBtn.style.zIndex = '1000';
     
     generateTestDataBtn.addEventListener('click', generateTestData);
-    document.body.appendChild(generateTestDataBtn);
+    document.body.appendChild(generateTestDataBtn);*/
 
     // Инициализация
     updateShiftControls();
