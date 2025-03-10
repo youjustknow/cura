@@ -1296,7 +1296,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (durationHours > 0) {
             const totalPlannedHours = (currentShift.plannedEndTime - currentShift.startTime) / (1000 * 60 * 60);
             // Если смена длится менее 2 часов, применяем коэффициент оптимизма
-            const optimismMultiplier = durationHours < 2 ? 1.2 : 1;
+            const optimismMultiplier = durationHours < 2 ? 1 : 1;
             predictedShiftIncome = Math.round(hourlyIncome * optimismMultiplier * totalPlannedHours);
         }
 
