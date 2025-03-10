@@ -253,7 +253,6 @@ button {
 .history-list {
     width: 100%;
     margin-top: 20px;
-    margin-bottom: 70px;
     overflow-y: auto;
     max-height: calc(100vh - 150px);
 }
@@ -473,6 +472,7 @@ button {
     padding: 20px;
     max-width: 600px;
     width: 100%;
+    overflow-y: scroll;
 }
 
 #settingsScreen {
@@ -707,6 +707,7 @@ h2 {
     list-style: none;
     padding: 0;
     margin: 0;
+    overflow-y: scroll;
 }
 
 .menu-items li {
@@ -950,9 +951,7 @@ h2 {
 
 /* Стили для статистики */
 .stats-container {
-    padding: 20px;
     max-width: 1200px;
-    margin: 0 auto;
     margin-top: 20px;
     overflow-y: auto;
     height: calc(100vh - 100px);
