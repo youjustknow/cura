@@ -1,3 +1,5 @@
+var orderId = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Глобальная переменная для истории маршрутов
     let routeHistory = [];
@@ -734,18 +736,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     const price = calculatePrice(weight, distance, isHighPriceDelivery);
                     console.log(`Рассчитанная цена: ${price}р`);
 
-                    const order = {
-                        id: nextOrderId++,
-                        address,
-                        weight,
-                        price,
-                        isHighPriceDelivery,
-                        completed: false,
-                        distance: typeof distance === 'number' ? distance.toFixed(2): '?'
-                    };
+                    const editedOrder = orders.find(o => o.id === orderId);
 
-                    console.log('Создан новый заказ:', order);
-                    orders.push(order);
+                    if (!editedOrder) {
+                        const order = {
+                            id: nextOrderId++,
+                            address,
+                            weight,
+                            price,
+                            isHighPriceDelivery,
+                            completed: false,
+                            distance: typeof distance === 'number' ? distance.toFixed(2): '?'
+                        };
+
+                        console.log('Создан новый заказ:', order);
+                        orders.push(order);
+                    } else {
+                        editedOrder.address = address;
+                        editedOrder.weight = weight;
+                        editedOrder.isHighPriceDelivery = isHighPriceDelivery;
+
+                        orderId = 0;
+                    }
+
                     renderOrderList();
 
                     // Сброс формы
@@ -821,8 +834,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 orderWeightInput.value = order.weight;
                 if (highPriceDeliveryCheckbox) highPriceDeliveryCheckbox.checked = order.isHighPriceDelivery;
 
+                orderId = order.id;
+
                 // Удаляем текущий заказ, после редактирования будет создан новый
-                orders = orders.filter(o => o.id !== order.id);
+                //orders = orders.filter(o => o.id !== order.id);
 
                 showScreen('orderForm');
             });
