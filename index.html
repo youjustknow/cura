@@ -86,6 +86,35 @@
         </div>
 
     </div>
+    <!-- Модальные окна -->
+    <div id="alertModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Уведомление</h3>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="alertOkBtn" class="modal-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Подтверждение</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmYesBtn" class="modal-btn">Да</button>
+                <button id="confirmNoBtn" class="modal-btn modal-btn-secondary">Нет</button>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

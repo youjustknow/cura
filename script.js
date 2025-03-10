@@ -52,6 +52,44 @@ document.addEventListener('DOMContentLoaded', function() {
     let startLocation = null;
     const API_KEY = '5b3ce3597851110001cf624892de0fe27ec54ee0afc5e65a6fff3c5c'; // Замените на свой ключ API
 
+    // Функции для работы с модальными окнами
+    function showAlert(message) {
+        const modal = document.getElementById('alertModal');
+        const messageElement = document.getElementById('alertMessage');
+        const okButton = document.getElementById('alertOkBtn');
+
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+
+        return new Promise(resolve => {
+            okButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve();
+            };
+        });
+    }
+
+    function showConfirm(message) {
+        const modal = document.getElementById('confirmModal');
+        const messageElement = document.getElementById('confirmMessage');
+        const yesButton = document.getElementById('confirmYesBtn');
+        const noButton = document.getElementById('confirmNoBtn');
+
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+
+        return new Promise(resolve => {
+            yesButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve(true);
+            };
+            noButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve(false);
+            };
+        });
+    }
+
     // Загрузка истории маршрутов
     function loadRouteHistory() {
         // В начале функции loadRouteHistory или в инициализации приложения
@@ -64,18 +102,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Если прошло менее 24 часов, предлагаем восстановить маршрут
                 if (diff < 24 * 60 * 60 * 1000) {
-                    if (confirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}. Восстановить?`)) {
-                        routeStartTime = startTime;
-                        showScreen('routeExecution');
-                        return true;
-                    } else {
-                        localStorage.removeItem('currentRouteStartTime');
-                    }
+                    return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}. Восстановить?`)
+                        .then(result => {
+                            if (result) {
+                                routeStartTime = startTime;
+                                showScreen('routeExecution');
+                                return true;
+                            } else {
+                                localStorage.removeItem('currentRouteStartTime');
+                                return false;
+                            }
+                        });
                 } else {
                     localStorage.removeItem('currentRouteStartTime');
                 }
             }
-            return false;
+            return Promise.resolve(false);
         }
 
         // Вызываем эту функцию при загрузке приложения
@@ -341,24 +383,17 @@ function loadStartLocation() {
 
 // Обработчик для кнопки сброса сессии
 if (document.getElementById('resetSessionBtn')) {
-    document.getElementById('resetSessionBtn').addEventListener('click', () => {
-        if (confirm('Вы уверены, что хотите сбросить сессию? Это удалит стартовую точку и текущие заказы.')) {
-            // Удаляем стартовую точку
+    document.getElementById('resetSessionBtn').addEventListener('click', async () => {
+        const confirmed = await showConfirm('Вы уверены, что хотите сбросить сессию? Это удалит стартовую точку и текущие заказы.');
+        if (confirmed) {
             localStorage.removeItem('startLocation');
             startLocation = null;
             startLocationInfo = null;
-            
-            // Сбрасываем текущие заказы
             orders = [];
-            
-            //routeHistory = [];
-            //localStorage.removeItem('routeHistory');
-            
-            // Сбрасываем время начала маршрута
             routeStartTime = null;
             localStorage.removeItem('currentRouteStartTime');
             
-            alert('Сессия сброшена');
+            await showAlert('Сессия сброшена');
             showScreen('initial');
         }
     });
@@ -503,12 +538,10 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                         timestamp: new Date().toISOString()
                     };
                     
-                    // Сохраняем в localStorage
                     localStorage.setItem('startLocation', JSON.stringify(startLocationInfo));
                     
-                    alert(`Начальная точка установлена: ${address} [${coordinates}]`);
+                    await showAlert(`Начальная точка установлена: ${address} [${coordinates}]`);
                     
-                    // Отображаем информацию о точке старта
                     if (startLocationInput.parentNode) {
                         const infoElement = document.createElement('div');
                         infoElement.className = 'start-location-info';
@@ -516,13 +549,13 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                         startLocationInput.parentNode.appendChild(infoElement);
                     }
                 } else {
-                    alert('Не удалось найти координаты для указанного адреса');
+                    await showAlert('Не удалось найти координаты для указанного адреса');
                 }
             } catch (error) {
-                alert(`Ошибка при установке начальной точки: ${error.message}`);
+                await showAlert(`Ошибка при установке начальной точки: ${error.message}`);
             }
         } else {
-            alert('Введите адрес начальной точки');
+            await showAlert('Введите адрес начальной точки');
         }
     });
 }
@@ -547,7 +580,7 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                     const endCoordinates = await geocodeAddress(address);
 
                     if (!endCoordinates) {
-                        alert('Не удалось найти координаты для адреса клиента');
+                        await showAlert('Не удалось найти координаты для адреса клиента');
                         return;
                     }
 
@@ -556,7 +589,7 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                     const distance = await calculateDistance(startLocation, endCoordinates);
 
                     if (distance === null) {
-                        alert('Не удалось рассчитать расстояние');
+                        await showAlert('Не удалось рассчитать расстояние');
                         return;
                     }
 
@@ -586,10 +619,10 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                     showScreen('orderList');
                 } catch (error) {
                     console.error('Ошибка при создании заказа:', error);
-                    alert(`Ошибка при создании заказа: ${error.message}`);
+                    await showAlert(`Ошибка при создании заказа: ${error.message}`);
                 }
             } else {
-                alert('Введите адрес и вес заказа');
+                await showAlert('Введите адрес и вес заказа');
             }
         });
     }
@@ -675,7 +708,7 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
 
     // Обработчик начала маршрута
     if (startRouteBtn) {
-        startRouteBtn.addEventListener('click', () => {
+        startRouteBtn.addEventListener('click', async () => {
             if (orders.length > 0) {
                 routeStartTime = new Date();
                 // Добавим запись в localStorage о начале маршрута
@@ -684,7 +717,7 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
                 showScreen('routeExecution');
                 renderOrderList();
             } else {
-                alert('Добавьте хотя бы один заказ для начала маршрута');
+                await showAlert('Добавьте хотя бы один заказ для начала маршрута');
             }
         });
     }
