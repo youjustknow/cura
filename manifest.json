@@ -2,7 +2,7 @@
     "name": "Курьер",
     "short_name": "Курьер",
     "description": "Приложение для управления заказами курьера",
-    "start_url": "/",
+    "start_url": "/cura",
     "display": "standalone",
     "background_color": "#333333",
     "theme_color": "#ffd700",
