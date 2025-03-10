@@ -8,23 +8,67 @@
 </head>
 <body>
     <div class="app">
+        <!-- Боковое меню -->
+        <div class="sidebar">
+            <nav class="menu">
+                <div class="menu-header">
+                    <h2>Меню</h2>
+                </div>
+                <ul class="menu-items">
+                    <li>
+                        <button id="showMainBtn" class="menu-btn active">
+                            <span class="material-icons">home</span>
+                            Главная
+                        </button>
+                    </li>
+                    <li>
+                        <button id="showHistoryBtn" class="menu-btn">
+                            <span class="material-icons">history</span>
+                            История
+                        </button>
+                    </li>
+                    <li>
+                        <button id="showSettingsBtn" class="menu-btn">
+                            <span class="material-icons">settings</span>
+                            Настройки
+                        </button>
+                    </li>
+                    <li>
+                        <button id="resetSessionBtn" class="menu-btn danger">
+                            <span class="material-icons">restart_alt</span>
+                            Сбросить сессию
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- Кнопка меню -->
+        <div class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
         <!-- Начальный экран с кнопкой добавления -->
         <div id="initialScreen" class="screen">
             <button id="addOrderBtn" class="add-order-button">
                 <span class="plus-icon">+</span>
             </button>
-            <button id="showHistoryBtn" class="history-button">История</button>
-            <button id="resetSessionBtn" class="reset-button">Сбросить сессию</button>
         </div>
 
         <!-- Экран формы добавления заказа -->
         <div id="orderFormScreen" class="screen hidden">
+            <div class="form-header">
+                <h2>Новый заказ</h2>
+                <button id="exitFormBtn" class="exit-button">Выйти</button>
+            </div>
             <div class="order-form">
                 <div class="form-group">
                     <label for="startLocation">Начальная точка</label>
                     <input type="text" id="startLocation" autocomplete="off">
                     <ul id="startLocationSuggestions" class="suggestions hidden"></ul>
                     <button id="setStartLocationBtn" class="secondary-button">Установить</button>
+                    <div id="startLocationInfo" class="start-location-info hidden"></div>
                 </div>
                 <div class="form-group">
                     <label for="clientAddress">Адрес клиента</label>
@@ -57,6 +101,7 @@
 
         <!-- Экран выполнения маршрута -->
         <div id="routeExecutionScreen" class="screen hidden">
+            <button id="exitRouteBtn" class="exit-button">Выйти</button>
             <div id="executionOrderList" class="order-list"></div>
             <button id="finishRouteBtn" class="action-button">Завершить</button>
         </div>
@@ -83,6 +128,40 @@
             <h2>История маршрутов</h2>
             <div id="routeHistoryList" class="history-list"></div>
             <button id="backToMainBtn" class="action-button">Назад</button>
+        </div>
+
+        <!-- Экран настроек -->
+        <div id="settingsScreen" class="screen hidden">
+            <h2>Настройки</h2>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="defaultStartLocation">Начальная точка по умолчанию</label>
+                    <input type="text" id="defaultStartLocation" autocomplete="off">
+                    <button id="setDefaultLocationBtn" class="secondary-button">Установить</button>
+                </div>
+                <div class="form-group">
+                    <label for="distanceRate">Оплата за километр (₽)</label>
+                    <input type="number" id="distanceRate" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="weightRate">Оплата за килограмм (₽)</label>
+                    <input type="number" id="weightRate" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="pickupRate">Оплата за забор заказа (₽)</label>
+                    <input type="number" id="pickupRate" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="deliveryRate">Базовая оплата за выдачу заказа (₽)</label>
+                    <input type="number" id="deliveryRate" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="highPriceDeliveryRate">Повышенная оплата за выдачу заказа (₽)</label>
+                    <input type="number" id="highPriceDeliveryRate" min="0">
+                </div>
+                <button id="saveSettingsBtn" class="action-button">Сохранить</button>
+            </div>
+            <button id="backFromSettingsBtn" class="action-button">Назад</button>
         </div>
 
     </div>

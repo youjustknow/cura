@@ -1,7 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Глобальная переменная для истории маршрутов
     let routeHistory = [];
-    let startLocationInfo = null;
+    let startLocationData = null;
+
+    // Настройки по умолчанию
+    const defaultSettings = {
+        defaultStartLocation: null,
+        distanceRate: 18,
+        weightRate: 2,
+        pickupRate: 63,
+        deliveryRate: 86,
+        highPriceDeliveryRate: 110
+    };
+
+    // Текущие настройки
+    let settings = { ...defaultSettings };
 
     // Элементы интерфейса
     const screens = {
@@ -10,8 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
         orderList: document.getElementById('orderListScreen'),
         routeExecution: document.getElementById('routeExecutionScreen'),
         routeCompletion: document.getElementById('routeCompletionScreen'),
-        routeHistory: document.getElementById('routeHistoryScreen')
+        routeHistory: document.getElementById('routeHistoryScreen'),
+        settings: document.getElementById('settingsScreen')
     };
+
+    // Элементы бокового меню
+    const sidebar = document.querySelector('.sidebar');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuButtons = document.querySelectorAll('.menu-btn');
+    const showMainBtn = document.getElementById('showMainBtn');
 
     // Кнопки
     const addOrderBtns = {
@@ -26,6 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const okBtn = document.getElementById('okBtn');
     const showHistoryBtn = document.getElementById('showHistoryBtn');
     const backToMainBtn = document.getElementById('backToMainBtn');
+    const showSettingsBtn = document.getElementById('showSettingsBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
+    const exitRouteBtn = document.getElementById('exitRouteBtn');
+    const exitFormBtn = document.getElementById('exitFormBtn');
 
     // Поля формы
     const clientAddressInput = document.getElementById('clientAddress');
@@ -35,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const startLocationInput = document.getElementById('startLocation');
     const startLocationSuggestions = document.getElementById('startLocationSuggestions');
     const setStartLocationBtn = document.getElementById('setStartLocationBtn');
+    const startLocationInfo = document.getElementById('startLocationInfo');
 
     // Контейнеры для списков заказов
     const orderList = document.getElementById('orderList');
@@ -52,100 +78,50 @@ document.addEventListener('DOMContentLoaded', function() {
     let startLocation = null;
     const API_KEY = '5b3ce3597851110001cf624892de0fe27ec54ee0afc5e65a6fff3c5c'; // Замените на свой ключ API
 
-    // Функции для работы с модальными окнами
-    function showAlert(message) {
-        const modal = document.getElementById('alertModal');
-        const messageElement = document.getElementById('alertMessage');
-        const okButton = document.getElementById('alertOkBtn');
+    // Функция для переключения активного состояния кнопок меню
+    function setActiveMenuButton(activeButton) {
+        menuButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
 
-        messageElement.textContent = message;
-        modal.classList.remove('hidden');
-
-        return new Promise(resolve => {
-            okButton.onclick = () => {
-                modal.classList.add('hidden');
-                resolve();
-            };
+    // Обработчик для переключения меню
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
         });
     }
 
-    function showConfirm(message) {
-        const modal = document.getElementById('confirmModal');
-        const messageElement = document.getElementById('confirmMessage');
-        const yesButton = document.getElementById('confirmYesBtn');
-        const noButton = document.getElementById('confirmNoBtn');
-
-        messageElement.textContent = message;
-        modal.classList.remove('hidden');
-
-        return new Promise(resolve => {
-            yesButton.onclick = () => {
-                modal.classList.add('hidden');
-                resolve(true);
-            };
-            noButton.onclick = () => {
-                modal.classList.add('hidden');
-                resolve(false);
-            };
+    // Обработчик для кнопки "Главная"
+    if (showMainBtn) {
+        showMainBtn.addEventListener('click', () => {
+            setActiveMenuButton(showMainBtn);
+            showScreen('initial');
+            sidebar.classList.remove('open');
         });
     }
 
-    // Загрузка истории маршрутов
-    function loadRouteHistory() {
-        // В начале функции loadRouteHistory или в инициализации приложения
-        function checkForUnfinishedRoute() {
-            const savedStartTime = localStorage.getItem('currentRouteStartTime');
-            if (savedStartTime) {
-                const startTime = new Date(savedStartTime);
-                const now = new Date();
-                const diff = now - startTime;
-
-                // Если прошло менее 24 часов, предлагаем восстановить маршрут
-                if (diff < 24 * 60 * 60 * 1000) {
-                    return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}. Восстановить?`)
-                        .then(result => {
-                            if (result) {
-                                routeStartTime = startTime;
-                                showScreen('routeExecution');
-                                return true;
-                            } else {
-                                localStorage.removeItem('currentRouteStartTime');
-                                return false;
-                            }
-                        });
-                } else {
-                    localStorage.removeItem('currentRouteStartTime');
-                }
-            }
-            return Promise.resolve(false);
-        }
-
-        // Вызываем эту функцию при загрузке приложения
-        document.addEventListener('DOMContentLoaded', function() {
-            loadRouteHistory();
-            if (!checkForUnfinishedRoute()) {
-                showScreen('initial');
-            }
+    // Обновляем обработчик для кнопки "История"
+    if (showHistoryBtn) {
+        showHistoryBtn.addEventListener('click', () => {
+            setActiveMenuButton(showHistoryBtn);
+            renderRouteHistory();
+            showScreen('routeHistory');
+            sidebar.classList.remove('open');
         });
+    }
 
-        const savedHistory = localStorage.getItem('routeHistory');
-        if (savedHistory) {
-            try {
-                routeHistory = JSON.parse(savedHistory);
-
-                // Преобразуем строковые даты обратно в объекты Date
-                routeHistory.forEach(route => {
-                    route.date = new Date(route.date);
-                    route.startTime = new Date(route.startTime);
-                    route.endTime = new Date(route.endTime);
-                });
-
-                console.log('История маршрутов загружена:', routeHistory);
-            } catch (error) {
-                console.error('Ошибка при загрузке истории маршрутов:', error);
-                routeHistory = [];
-            }
-        }
+    // Обновляем обработчик для кнопки "Настройки"
+    if (showSettingsBtn) {
+        showSettingsBtn.addEventListener('click', () => {
+            setActiveMenuButton(showSettingsBtn);
+            updateSettingsForm();
+            showScreen('settings');
+            sidebar.classList.remove('open');
+        });
     }
 
     // Функция для отображения истории маршрутов
@@ -245,20 +221,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Функции для переключения экранов
-    function showScreen(screenId) {
-        Object.values(screens).forEach(screen => {
-            if (screen) screen.classList.add('hidden');
-        });
-        if (screens[screenId]) screens[screenId].classList.remove('hidden');
+    // Функция загрузки настроек
+    function loadSettings() {
+        const savedSettings = localStorage.getItem('settings');
+        if (savedSettings) {
+            try {
+                const parsed = JSON.parse(savedSettings);
+                settings = { ...defaultSettings, ...parsed };
+            } catch (error) {
+                console.error('Ошибка при загрузке настроек:', error);
+                settings = { ...defaultSettings };
+            }
+        }
+        updateSettingsForm();
     }
 
-    // Расчет цены заказа
+    // Функция сохранения настроек
+    function saveSettings() {
+        settings = {
+            defaultStartLocation: document.getElementById('defaultStartLocation').value,
+            distanceRate: parseFloat(document.getElementById('distanceRate').value) || defaultSettings.distanceRate,
+            weightRate: parseFloat(document.getElementById('weightRate').value) || defaultSettings.weightRate,
+            pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
+            deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
+            highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate
+        };
+
+        localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
+    // Функция обновления формы настроек
+    function updateSettingsForm() {
+        document.getElementById('defaultStartLocation').value = settings.defaultStartLocation || '';
+        document.getElementById('distanceRate').value = settings.distanceRate;
+        document.getElementById('weightRate').value = settings.weightRate;
+        document.getElementById('pickupRate').value = settings.pickupRate;
+        document.getElementById('deliveryRate').value = settings.deliveryRate;
+        document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
+    }
+
+    // Обновляем функцию расчета цены
     function calculatePrice(weight, distance, isHighPriceDelivery = false) {
-        const pickupPrice = 63;
-        const deliveryPrice = isHighPriceDelivery ? 110: 86;
-        const weightPrice = weight * 2;
-        const distancePrice = distance * 18;
+        const pickupPrice = settings.pickupRate;
+        const deliveryPrice = isHighPriceDelivery ? settings.highPriceDeliveryRate : settings.deliveryRate;
+        const weightPrice = weight * settings.weightRate;
+        const distancePrice = distance * settings.distanceRate;
 
         return Math.round(pickupPrice + deliveryPrice + weightPrice + distancePrice);
     }
@@ -362,52 +369,65 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-// Загрузка стартовой точки при инициализации
-function loadStartLocation() {
-    const savedStartLocation = localStorage.getItem('startLocation');
-    if (savedStartLocation) {
-        try {
-            startLocationInfo = JSON.parse(savedStartLocation);
-            startLocation = startLocationInfo.coordinates;
-            console.log(`Загружена стартовая точка: ${startLocationInfo.address} [${startLocation}]`);
-        } catch (error) {
-            console.error('Ошибка при загрузке стартовой точки:', error);
-            startLocationInfo = null;
-            startLocation = null;
+    // Функция обновления информации о начальной точке
+    function updateStartLocationInfo() {
+        if (startLocationInfo) {
+            if (startLocationData && startLocation) {
+                startLocationInfo.textContent = `Текущая точка старта: ${startLocationData.address || 'Не установлена'}`;
+                startLocationInfo.classList.remove('hidden');
+            } else {
+                startLocationInfo.classList.add('hidden');
+            }
         }
     }
-}
 
-// Обработчик для кнопки установки начальной точки
+    // Загрузка стартовой точки при инициализации
+    function loadStartLocation() {
+        const savedStartLocation = localStorage.getItem('startLocation');
+        if (savedStartLocation) {
+            try {
+                startLocationData = JSON.parse(savedStartLocation);
+                startLocation = startLocationData.coordinates;
+                console.log(`Загружена стартовая точка: ${startLocationData.address} [${startLocation}]`);
+                updateStartLocationInfo();
+            } catch (error) {
+                console.error('Ошибка при загрузке стартовой точки:', error);
+                startLocationData = null;
+                startLocation = null;
+            }
+        }
+    }
 
-
-// Обработчик для кнопки сброса сессии
-if (document.getElementById('resetSessionBtn')) {
-    document.getElementById('resetSessionBtn').addEventListener('click', async () => {
-        const confirmed = await showConfirm('Вы уверены, что хотите сбросить сессию? Это удалит стартовую точку и текущие заказы.');
-        if (confirmed) {
-            localStorage.removeItem('startLocation');
-            startLocation = null;
-            startLocationInfo = null;
-            orders = [];
-            routeStartTime = null;
-            localStorage.removeItem('currentRouteStartTime');
+    // Обработчик для кнопки установки начальной точки
+    if (setStartLocationBtn) {
+        setStartLocationBtn.addEventListener('click', async () => {
+            const address = startLocationInput.value.trim();
             
-            await showAlert('Сессия сброшена');
-            showScreen('initial');
-        }
-    });
-}
-
-// Вызываем функцию загрузки стартовой точки при инициализации
-document.addEventListener('DOMContentLoaded', function() {
-    loadRouteHistory();
-    loadStartLocation();
-    if (!checkForUnfinishedRoute()) {
-        showScreen('initial');
+            if (address) {
+                try {
+                    const coordinates = await geocodeAddress(address);
+                    if (coordinates) {
+                        startLocation = coordinates;
+                        startLocationData = {
+                            address: address,
+                            coordinates: coordinates,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        localStorage.setItem('startLocation', JSON.stringify(startLocationData));
+                        updateStartLocationInfo();
+                        await showAlert(`Начальная точка установлена: ${address}`);
+                    } else {
+                        await showAlert('Не удалось найти координаты для указанного адреса');
+                    }
+                } catch (error) {
+                    await showAlert(`Ошибка при установке начальной точки: ${error.message}`);
+                }
+            } else {
+                await showAlert('Введите адрес начальной точки');
+            }
+        });
     }
-});
-
 
     // Обработчики событий для кнопок добавления заказа
     Object.values(addOrderBtns).forEach(btn => {
@@ -419,146 +439,221 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-// Функция для получения подсказок адресов с использованием API OpenStreetMap
-async function getAddressSuggestions(query) {
-    if (query.length < 3) return [];
-    
-    try {
-        // Добавляем задержку между запросами для соблюдения лимитов API
-        await new Promise(resolve => setTimeout(resolve, 300));
+    // Функция для получения подсказок адресов с использованием API OpenStreetMap
+    async function getAddressSuggestions(query) {
+        if (query.length < 3) return [];
         
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`, {
-            headers: {
-                'User-Agent': 'CourierApp/1.0 (your-email@example.com)'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ошибка: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Преобразуем результаты в массив строк адресов
-        const suggestions = data.features.map(feature => {
-            const properties = feature.properties;
-            let address = '';
+        try {
+            // Добавляем задержку между запросами для соблюдения лимитов API
+            await new Promise(resolve => setTimeout(resolve, 300));
             
-            if (properties.name) address += properties.name;
-            if (properties.street) {
-                if (address) address += ', ';
-                address += properties.street;
-            }
-            if (properties.housenumber) {
-                address += ' ' + properties.housenumber;
-            }
-            if (properties.city) {
-                if (address) address += ', ';
-                address += properties.city;
-            }
-            if (properties.state) {
-                if (address) address += ', ';
-                address += properties.state;
-            }
-            if (properties.country) {
-                if (address) address += ', ';
-                address += properties.country;
-            }
-            
-            return address;
-        });
-        
-        return suggestions;
-    } catch (error) {
-        console.error('Ошибка при получении подсказок адресов:', error);
-        return [];
-    }
-}
-
-/*// Обновленная функция настройки подсказок для адреса
-function setupAddressSuggestions(inputElement, suggestionsElement) {
-    if (inputElement && suggestionsElement) {
-        // Добавляем debounce для предотвращения слишком частых запросов
-        let debounceTimer;
-        
-        inputElement.addEventListener('input', () => {
-            const value = inputElement.value.trim();
-            
-            clearTimeout(debounceTimer);
-            
-            if (value.length > 2) {
-                debounceTimer = setTimeout(async () => {
-                    const suggestions = await getAddressSuggestions(value);
-                    
-                    suggestionsElement.innerHTML = '';
-                    
-                    if (suggestions.length > 0) {
-                        suggestions.forEach(suggestion => {
-                            const li = document.createElement('li');
-                            li.textContent = suggestion;
-                            li.addEventListener('click', () => {
-                                inputElement.value = suggestion;
-                                suggestionsElement.classList.add('hidden');
-                            });
-                            suggestionsElement.appendChild(li);
-                        });
-                        
-                        suggestionsElement.classList.remove('hidden');
-                    } else {
-                        suggestionsElement.classList.add('hidden');
-                    }
-                }, 500); // Задержка 500 мс перед запросом
-            } else {
-                suggestionsElement.classList.add('hidden');
-            }
-        });
-    }
-}
-
-
-    // Настройка подсказок для обоих полей адреса
-    setupAddressSuggestions(clientAddressInput,
-        addressSuggestions);
-    setupAddressSuggestions(startLocationInput,
-        startLocationSuggestions);*/
-
-    // Обработчик для кнопки установки начальной точки
-    if (setStartLocationBtn) {
-    setStartLocationBtn.addEventListener('click', async () => {
-        const address = startLocationInput.value.trim();
-        
-        if (address) {
-            try {
-                const coordinates = await geocodeAddress(address);
-                if (coordinates) {
-                    startLocation = coordinates;
-                    startLocationInfo = {
-                        address: address,
-                        coordinates: coordinates,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    localStorage.setItem('startLocation', JSON.stringify(startLocationInfo));
-                    
-                    await showAlert(`Начальная точка установлена: ${address} [${coordinates}]`);
-                    
-                    if (startLocationInput.parentNode) {
-                        const infoElement = document.createElement('div');
-                        infoElement.className = 'start-location-info';
-                        infoElement.textContent = `Текущая точка старта: ${address}`;
-                        startLocationInput.parentNode.appendChild(infoElement);
-                    }
-                } else {
-                    await showAlert('Не удалось найти координаты для указанного адреса');
+            const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`, {
+                headers: {
+                    'User-Agent': 'CourierApp/1.0 (your-email@example.com)'
                 }
-            } catch (error) {
-                await showAlert(`Ошибка при установке начальной точки: ${error.message}`);
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ошибка: ${response.status}`);
             }
-        } else {
-            await showAlert('Введите адрес начальной точки');
+            
+            const data = await response.json();
+            
+            // Преобразуем результаты в массив строк адресов
+            const suggestions = data.features.map(feature => {
+                const properties = feature.properties;
+                let address = '';
+                
+                if (properties.name) address += properties.name;
+                if (properties.street) {
+                    if (address) address += ', ';
+                    address += properties.street;
+                }
+                if (properties.housenumber) {
+                    address += ' ' + properties.housenumber;
+                }
+                if (properties.city) {
+                    if (address) address += ', ';
+                    address += properties.city;
+                }
+                if (properties.state) {
+                    if (address) address += ', ';
+                    address += properties.state;
+                }
+                if (properties.country) {
+                    if (address) address += ', ';
+                    address += properties.country;
+                }
+                
+                return address;
+            });
+            
+            return suggestions;
+        } catch (error) {
+            console.error('Ошибка при получении подсказок адресов:', error);
+            return [];
         }
+    }
+
+    // Обработчики для экрана настроек
+    if (showSettingsBtn) {
+        showSettingsBtn.addEventListener('click', () => {
+            updateSettingsForm();
+            showScreen('settings');
+        });
+    }
+
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', async () => {
+            saveSettings();
+            await showAlert('Настройки сохранены');
+            showScreen('initial');
+        });
+    }
+
+    if (backFromSettingsBtn) {
+        backFromSettingsBtn.addEventListener('click', () => {
+            showScreen('initial');
+        });
+    }
+
+    // Обработчик для кнопки выхода из маршрута
+    if (exitRouteBtn) {
+        exitRouteBtn.addEventListener('click', async () => {
+            const confirmed = await showConfirm('Вы уверены, что хотите выйти из текущего маршрута? Прогресс будет сохранен.');
+            if (confirmed) {
+                showScreen('orderList');
+            }
+        });
+    }
+
+    // Обработчик для кнопки выхода из формы
+    if (exitFormBtn) {
+        exitFormBtn.addEventListener('click', () => {
+            showScreen('orderList');
+        });
+    }
+
+    // Функции для работы с модальными окнами
+    function showAlert(message) {
+        const modal = document.getElementById('alertModal');
+        const messageElement = document.getElementById('alertMessage');
+        const okButton = document.getElementById('alertOkBtn');
+
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+        sidebar.classList.remove('open'); // Закрываем боковое меню при показе модального окна
+
+        return new Promise(resolve => {
+            okButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve();
+            };
+        });
+    }
+
+    function showConfirm(message) {
+        const modal = document.getElementById('confirmModal');
+        const messageElement = document.getElementById('confirmMessage');
+        const yesButton = document.getElementById('confirmYesBtn');
+        const noButton = document.getElementById('confirmNoBtn');
+
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+        sidebar.classList.remove('open'); // Закрываем боковое меню при показе модального окна
+
+        return new Promise(resolve => {
+            yesButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve(true);
+            };
+            noButton.onclick = () => {
+                modal.classList.add('hidden');
+                resolve(false);
+            };
+        });
+    }
+
+    // Обработчик для кнопки сброса сессии
+    const resetSessionBtn = document.getElementById('resetSessionBtn');
+    if (resetSessionBtn) {
+        resetSessionBtn.addEventListener('click', async () => {
+            const confirmed = await showConfirm('Вы уверены, что хотите сбросить текущую сессию? Все несохраненные данные будут потеряны.');
+            if (confirmed) {
+                localStorage.removeItem('currentRouteStartTime');
+                localStorage.removeItem('currentRoute');
+                routeHistory = [];
+                localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
+                showAlert('Сессия успешно сброшена').then(() => {
+                    setActiveMenuButton(showMainBtn);
+                    showScreen('initial');
+                    sidebar.classList.remove('open');
+                });
+            }
+        });
+    }
+
+    // Загрузка истории маршрутов
+    function loadRouteHistory() {
+        const savedHistory = localStorage.getItem('routeHistory');
+        if (savedHistory) {
+            try {
+                routeHistory = JSON.parse(savedHistory);
+
+                // Преобразуем строковые даты обратно в объекты Date
+                routeHistory.forEach(route => {
+                    route.date = new Date(route.date);
+                    route.startTime = new Date(route.startTime);
+                    route.endTime = new Date(route.endTime);
+                });
+
+                console.log('История маршрутов загружена:', routeHistory);
+            } catch (error) {
+                console.error('Ошибка при загрузке истории маршрутов:', error);
+                routeHistory = [];
+            }
+        }
+    }
+
+    // Проверка незавершенного маршрута при загрузке
+    function checkForUnfinishedRoute() {
+        const savedStartTime = localStorage.getItem('currentRouteStartTime');
+        if (savedStartTime) {
+            const startTime = new Date(savedStartTime);
+            const now = new Date();
+            const diff = now - startTime;
+
+            // Если прошло менее 24 часов, предлагаем восстановить маршрут
+            if (diff < 24 * 60 * 60 * 1000) {
+                return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}. Восстановить?`)
+                    .then(result => {
+                        if (result) {
+                            routeStartTime = startTime;
+                            showScreen('routeExecution');
+                            return true;
+                        } else {
+                            localStorage.removeItem('currentRouteStartTime');
+                            return false;
+                        }
+                    });
+            } else {
+                localStorage.removeItem('currentRouteStartTime');
+            }
+        }
+        return Promise.resolve(false);
+    }
+
+    // Инициализация приложения
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRouteHistory();
+        loadSettings();
+        loadStartLocation();
+        checkForUnfinishedRoute().then(restored => {
+            if (!restored) {
+                showScreen('initial');
+            }
+        });
     });
-}
 
     // Обработчик отправки формы заказа
     if (submitOrderBtn) {
@@ -722,9 +817,6 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
         });
     }
 
-
-
-
     // Обработчик завершения маршрута
     if (finishRouteBtn) {
         finishRouteBtn.addEventListener('click', () => {
@@ -773,7 +865,6 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
         });
     }
 
-
     // Обработчик кнопки ОК на экране завершения
     if (okBtn) {
         okBtn.addEventListener('click', () => {
@@ -782,14 +873,6 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
             routeStartTime = null;
 
             showScreen('initial');
-        });
-    }
-
-    // Обработчик для кнопки показа истории
-    if (showHistoryBtn) {
-        showHistoryBtn.addEventListener('click', () => {
-            renderRouteHistory();
-            showScreen('routeHistory');
         });
     }
 
@@ -869,9 +952,23 @@ function setupAddressSuggestions(inputElement, suggestionsElement) {
         });
     }
 
-    // Загружаем историю маршрутов
-    loadRouteHistory();
-
-    // Инициализация приложения
-    showScreen('initial');
+    // Обновляем функцию показа экрана
+    function showScreen(screenId) {
+        Object.values(screens).forEach(screen => {
+            if (screen) screen.classList.add('hidden');
+        });
+        if (screens[screenId]) {
+            screens[screenId].classList.remove('hidden');
+            // Обновляем активную кнопку меню
+            if (screenId === 'initial') {
+                setActiveMenuButton(showMainBtn);
+            } else if (screenId === 'routeHistory') {
+                setActiveMenuButton(showHistoryBtn);
+            } else if (screenId === 'settings') {
+                setActiveMenuButton(showSettingsBtn);
+            } else {
+                setActiveMenuButton(null);
+            }
+        }
+    }
 });

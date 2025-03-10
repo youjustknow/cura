@@ -439,3 +439,313 @@ button {
 .modal-btn-secondary:hover {
     background-color: #666;
 }
+
+/* Кнопка выхода */
+.exit-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #ff5722;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+/* Кнопка настроек */
+.settings-button {
+    position: absolute;
+    top: 20px;
+    right: 120px;
+    background-color: #555;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+/* Экран настроек */
+.settings-form {
+    background-color: #444;
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    max-width: 600px;
+    width: 100%;
+}
+
+#settingsScreen {
+    align-items: center;
+}
+
+#settingsScreen h2 {
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.settings-form .form-group {
+    margin-bottom: 20px;
+}
+
+.settings-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #fff;
+}
+
+.settings-form input[type="text"],
+.settings-form input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    font-size: 16px;
+}
+
+.settings-form input[type="number"] {
+    width: 200px;
+}
+
+#saveSettingsBtn {
+    margin: 20px 0;
+    width: 100%;
+    padding: 15px;
+}
+
+#backFromSettingsBtn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+/* Кнопки в верхней части экрана */
+.top-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.history-button {
+    background-color: #555;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.settings-button {
+    background-color: #555;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.reset-button {
+    background-color: #ff5722;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.exit-button {
+    background-color: #ff5722;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+/* Анимация для кнопок */
+.exit-button,
+.settings-button,
+.history-button,
+.reset-button {
+    transition: all 0.3s ease;
+}
+
+.exit-button:hover,
+.settings-button:hover,
+.history-button:hover,
+.reset-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Обновленные стили для формы */
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-header h2 {
+    color: #ffd700;
+    margin: 0;
+}
+
+.start-location-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #555;
+    border-radius: 5px;
+    color: #ffd700;
+}
+
+/* Стили для бокового меню */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    background-color: #333;
+    transform: translateX(-250px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    background-color: #444;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    z-index: 1001;
+    transition: left 0.3s ease;
+}
+
+.sidebar.open + .menu-toggle,
+.sidebar.open .menu-toggle {
+    left: 250px;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #ffd700;
+    transition: all 0.3s ease;
+}
+
+.sidebar.open .menu-toggle span:nth-child(1),
+.sidebar.open + .menu-toggle span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.sidebar.open .menu-toggle span:nth-child(2),
+.sidebar.open + .menu-toggle span:nth-child(2) {
+    opacity: 0;
+}
+
+.sidebar.open .menu-toggle span:nth-child(3),
+.sidebar.open + .menu-toggle span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.menu {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+.menu-header {
+    padding: 0 20px 20px;
+    border-bottom: 2px solid #444;
+}
+
+.menu-header h2 {
+    color: #ffd700;
+    margin: 0;
+    font-size: 24px;
+}
+
+.menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-items li {
+    padding: 0;
+    margin: 0;
+}
+
+.menu-btn {
+    width: 100%;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+    background-color: #444;
+}
+
+.menu-btn.active {
+    background-color: #ffd700;
+    color: #333;
+}
+
+.menu-btn.danger {
+    color: #ff5722;
+}
+
+.menu-btn.danger:hover {
+    background-color: #ff5722;
+    color: white;
+}
+
+.material-icons {
+    font-size: 20px;
+}
+
+/* Добавляем стили для иконок Material Icons */
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+}
