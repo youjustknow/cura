@@ -1538,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Отрисовка графиков
         renderEarningsChart(dailyEarnings);
-        renderWeekdayChart(completedShifts);
+        //renderWeekdayChartrenderWeekdayChart(completedShifts);
         renderOrdersDistributionChart(completedShifts);
         renderWeightDistributionChart(completedShifts);
     }
