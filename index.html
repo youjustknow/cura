@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Смена курьера</title>
-    <link rel="stylesheet" href="styles.css">
     
     <!-- PWA мета-теги -->
     <meta name="theme-color" content="#666">
@@ -307,6 +306,18 @@
                     <label for="highPriceDeliveryRate">Повышенная оплата за выдачу заказа (₽)</label>
                     <input type="number" id="highPriceDeliveryRate" min="0">
                 </div>
+                <div class="form-group">
+                    <label for="themeColor">Основной цвет приложения</label>
+                    <div class="color-group">
+                        <input type="color" id="themeColor">
+                        <div class="color-preview">
+                            <div class="color-sample primary-color-sample" title="Основной цвет"></div>
+                            <div class="color-sample primary-dark-sample" title="Тёмный вариант"></div>
+                            <div class="color-sample primary-light-sample" title="Светлый вариант"></div>
+                            <div class="color-sample accent-color-sample" title="Акцентный цвет"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <button id="saveSettingsBtn" class="action-button">Сохранить</button>
         </div>
@@ -408,6 +419,12 @@
         const scriptTag = document.createElement('script');
         scriptTag.src = 'script.js?v=' + new Date().getTime();
         document.body.appendChild(scriptTag);
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = 'styles.css?v=' + new Date().getTime();
+        document.head.appendChild(styleTag);
     </script>
+
 </body>
 </html>

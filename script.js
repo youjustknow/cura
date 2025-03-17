@@ -222,7 +222,8 @@ const defaultSettings = {
     weightRate: 2,
     pickupRate: 63,
     deliveryRate: 86,
-    highPriceDeliveryRate: 110
+    highPriceDeliveryRate: 110,
+    themeColor: '#ff8c00'
 };
 
 // Текущие настройки
@@ -471,6 +472,12 @@ function loadSettings() {
     }
     updateSettingsForm();
     applyDefaultStartLocation();
+    
+    // Применение цветовой палитры
+    if (settings.themeColor) {
+        const palette = generateColorPalette(settings.themeColor);
+        applyColorPalette(palette);
+    }
 }
 
 // Функция сохранения настроек
@@ -481,11 +488,16 @@ function saveSettings() {
         weightRate: parseFloat(document.getElementById('weightRate').value) || defaultSettings.weightRate,
         pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
         deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
-        highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate
+        highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate,
+        themeColor: document.getElementById('themeColor').value || defaultSettings.themeColor
     };
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Настройки сохранены:', settings);
+    
+    // Применение новой цветовой палитры
+    const palette = generateColorPalette(settings.themeColor);
+    applyColorPalette(palette);
 }
 
 // Функция обновления формы настроек
@@ -496,6 +508,7 @@ function updateSettingsForm() {
     document.getElementById('pickupRate').value = settings.pickupRate;
     document.getElementById('deliveryRate').value = settings.deliveryRate;
     document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
+    document.getElementById('themeColor').value = settings.themeColor;
 }
 
 // Функция применения начальной точки из настроек
@@ -2157,3 +2170,102 @@ function clearUnfinishedOrders() {
     localStorage.removeItem('unfinishedOrders');
     localStorage.removeItem('nextOrderId');
 }
+
+// Функции для генерации и применения цветовой палитры
+function generateColorPalette(primaryColor) {
+    // Конвертировать HEX в RGB
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    };
+
+    // Конвертировать RGB в HEX
+    const rgbToHex = (r, g, b) => {
+        return '#' + [r, g, b].map(x => {
+            const hex = Math.min(255, Math.max(0, Math.round(x))).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    };
+
+    // Затемнение цвета
+    const darken = (hex, amount) => {
+        const rgb = hexToRgb(hex);
+        const darkenColor = {
+            r: rgb.r * (1 - amount),
+            g: rgb.g * (1 - amount),
+            b: rgb.b * (1 - amount)
+        };
+        return rgbToHex(darkenColor.r, darkenColor.g, darkenColor.b);
+    };
+
+    // Осветление цвета
+    const lighten = (hex, amount) => {
+        const rgb = hexToRgb(hex);
+        const lightenColor = {
+            r: rgb.r + (255 - rgb.r) * amount,
+            g: rgb.g + (255 - rgb.g) * amount,
+            b: rgb.b + (255 - rgb.b) * amount
+        };
+        return rgbToHex(lightenColor.r, lightenColor.g, lightenColor.b);
+    };
+
+    // Получение дополнительного (акцент) цвета
+    const getAccentColor = (hex) => {
+        const rgb = hexToRgb(hex);
+        
+        // Создание золотистого акцента на основе основного цвета
+        let accentRgb = {
+            r: Math.min(255, rgb.r * 1.3),
+            g: Math.min(255, rgb.g * 1.2),
+            b: Math.max(0, rgb.b * 0.7)
+        };
+        
+        return rgbToHex(accentRgb.r, accentRgb.g, accentRgb.b);
+    };
+
+    return {
+        primary: primaryColor,
+        primaryDark: darken(primaryColor, 0.2),
+        primaryLight: lighten(primaryColor, 0.2),
+        accent: getAccentColor(primaryColor)
+    };
+}
+
+function applyColorPalette(palette) {
+    document.documentElement.style.setProperty('--primary-color', palette.primary);
+    document.documentElement.style.setProperty('--primary-dark', palette.primaryDark);
+    document.documentElement.style.setProperty('--primary-light', palette.primaryLight);
+    document.documentElement.style.setProperty('--accent-color', palette.accent);
+    
+    // Обновляем тег meta theme-color для поддержки мобильных устройств
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', palette.primary);
+    }
+}
+    
+    // Обработчик изменения цвета темы
+    const themeColorInput = document.getElementById('themeColor');
+    if (themeColorInput) {
+        // Инициализация превью цветовой палитры при загрузке
+        const initialPalette = generateColorPalette(settings.themeColor);
+        document.querySelector('.primary-color-sample').style.backgroundColor = initialPalette.primary;
+        document.querySelector('.primary-dark-sample').style.backgroundColor = initialPalette.primaryDark;
+        document.querySelector('.primary-light-sample').style.backgroundColor = initialPalette.primaryLight;
+        document.querySelector('.accent-color-sample').style.backgroundColor = initialPalette.accent;
+
+        themeColorInput.addEventListener('input', function() {
+            const color = this.value;
+            const palette = generateColorPalette(color);
+            
+            // Обновляем превью
+            document.querySelector('.primary-color-sample').style.backgroundColor = palette.primary;
+            document.querySelector('.primary-dark-sample').style.backgroundColor = palette.primaryDark;
+            document.querySelector('.primary-light-sample').style.backgroundColor = palette.primaryLight;
+            document.querySelector('.accent-color-sample').style.backgroundColor = palette.accent;
+        });
+    }

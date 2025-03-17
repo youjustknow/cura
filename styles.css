@@ -5,9 +5,34 @@
     font-family: Arial, sans-serif;
 }
 
+:root {
+    --primary-color: #ff8c00;
+    --primary-dark: #cc7000;
+    --primary-light: #ffa333;
+    --accent-color: #ffd700;
+    --background-color: #333;
+    --background-light: #444;
+    --background-lighter: #555;
+    --background-darkest: #383838;
+    --background-darker: #4a4a4a;
+    --border-color: #666;
+    --text-color: #fff;
+    --text-dark: #ddd;
+    --text-muted: #ccc;
+    --text-faded: #888;
+    --danger-color: #ff5722;
+    --danger-dark: #d32f2f;
+    --success-color: #4caf50;
+    --success-dark: #45a049;
+    --info-color: #2196F3;
+    --info-dark: #1976D2;
+    --warning-color: #FFC107;
+    --accent-light: #ffed4a;
+}
+
 body {
-    background-color: #333;
-    color: white;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 .app {
@@ -28,26 +53,23 @@ body {
     padding: 20px;
 }
 
-
-
 .reset-button {
     position: absolute;
     top: 20px;
     left: 20px;
-    background-color: #ff5722;
-    color: white;
+    background-color: var(--danger-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
-
 
 /* Кнопка добавления заказа */
 .add-order-button {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(to bottom right, #ffd700, #ff8c00);
-    border: 2px solid #ffd700;
+    background: linear-gradient(to bottom right, var(--accent-color), var(--primary-color));
+    border: 2px solid var(--accent-color);
     color: white;
     font-size: 24px;
     display: flex;
@@ -88,17 +110,17 @@ body {
 .form-group input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid #ffd700;
+    border: 2px solid var(--accent-color);
     border-radius: 5px;
-    background-color: #444;
-    color: white;
+    background-color: var(--background-light);
+    color: var(--text-color);
     font-size: 16px;
 }
 
 .suggestions {
     list-style: none;
-    background-color: #444;
-    border: 1px solid #ffd700;
+    background-color: var(--background-light);
+    border: 1px solid var(--accent-color);
     border-radius: 0 0 5px 5px;
     max-height: 150px;
     overflow-y: auto;
@@ -110,13 +132,13 @@ body {
 }
 
 .suggestions li:hover {
-    background-color: #555;
+    background-color: var(--background-lighter);
 }
 
 button {
     padding: 10px 15px;
-    background-color: #ffd700;
-    color: #333;
+    background-color: var(--accent-color);
+    color: var(--background-color);
     border: none;
     border-radius: 5px;
     font-size: 16px;
@@ -133,8 +155,8 @@ button {
 }
 
 .order-item {
-    background-color: #444;
-    border: 2px solid #ffd700;
+    background-color: var(--background-light);
+    border: 2px solid var(--accent-color);
     border-radius: 10px;
     margin-bottom: 15px;
     padding: 15px;
@@ -145,7 +167,7 @@ button {
     grid-template-columns: 1fr 2fr 1fr;
     font-weight: bold;
     margin-bottom: 5px;
-    color: #ccc;
+    color: var(--text-muted);
 }
 
 .order-data {
@@ -158,7 +180,7 @@ button {
 .order-price {
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid #666;
+    border-top: 1px solid var(--border-color);
     padding-top: 10px;
     font-weight: bold;
 }
@@ -170,8 +192,8 @@ button {
 }
 
 .order-actions button {
-    background-color: #555;
-    color: white;
+    background-color: var(--background-lighter);
+    color: var(--text-color);
     padding: 5px 10px;
     font-size: 14px;
 }
@@ -180,8 +202,8 @@ button {
 .action-button {
     width: 100%;
     padding: 15px;
-    background-color: #ff8c00;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--text-color);
     font-size: 18px;
     position: absolute;
     bottom: 0;
@@ -189,10 +211,14 @@ button {
     border-radius: 0;
 }
 
+.action-button:hover {
+    background-color: var(--primary-dark);
+}
+
 /* Экран завершения */
 .completion-container {
-    background-color: #444;
-    border: 2px solid #ffd700;
+    background-color: var(--background-light);
+    border: 2px solid var(--accent-color);
     border-radius: 10px;
     padding: 20px;
     width: 90%;
@@ -217,8 +243,8 @@ button {
     margin-top: 20px;
 }
 .secondary-button {
-    background-color: #555;
-    color: white;
+    background-color: var(--background-lighter);
+    color: var(--text-color);
     padding: 5px 10px;
     font-size: 14px;
     margin-top: 5px;
@@ -235,7 +261,7 @@ button {
 .order-distance {
     margin-top: 5px;
     padding-top: 5px;
-    border-top: 1px solid #666;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
 }
@@ -244,8 +270,8 @@ button {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: #555;
-    color: white;
+    background-color: var(--background-lighter);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -259,15 +285,15 @@ button {
 
 .date-group {
     margin-bottom: 20px;
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .date-header {
-    background-color: #333;
+    background-color: var(--background-color);
     padding: 15px;
-    border-bottom: 2px solid #ffd700;
+    border-bottom: 2px solid var(--accent-color);
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -288,12 +314,12 @@ button {
 }
 
 .date-income {
-    color: #ffd700;
+    color: var(--accent-color);
     font-weight: bold;
 }
 
 .date-toggle {
-    color: #ffd700;
+    color: var(--accent-color);
     font-size: 16px;
     transition: transform 0.3s ease;
 }
@@ -307,7 +333,7 @@ button {
 }
 
 .route-item {
-    background-color: #555;
+    background-color: var(--background-lighter);
     margin: 5px 0;
     border-radius: 5px;
     overflow: hidden;
@@ -318,18 +344,18 @@ button {
     display: flex;
     justify-content: space-between;
     cursor: pointer;
-    background-color: #4a4a4a;
+    background-color: var(--background-darker);
     transition: background-color 0.2s ease;
 }
 
 .route-header:hover {
-    background-color: #666;
+    background-color: var(--border-color);
 }
 
 .route-details {
     padding: 10px;
-    border-top: 1px solid #666;
-    background-color: #555;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--background-lighter);
 }
 
 .route-details.hidden {
@@ -339,7 +365,7 @@ button {
 .history-order-item {
     padding: 10px;
     margin: 5px 0;
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 5px;
 }
 
@@ -350,7 +376,7 @@ button {
 }
 
 .order-distance {
-    color: #ccc;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
@@ -373,8 +399,8 @@ button {
 }
 
 .modal-content {
-    background-color: #444;
-    border: 2px solid #ffd700;
+    background-color: var(--background-light);
+    border: 2px solid var(--accent-color);
     border-radius: 10px;
     width: 90%;
     max-width: 400px;
@@ -394,12 +420,12 @@ button {
 
 .modal-header {
     padding: 15px;
-    border-bottom: 2px solid #ffd700;
+    border-bottom: 2px solid var(--accent-color);
 }
 
 .modal-header h3 {
     margin: 0;
-    color: #ffd700;
+    color: var(--accent-color);
     font-size: 20px;
 }
 
@@ -422,23 +448,23 @@ button {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #ffd700;
-    color: #333;
+    background-color: var(--accent-color);
+    color: var(--background-color);
     font-weight: bold;
     transition: background-color 0.2s ease;
 }
 
 .modal-btn:hover {
-    background-color: #ffed4a;
+    background-color: var(--accent-light);
 }
 
 .modal-btn-secondary {
-    background-color: #555;
-    color: white;
+    background-color: var(--background-lighter);
+    color: var(--text-color);
 }
 
 .modal-btn-secondary:hover {
-    background-color: #666;
+    background-color: var(--border-color);
 }
 
 /* Кнопка выхода */
@@ -446,8 +472,8 @@ button {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: #ff5722;
-    color: white;
+    background-color: var(--danger-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
     z-index: 10;
@@ -458,16 +484,16 @@ button {
     position: absolute;
     top: 20px;
     right: 120px;
-    background-color: #555;
-    color: white;
+    background-color: var(--background-lighter);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 /* Экран настроек */
 .settings-form {
-    background-color: #444;
-    border: 2px solid #ffd700;
+    background-color: var(--background-light);
+    border: 2px solid var(--accent-color);
     border-radius: 10px;
     padding: 20px;
     max-width: 600px;
@@ -480,7 +506,7 @@ button {
 }
 
 #settingsScreen h2 {
-    color: #ffd700;
+    color: var(--accent-color);
     margin-bottom: 20px;
 }
 
@@ -492,22 +518,44 @@ button {
     display: block;
     margin-bottom: 8px;
     font-size: 16px;
-    color: #fff;
+    color: var(--text-color);
 }
 
 .settings-form input[type="text"],
 .settings-form input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid #ffd700;
+    border: 2px solid var(--accent-color);
     border-radius: 5px;
-    background-color: #333;
-    color: white;
+    background-color: var(--background-color);
+    color: var(--text-color);
     font-size: 16px;
 }
 
 .settings-form input[type="number"] {
-    width: 200px;
+    width: 100%;
+}
+
+.settings-form input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+}
+
+.settings-form input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: 50%;
+}
+
+.settings-form input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
 }
 
 h2 {
@@ -551,14 +599,14 @@ h2 {
 }
 
 .reset-button {
-    background-color: #ff5722;
+    background-color: var(--danger-color);
     color: white;
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .exit-button {
-    background-color: #ff5722;
+    background-color: var(--danger-color);
     color: white;
     padding: 10px 15px;
     border-radius: 5px;
@@ -589,7 +637,7 @@ h2 {
 }
 
 .form-header h2 {
-    color: #ffd700;
+    color: var(--accent-color);
     margin: 0;
 }
 
@@ -598,7 +646,7 @@ h2 {
     padding: 10px;
     background-color: #555;
     border-radius: 5px;
-    color: #ffd700;
+    color: var(--accent-color);
 }
 
 /* Стили для бокового меню */
@@ -608,7 +656,7 @@ h2 {
     left: 0;
     height: 100%;
     width: 250px;
-    background-color: #333;
+    background-color: var(--background-color);
     transform: translateX(-250px);
     transition: transform 0.3s ease;
     z-index: 1000;
@@ -644,7 +692,7 @@ h2 {
     left: 0;
     width: 40px;
     height: 40px;
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 0 5px 5px 0;
     cursor: pointer;
     display: flex;
@@ -666,7 +714,7 @@ h2 {
     display: block;
     width: 24px;
     height: 2px;
-    background-color: #ffd700;
+    background-color: var(--accent-color);
     transition: all 0.3s ease;
 }
 
@@ -694,11 +742,11 @@ h2 {
 
 .menu-header {
     padding: 0 20px 20px;
-    border-bottom: 2px solid #444;
+    border-bottom: 2px solid var(--background-light);
 }
 
 .menu-header h2 {
-    color: #ffd700;
+    color: var(--accent-color);
     margin: 0;
     font-size: 24px;
 }
@@ -723,7 +771,7 @@ h2 {
     gap: 10px;
     background: none;
     border: none;
-    color: white;
+    color: var(--text-color);
     font-size: 16px;
     text-align: left;
     cursor: pointer;
@@ -731,21 +779,21 @@ h2 {
 }
 
 .menu-btn:hover {
-    background-color: #444;
+    background-color: var(--background-light);
 }
 
 .menu-btn.active {
-    background-color: #ffd700;
-    color: #333;
+    background-color: var(--primary-color);
+    color: var(--background-color);
 }
 
 .menu-btn.danger {
-    color: #ff5722;
+    color: var(--danger-color);
 }
 
 .menu-btn.danger:hover {
-    background-color: #ff5722;
-    color: white;
+    background-color: var(--danger-color);
+    color: var(--text-color);
 }
 
 .material-icons {
@@ -790,8 +838,8 @@ h2 {
 .shift-button {
     padding: 15px 30px;
     font-size: 18px;
-    background: linear-gradient(to bottom right, #4CAF50, #45a049);
-    color: white;
+    background: linear-gradient(to bottom right, var(--success-color), var(--success-dark));
+    color: var(--text-color);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -805,21 +853,21 @@ h2 {
 }
 
 #endShiftBtn {
-    background: linear-gradient(to bottom right, #f44336, #d32f2f);
+    background: linear-gradient(to bottom right, var(--danger-color), var(--danger-dark));
 }
 
 /* Стили для истории смен */
 .shift-group {
     margin-bottom: 30px;
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .shift-header {
-    background-color: #333;
+    background-color: var(--background-color);
     padding: 20px;
-    border-bottom: 2px solid #4CAF50;
+    border-bottom: 2px solid var(--success-color);
     cursor: pointer;
 }
 
@@ -836,23 +884,23 @@ h2 {
 }
 
 .shift-label {
-    color: #888;
+    color: var(--text-faded);
     font-size: 14px;
 }
 
 .shift-value {
-    color: #fff;
+    color: var(--text-color);
     font-size: 16px;
 }
 
 .shift-income .shift-value {
-    color: #4CAF50;
+    color: var(--success-color);
     font-weight: bold;
 }
 
 .shift-routes {
     padding: 15px;
-    background-color: #383838;
+    background-color: var(--background-darkest);
 }
 
 .hidden {
@@ -863,8 +911,8 @@ h2 {
 .shift-info-button {
     padding: 15px 30px;
     font-size: 18px;
-    background: linear-gradient(to bottom right, #2196F3, #1976D2);
-    color: white;
+    background: linear-gradient(to bottom right, var(--info-color), var(--info-dark));
+    color: var(--text-color);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -897,23 +945,23 @@ h2 {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #555;
+    background-color: var(--background-lighter);
     border-radius: 5px;
 }
 
 .info-label {
-    color: #ccc;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
 .info-value {
-    color: #4CAF50;
+    color: var(--success-color);
     font-weight: bold;
     font-size: 16px;
 }
 
 #predictedIncome {
-    color: #2196F3;
+    color: var(--info-color);
 }
 
 /* Стили для выбора времени смены */
@@ -930,16 +978,16 @@ h2 {
 }
 
 .time-input-group label {
-    color: #ccc;
+    color: var(--text-muted);
     font-size: 16px;
 }
 
 .time-input-group input[type="time"] {
     padding: 10px;
-    border: 2px solid #ffd700;
+    border: 2px solid var(--accent-color);
     border-radius: 5px;
-    background-color: #333;
-    color: white;
+    background-color: var(--background-color);
+    color: var(--text-color);
     font-size: 16px;
     width: 100%;
 }
@@ -958,14 +1006,14 @@ h2 {
 }
 
 .stats-section {
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
 }
 
 .stats-section h3 {
-    color: #ffd700;
+    color: var(--accent-color);
     margin-bottom: 15px;
     font-size: 18px;
 }
@@ -977,7 +1025,7 @@ h2 {
 }
 
 .stats-item {
-    background-color: #555;
+    background-color: var(--background-lighter);
     padding: 15px;
     border-radius: 8px;
     display: flex;
@@ -986,12 +1034,12 @@ h2 {
 }
 
 .stats-label {
-    color: #ccc;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
 .stats-value {
-    color: #ffd700;
+    color: var(--accent-color);
     font-size: 24px;
     font-weight: bold;
 }
@@ -999,7 +1047,7 @@ h2 {
 .stats-chart {
     width: 100%;
     height: 300px;
-    background-color: #444;
+    background-color: var(--background-light);
     border-radius: 8px;
     margin-top: 15px;
     padding: 15px;
@@ -1025,7 +1073,7 @@ h2 {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #ccc;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
@@ -1053,4 +1101,39 @@ h2 {
     .stats-chart {
         height: 200px;
     }
+}
+
+.settings-form .color-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.color-sample {
+    width: 30px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.primary-color-sample {
+    background-color: var(--primary-color);
+}
+
+.primary-dark-sample {
+    background-color: var(--primary-dark);
+}
+
+.primary-light-sample {
+    background-color: var(--primary-light);
+}
+
+.accent-color-sample {
+    background-color: var(--accent-color);
 }
