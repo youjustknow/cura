@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Смена курьера</title>
+
+    <script>
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = 'styles.css?v=' + new Date().getTime();
+        document.head.appendChild(styleTag);
+    </script>
     
     <!-- PWA мета-теги -->
     <meta name="theme-color" content="#666">
@@ -419,11 +426,6 @@
         const scriptTag = document.createElement('script');
         scriptTag.src = 'script.js?v=' + new Date().getTime();
         document.body.appendChild(scriptTag);
-
-        const styleTag = document.createElement('link');
-        styleTag.rel = 'stylesheet';
-        styleTag.href = 'styles.css?v=' + new Date().getTime();
-        document.head.appendChild(styleTag);
     </script>
 
 </body>
