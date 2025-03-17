@@ -33,10 +33,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
                         console.log('Удаление старого кэша:', cacheName);
                         return caches.delete(cacheName);
-                    }
                 })
             );
         })
