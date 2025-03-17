@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupedRoutes = {};
 
         routeHistory.forEach(route => {
-            const dateKey = route.date.toLocaleDateString();
+            const dateKey = route.date.toISOString();
             if (!groupedRoutes[dateKey]) {
                 groupedRoutes[dateKey] = {
                     routes: [],
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dateHeader.className = 'date-header';
             dateHeader.innerHTML = `
                 <div class="date-info">
-                    <span class="date-text">${dateKey}</span>
+                    <span class="date-text">${new Date(dateKey).toLocaleDateString()}</span>
                     <span class="date-income">Заработок: ${groupedRoutes[dateKey].totalIncome}₽</span>
                 </div>
                 <div class="date-toggle">▼</div>
