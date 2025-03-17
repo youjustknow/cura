@@ -460,6 +460,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function geocodeAddress(address) {
+        if (!address.includes('Нижний')) {
+            address = `Нижний Новгород, ${address}`;
+        }
+
         const response = await fetch(`https://geocode-maps.yandex.ru/1.x/?geocode=${address}&apikey=${YANDEX_API_KEY}&format=json`);
         const data = await response.json();
         return data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(' ').reverse().join(', ');
@@ -782,7 +786,10 @@ document.addEventListener('DOMContentLoaded', function() {
         loadStartLocation();
         checkForUnfinishedRoute().then(restored => {
             if (!restored) {
-                showScreen('initial');
+                // Проверяем наличие незавершенных заказов
+                if (!loadUnfinishedOrders()) {
+                    showScreen('initial');
+                }
             }
         });
     //});
@@ -848,6 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     renderOrderList();
+                    saveUnfinishedOrders(); // Сохраняем заказы после добавления/редактирования
 
                     // Сброс формы
                     clientAddressInput.value = '';
@@ -936,6 +944,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 () => {
                     orders = orders.filter(o => o.id !== order.id);
                     renderOrderList();
+                    saveUnfinishedOrders(); // Сохраняем заказы после удаления
                 });
 
             actions.appendChild(editBtn);
@@ -955,6 +964,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('currentRouteStartTime', routeStartTime.toISOString());
                 // Сохраняем текущие заказы в localStorage
                 localStorage.setItem('currentRoute', JSON.stringify(orders));
+                clearUnfinishedOrders(); // Очищаем сохраненные незавершенные заказы
                 console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()}`);
                 showScreen('routeExecution');
                 renderOrderList();
@@ -1007,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (executionTimeElement) executionTimeElement.textContent = formattedTime;
                 if (totalIncomeElement) totalIncomeElement.textContent = `${income}₽`;
 
+                clearUnfinishedOrders(); // Очищаем незавершенные заказы после завершения маршрута
                 showScreen('routeCompletion');
             }
         });
@@ -1018,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Сброс данных приложения
             orders = [];
             routeStartTime = null;
-
+            clearUnfinishedOrders(); // Очищаем незавершенные заказы при сбросе
             showScreen('initial');
         });
     }
@@ -1066,15 +1077,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 container.insertBefore(draggedItem, this);
             }
 
+            const afterItems = Array.from(container.querySelectorAll('.order-item'));
+
             // Обновление порядка заказов в массиве
             const newOrders = [];
-            items.forEach(item => {
+            afterItems.forEach(item => {
                 const id = parseInt(item.getAttribute('data-id'));
                 const order = orders.find(o => o.id === id);
                 if (order) newOrders.push(order);
             });
 
             orders = newOrders;
+            saveUnfinishedOrders(); // Сохраняем заказы после изменения порядка
         }
     }
 
@@ -1900,5 +1914,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Ошибка регистрации ServiceWorker:', error);
                 });
         });
+    }
+
+    // Функция для сохранения незавершенных заказов
+    function saveUnfinishedOrders() {
+        if (!routeStartTime && orders.length > 0) {
+            localStorage.setItem('unfinishedOrders', JSON.stringify(orders));
+            localStorage.setItem('nextOrderId', nextOrderId.toString());
+            console.log('Незавершенные заказы сохранены:', orders);
+        }
+
+        if (orders.length === 0) {
+            localStorage.removeItem('unfinishedOrders');
+            localStorage.removeItem('nextOrderId');
+        }
+    }
+
+    // Функция для загрузки незавершенных заказов
+    function loadUnfinishedOrders() {
+        const savedOrders = localStorage.getItem('unfinishedOrders');
+        const savedNextOrderId = localStorage.getItem('nextOrderId');
+        
+        if (savedOrders && !routeStartTime) {
+            try {
+                orders = JSON.parse(savedOrders);
+                if (savedNextOrderId) {
+                    nextOrderId = parseInt(savedNextOrderId);
+                }
+                console.log('Незавершенные заказы загружены:', orders);
+                showScreen('orderList');
+                renderOrderList();
+                return true;
+            } catch (error) {
+                console.error('Ошибка при загрузке незавершенных заказов:', error);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // Функция для очистки незавершенных заказов
+    function clearUnfinishedOrders() {
+        localStorage.removeItem('unfinishedOrders');
+        localStorage.removeItem('nextOrderId');
     }
 });
