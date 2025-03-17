@@ -505,6 +505,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (activeRoute) {
                         // Получение длины маршрута в метрах
                         var distance = activeRoute.properties.get("distance");
+
+                        myMap.destroy();
                         
                         resolve(parseFloat(distance.text.replace(',', '.')));
                     }
