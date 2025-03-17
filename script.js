@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .loading-dot {
-            width: 12px;
-            height: 12px;
+            width: 6px;
+            height: 6px;
             background-color: white;
             border-radius: 50%;
             animation: loading-dot-animation 1s infinite ease-in-out;
