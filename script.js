@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Создаем объект маршрута
                 const completedRoute = {
-                    id: routeHistory.length + 1,
+                    id: currentShift.routes.length + 1,
                     date: new Date(),
                     startTime: routeStartTime,
                     endTime: endTime,
@@ -1187,6 +1187,9 @@ document.addEventListener('DOMContentLoaded', function() {
         currentShift = null;
         updateShiftControls();
         await showAlert('Смена завершена');
+
+        nextOrderId = 0;
+        
     }
 
     // Функция обновления элементов управления сменой
