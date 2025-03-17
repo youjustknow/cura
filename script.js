@@ -2,13 +2,105 @@ var orderId = 0;
 // Функция для геокодирования адреса с подробной обработкой ошибок
 const YANDEX_API_KEY = 'f88e81ac-59f7-458b-b53a-97b538c564d6';
 
+// Добавляем стили для индикатора загрузки
 document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем стили для индикатора загрузки
+    const style = document.createElement('style');
+    style.textContent = `
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .loading-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .loading-dot {
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            animation: loading-dot-animation 1s infinite ease-in-out;
+        }
+        
+        @keyframes loading-dot-animation {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-15px);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
     // Глобальные переменные для элементов интерфейса смены
     let shiftStartTimeInput = document.getElementById('shiftStartTimeInput');
     let shiftEndTimeInput = document.getElementById('shiftEndTimeInput');
     let shiftTimeModal = document.getElementById('shiftTimeModal');
     let confirmShiftTimeBtn = document.getElementById('confirmShiftTimeBtn');
     let cancelShiftTimeBtn = document.getElementById('cancelShiftTimeBtn');
+
+    // Добавляем функцию для отображения индикатора загрузки
+    function showLoadingIndicator(container) {
+        // Проверяем, существует ли контейнер
+        if (!container) {
+            // Если контейнер не передан, создаем новый
+            container = document.createElement('div');
+            container.className = 'loading-container';
+            document.body.appendChild(container);
+        }
+        
+        // Очищаем контейнер
+        container.innerHTML = '';
+        
+        // Создаем индикатор загрузки
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        
+        // Добавляем 5 точек для анимации
+        for (let i = 0; i < 5; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'loading-dot';
+            // Добавляем задержку для создания эффекта "волны"
+            dot.style.animationDelay = `${i * 0.15}s`;
+            loadingIndicator.appendChild(dot);
+        }
+        
+        container.appendChild(loadingIndicator);
+        container.classList.add('active');
+        
+        return container;
+    }
+    
+    // Функция для скрытия индикатора загрузки
+    function hideLoadingIndicator(container) {
+        if (container) {
+            container.classList.remove('active');
+        }
+    }
 
     // Данные приложения
     let orders = [];
@@ -245,9 +337,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (showHistoryBtn) {
         showHistoryBtn.addEventListener('click', () => {
             setActiveMenuButton(showHistoryBtn);
-            renderRouteHistory();
-            showScreen('routeHistory');
-            sidebar.classList.remove('open');
+            
+            const loader = showLoadingIndicator();
+            setTimeout(() => {
+                renderRouteHistory();
+                showScreen('routeHistory');
+                sidebar.classList.remove('open');
+                hideLoadingIndicator(loader);
+            }, 100);
         });
     }
 
@@ -460,18 +557,36 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.round(deliveryPrice + weightPrice + distancePrice);
     }
 
+    // Обновляем функцию geocodeAddress чтобы использовать индикатор загрузки
     async function geocodeAddress(address) {
-        if (!address.includes('Нижний')) {
-            address = `Нижний Новгород, ${address}`;
+        // Показываем индикатор загрузки
+        const loader = showLoadingIndicator();
+        
+        try {
+            if (!address.includes('Нижний')) {
+                address = `Нижний Новгород, ${address}`;
+            }
+
+            const response = await fetch(`https://geocode-maps.yandex.ru/1.x/?geocode=${address}&apikey=${YANDEX_API_KEY}&format=json`);
+            const data = await response.json();
+            
+            // Скрываем индикатор загрузки
+            hideLoadingIndicator(loader);
+            
+            return data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(' ').reverse().join(', ');
+        } catch (error) {
+            // Скрываем индикатор загрузки в случае ошибки
+            hideLoadingIndicator(loader);
+            console.error('Ошибка при геокодировании адреса:', error);
+            throw error;
         }
-
-        const response = await fetch(`https://geocode-maps.yandex.ru/1.x/?geocode=${address}&apikey=${YANDEX_API_KEY}&format=json`);
-        const data = await response.json();
-        return data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(' ').reverse().join(', ');
     }
-
-    // Функция для расчета расстояния между двумя точками
+    
+    // Обновляем функцию calculateDistance чтобы использовать индикатор загрузки
     async function calculateDistance(startCoords, endCoords, mapId = 'map') {
+        // Показываем индикатор загрузки
+        const loader = showLoadingIndicator();
+        
         return new Promise((resolve, reject) => {
             ymaps.ready(init);
             
@@ -512,11 +627,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         var distance = activeRoute.properties.get("distance");
 
                         myMap.destroy();
+                        
+                        // Скрываем индикатор загрузки
+                        hideLoadingIndicator(loader);
 
                         const distanceInKm = parseFloat(distance.text.replace(',', '.')) / (distance.text.includes('км') ? 1 : 1000);
                         
                         resolve(distanceInKm);
                     }
+                });
+                
+                // Обработка ошибок
+                multiRoute.model.events.add('requestfail', function(error) {
+                    myMap.destroy();
+                    // Скрываем индикатор загрузки в случае ошибки
+                    hideLoadingIndicator(loader);
+                    reject(error);
                 });
             }
         });
@@ -806,6 +932,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (address && weight > 0) {
                 try {
+                    const loader = showLoadingIndicator();
+                    
                     if (!startLocation) {
                         console.log('Начальная точка не установлена, используем случайные координаты');
                         startLocation = [Math.random() * 10,
@@ -817,6 +945,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const endCoordinates = await geocodeAddress(address);
 
                     if (!endCoordinates) {
+                        hideLoadingIndicator(loader);
                         await showAlert('Не удалось найти координаты для адреса клиента');
                         return;
                     }
@@ -828,6 +957,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const distance = await calculateDistance(lastOrder.coordinates, endCoordinates);
 
                     if (distance === null) {
+                        hideLoadingIndicator(loader);
                         await showAlert('Не удалось рассчитать расстояние');
                         return;
                     }
@@ -859,7 +989,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         orderId = 0;
                     }
-
+                    
+                    hideLoadingIndicator(loader);
                     renderOrderList();
                     saveUnfinishedOrders(); // Сохраняем заказы после добавления/редактирования
 
@@ -966,15 +1097,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (startRouteBtn) {
         startRouteBtn.addEventListener('click', async () => {
             if (orders.length > 0) {
-                routeStartTime = new Date();
-                // Добавим запись в localStorage о начале маршрута
-                localStorage.setItem('currentRouteStartTime', routeStartTime.toISOString());
-                // Сохраняем текущие заказы в localStorage
-                localStorage.setItem('currentRoute', JSON.stringify(orders));
-                clearUnfinishedOrders(); // Очищаем сохраненные незавершенные заказы
-                console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()}`);
-                showScreen('routeExecution');
-                renderOrderList();
+                const loader = showLoadingIndicator();
+                
+                setTimeout(() => {
+                    routeStartTime = new Date();
+                    // Добавим запись в localStorage о начале маршрута
+                    localStorage.setItem('currentRouteStartTime', routeStartTime.toISOString());
+                    // Сохраняем текущие заказы в localStorage
+                    localStorage.setItem('currentRoute', JSON.stringify(orders));
+                    clearUnfinishedOrders(); // Очищаем сохраненные незавершенные заказы
+                    console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()}`);
+                    
+                    hideLoadingIndicator(loader);
+                    showScreen('routeExecution');
+                    renderOrderList();
+                }, 300);
             } else {
                 await showAlert('Добавьте хотя бы один заказ для начала маршрута');
             }
@@ -983,49 +1120,55 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработчик завершения маршрута
     if (finishRouteBtn) {
-        finishRouteBtn.addEventListener('click', () => {
+        finishRouteBtn.addEventListener('click', async () => {
             if (routeStartTime) {
-                const endTime = new Date();
-                const diff = endTime - routeStartTime;
-
-                // Расчет времени выполнения
-                const hours = Math.floor(diff / 3600000);
-                const minutes = Math.floor((diff % 3600000) / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
-                const formattedTime = `${hours}ч ${minutes}м ${seconds}с`;
-
-                // Расчет дохода
-                const income = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
-
-                // Создаем объект маршрута
-                const completedRoute = {
-                    id: currentShift.routes.length + 1,
-                    date: new Date(),
-                    startTime: routeStartTime,
-                    endTime: endTime,
-                    executionTime: formattedTime,
-                    executionTimeMs: diff,
-                    income: income,
-                    orders: [...orders]
-                };
-
-                // Добавляем маршрут в текущую смену
-                if (currentShift) {
-                    currentShift.routes.push(completedRoute);
-                    currentShift.totalIncome += income;
-                    localStorage.setItem('currentShift', JSON.stringify(currentShift));
-                }
-
-                routeHistory.push(completedRoute);
-                localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
-                localStorage.removeItem('currentRouteStartTime');
-                localStorage.removeItem('currentRoute');
-
-                if (executionTimeElement) executionTimeElement.textContent = formattedTime;
-                if (totalIncomeElement) totalIncomeElement.textContent = `${income}₽`;
-
-                clearUnfinishedOrders(); // Очищаем незавершенные заказы после завершения маршрута
-                showScreen('routeCompletion');
+                const loader = showLoadingIndicator();
+                
+                setTimeout(() => {
+                    const endTime = new Date();
+                    const diff = endTime - routeStartTime;
+    
+                    // Расчет времени выполнения
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    const formattedTime = `${hours}ч ${minutes}м ${seconds}с`;
+    
+                    // Расчет дохода
+                    const income = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
+    
+                    // Создаем объект маршрута
+                    const completedRoute = {
+                        id: currentShift.routes.length + 1,
+                        date: new Date(),
+                        startTime: routeStartTime,
+                        endTime: endTime,
+                        executionTime: formattedTime,
+                        executionTimeMs: diff,
+                        income: income,
+                        orders: [...orders]
+                    };
+    
+                    // Добавляем маршрут в текущую смену
+                    if (currentShift) {
+                        currentShift.routes.push(completedRoute);
+                        currentShift.totalIncome += income;
+                        localStorage.setItem('currentShift', JSON.stringify(currentShift));
+                    }
+    
+                    routeHistory.push(completedRoute);
+                    localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
+                    localStorage.removeItem('currentRouteStartTime');
+                    localStorage.removeItem('currentRoute');
+    
+                    if (executionTimeElement) executionTimeElement.textContent = formattedTime;
+                    if (totalIncomeElement) totalIncomeElement.textContent = `${income}₽`;
+    
+                    clearUnfinishedOrders(); // Очищаем незавершенные заказы после завершения маршрута
+                    
+                    hideLoadingIndicator(loader);
+                    showScreen('routeCompletion');
+                }, 300);
             }
         });
     }
@@ -1101,26 +1244,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function recalculateOrderPrices() {
-        const promises = [];
+        const loader = showLoadingIndicator();
         
-        orders.forEach((order, index) => {
-            const lastOrder = index > 0 ? orders.at(index - 1) : { coordinates: startLocation };
-
-            console.log('Пересчет расстояния...', lastOrder.coordinates, order.coordinates);
-
-            promises.push(calculateDistance(lastOrder.coordinates, order.coordinates, 'map-orders').then(distance => {
-                order.distance = distance;
-                order.price = calculatePrice(order.weight, order.distance, order.isHighPriceDelivery);
-            }));
-
-        });
-
-        await Promise.all(promises);
-
-        console.log('Пересчитаны цены заказов:', orders);
-
-        renderOrderList();
-        saveUnfinishedOrders();
+        try {
+            const promises = [];
+            
+            orders.forEach((order, index) => {
+                const lastOrder = index > 0 ? orders.at(index - 1) : { coordinates: startLocation };
+    
+                console.log('Пересчет расстояния...', lastOrder.coordinates, order.coordinates);
+    
+                promises.push(calculateDistance(lastOrder.coordinates, order.coordinates, 'map-orders').then(distance => {
+                    order.distance = distance;
+                    order.price = calculatePrice(order.weight, order.distance, order.isHighPriceDelivery);
+                }));
+            });
+    
+            await Promise.all(promises);
+    
+            console.log('Пересчитаны цены заказов:', orders);
+    
+            renderOrderList();
+            saveUnfinishedOrders();
+            
+            hideLoadingIndicator(loader);
+        } catch (error) {
+            hideLoadingIndicator(loader);
+            console.error('Ошибка при пересчете цен заказов:', error);
+            showAlert('Произошла ошибка при пересчете цен заказов');
+        }
     }
 
     // Добавление обработчиков событий для drag-and-drop
@@ -1356,9 +1508,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (showShiftsHistoryBtn) {
         showShiftsHistoryBtn.addEventListener('click', () => {
             setActiveMenuButton(showShiftsHistoryBtn);
-            renderShiftsHistory();
-            showScreen('shiftsHistory');
-            sidebar.classList.remove('open');
+            
+            const loader = showLoadingIndicator();
+            setTimeout(() => {
+                renderShiftsHistory();
+                showScreen('shiftsHistory');
+                sidebar.classList.remove('open');
+                hideLoadingIndicator(loader);
+            }, 100);
         });
     }
 
@@ -1367,9 +1524,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (showStatsBtn) {
         showStatsBtn.addEventListener('click', () => {
             setActiveMenuButton(showStatsBtn);
-            updateStatistics();
-            showScreen('statsScreen');
-            sidebar.classList.remove('open');
+            
+            // Показываем индикатор загрузки при обновлении статистики
+            const loader = showLoadingIndicator();
+            
+            // Используем setTimeout, чтобы дать браузеру время отрисовать индикатор загрузки
+            setTimeout(() => {
+                updateStatistics();
+                showScreen('statsScreen');
+                sidebar.classList.remove('open');
+                hideLoadingIndicator(loader);
+            }, 100);
         });
     }
 
