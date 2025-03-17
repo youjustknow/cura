@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Отображаем маршруты, сгруппированные по датам
         Object.keys(groupedRoutes).sort((a, b) => {
-            return new Date(b) - new Date(a); // Сортировка по убыванию дат
+            return new Date(b) - new Date(a); // Сортировка по возрастанию дат
         }).forEach(dateKey => {
             const dateGroup = document.createElement('div');
             dateGroup.className = 'date-group';
