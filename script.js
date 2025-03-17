@@ -269,11 +269,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupedRoutes = {};
 
         routeHistory.forEach(route => {
-            const dateKey = route.date.toISOString();
+            const dateKey = route.date.toLocaleDateString();
             if (!groupedRoutes[dateKey]) {
                 groupedRoutes[dateKey] = {
                     routes: [],
-                    totalIncome: 0
+                    totalIncome: 0,
+                    isoDate: route.date.toISOString(),
                 };
             }
             groupedRoutes[dateKey].routes.push(route);
@@ -282,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Отображаем маршруты, сгруппированные по датам
         Object.keys(groupedRoutes).sort((a, b) => {
-            return new Date(b) - new Date(a); // Сортировка по убыванию дат
+            return new Date(groupedRoutes[b].isoDate) - new Date(groupedRoutes[a].isoDate); // Сортировка по убыванию дат
         }).forEach(dateKey => {
             const dateGroup = document.createElement('div');
             dateGroup.className = 'date-group';
@@ -291,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dateHeader.className = 'date-header';
             dateHeader.innerHTML = `
                 <div class="date-info">
-                    <span class="date-text">${new Date(dateKey).toLocaleDateString()}</span>
+                    <span class="date-text">${dateKey}</span>
                     <span class="date-income">Заработок: ${groupedRoutes[dateKey].totalIncome}₽</span>
                 </div>
                 <div class="date-toggle">▼</div>
