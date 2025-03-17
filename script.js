@@ -1,4 +1,6 @@
 var orderId = 0;
+// Функция для геокодирования адреса с подробной обработкой ошибок
+const YANDEX_API_KEY = 'f88e81ac-59f7-458b-b53a-97b538c564d6';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Глобальные переменные для элементов интерфейса смены
@@ -458,105 +460,58 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.round(pickupPrice + deliveryPrice + weightPrice + distancePrice);
     }
 
-    // Функция для геокодирования адреса с подробной обработкой ошибок
     async function geocodeAddress(address) {
-        address = `Нижний Новгород, ${address}`;
-
-        try {
-            console.log(`Отправка запроса геокодирования для адреса: ${address}`);
-
-            // Добавляем задержку между запросами (минимум 1 секунда)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`, {
-                headers: {
-                    // Обязательно указываем User-Agent с названием приложения и контактной информацией
-                    'User-Agent': 'CourierApp/1.0 (your-email@example.com)'
-                }
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Ошибка HTTP при геокодировании: ${response.status} ${response.statusText}`);
-                console.error(`Ответ сервера: ${errorText}`);
-                throw new Error(`HTTP ошибка: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Ответ геокодирования:', data);
-
-            if (!data || data.length === 0) {
-                console.warn('Геокодирование не вернуло результатов');
-                return null;
-            }
-
-            // Nominatim возвращает координаты в формате [lat, lon], но нам нужно [lon, lat]
-            const coordinates = [parseFloat(data[0].lon),
-                parseFloat(data[0].lat)];
-            console.log(`Найдены координаты: [${coordinates}]`);
-            return coordinates;
-        } catch (error) {
-            console.error('Ошибка геокодирования:', error);
-            alert(`Ошибка при геокодировании адреса: ${error.message}`);
-
-            // Если API недоступен, возвращаем случайные координаты
-            const randomCoords = [Math.random() * 10,
-                Math.random() * 10];
-            console.log(`Используем случайные координаты: [${randomCoords}]`);
-            return randomCoords;
-        }
+        const response = await fetch(`https://geocode-maps.yandex.ru/1.x/?geocode=${address}&apikey=${YANDEX_API_KEY}&format=json`);
+        const data = await response.json();
+        return data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(' ').reverse().join(', ');
     }
 
     // Функция для расчета расстояния между двумя точками
     async function calculateDistance(startCoords, endCoords) {
-        try {
-            console.log(`Расчет расстояния от [${startCoords}] до [${endCoords}]`);
-
-            const body = {
-                locations: [startCoords,
-                    endCoords],
-                metrics: ["distance"],
-                units: "km"
-            };
-
-            console.log('Отправляемые данные:', JSON.stringify(body));
-
-            const response = await fetch('https://api.openrouteservice.org/v2/matrix/foot-walking', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': API_KEY
-                },
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Ошибка HTTP при расчете расстояния: ${response.status} ${response.statusText}`);
-                console.error(`Ответ сервера: ${errorText}`);
-                throw new Error(`HTTP ошибка: ${response.status}`);
+        return new Promise((resolve, reject) => {
+            ymaps.ready(init);
+            
+            function init() {
+                var myMap = new ymaps.Map('map', {
+                    center: startCoords, // Координаты Нижнего Новгорода
+                    zoom: 13,
+                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+                });
+                
+                // Создание мультимаршрута
+                var multiRoute = new ymaps.multiRouter.MultiRoute({
+                    referencePoints: [
+                        startCoords,
+                        endCoords
+                    ],
+                    params: {
+                        // Тип маршрутизации - пешеходная маршрутизация
+                        routingMode: 'pedestrian'
+                    }
+                }, {
+                    // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком
+                    boundsAutoApply: true,
+                    // Внешний вид линии маршрута
+                    routeActiveStrokeWidth: 6,
+                    routeActiveStrokeColor: "#1976D2"
+                });
+                
+                // Добавляем мультимаршрут на карту
+                myMap.geoObjects.add(multiRoute);
+                
+                // Подписываемся на событие обновления данных мультимаршрута
+                multiRoute.model.events.add('requestsuccess', function() {
+                    // Получение активного маршрута
+                    var activeRoute = multiRoute.getActiveRoute();
+                    if (activeRoute) {
+                        // Получение длины маршрута в метрах
+                        var distance = activeRoute.properties.get("distance");
+                        
+                        resolve(parseFloat(distance.text.replace(',', '.')));
+                    }
+                });
             }
-
-            const data = await response.json();
-            console.log('Ответ API расчета расстояния:', data);
-
-            if (!data.distances || data.distances.length === 0 || !data.distances[0] || data.distances[0].length < 2) {
-                console.warn('API вернул некорректные данные о расстоянии');
-                throw new Error('Некорректные данные о расстоянии');
-            }
-
-            const distance = data.distances[0][1];
-            console.log(`Рассчитанное расстояние: ${distance} км`);
-            return distance;
-        } catch (error) {
-            console.error('Ошибка расчета расстояния:', error);
-            alert(`Ошибка при расчете расстояния: ${error.message}`);
-
-            // Если API недоступен, возвращаем случайное расстояние
-            const randomDistance = Math.floor(Math.random() * 10) + 1;
-            console.log(`Используем случайное расстояние: ${randomDistance} км`);
-            return randomDistance;
-        }
+        });
     }
 
     // Функция обновления информации о начальной точке
