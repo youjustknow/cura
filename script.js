@@ -1929,4 +1929,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Инициализация
     updateShiftControls();
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // Получаем базовый путь из текущего URL
+            const basePath = window.location.pathname.replace(/\/[^/]*$/, '/');
+            
+            navigator.serviceWorker.register(basePath + 'sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker успешно зарегистрирован:', registration);
+                })
+                .catch(error => {
+                    console.log('Ошибка регистрации ServiceWorker:', error);
+                });
+        });
+    }
 });

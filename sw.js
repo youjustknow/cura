@@ -1,16 +1,16 @@
 const CACHE_NAME = 'courier-app-v1';
-const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/script.js',
-    '/manifest.json',
+const urlsToCache = [
+    './',
+    'index.html',
+    'styles.css',
+    'script.js',
+    'manifest.json',
+    'icons/android-launchericon-192-192.png',
     '/icons/icon-72x72.png',
     '/icons/icon-96x96.png',
     '/icons/icon-128x128.png',
     '/icons/icon-144x144.png',
     '/icons/icon-152x152.png',
-    '/icons/icon-192x192.png',
     '/icons/icon-384x384.png',
     '/icons/icon-512x512.png',
     'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2'
@@ -22,7 +22,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('Кэширование ресурсов');
-                return cache.addAll(ASSETS_TO_CACHE);
+                return cache.addAll(urlsToCache);
             })
     );
 });
