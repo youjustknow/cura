@@ -470,12 +470,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Функция для расчета расстояния между двумя точками
-    async function calculateDistance(startCoords, endCoords) {
+    async function calculateDistance(startCoords, endCoords, mapId = 'map') {
         return new Promise((resolve, reject) => {
             ymaps.ready(init);
             
             function init() {
-                var myMap = new ymaps.Map('map', {
+                var myMap = new ymaps.Map(mapId, {
                     center: startCoords, // Координаты Нижнего Новгорода
                     zoom: 13,
                     controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
@@ -511,8 +511,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         var distance = activeRoute.properties.get("distance");
 
                         myMap.destroy();
+
+                        const distanceInKm = parseFloat(distance.text.replace(',', '.')) / (distance.text.includes('км') ? 1 : 1000);
                         
-                        resolve(parseFloat(distance.text.replace(',', '.')));
+                        resolve(distanceInKm);
                     }
                 });
             }
@@ -818,9 +820,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
 
+                    const lastOrder = orders.at(-1) ?? { coordinates: startLocation };
+
                     // Рассчитываем расстояние
                     console.log('Расчет расстояния...');
-                    const distance = await calculateDistance(startLocation, endCoordinates);
+                    const distance = await calculateDistance(lastOrder.coordinates, endCoordinates);
 
                     if (distance === null) {
                         await showAlert('Не удалось рассчитать расстояние');
@@ -841,7 +845,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             price,
                             isHighPriceDelivery,
                             completed: false,
-                            distance: typeof distance === 'number' ? distance.toFixed(2): '?'
+                            distance: typeof distance === 'number' ? distance.toFixed(2): '?',
+                            coordinates: endCoordinates
                         };
 
                         console.log('Создан новый заказ:', order);
@@ -943,6 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteBtn.addEventListener('click',
                 () => {
                     orders = orders.filter(o => o.id !== order.id);
+                    recalculateOrderPrices();
                     renderOrderList();
                     saveUnfinishedOrders(); // Сохраняем заказы после удаления
                 });
@@ -1089,7 +1095,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
             orders = newOrders;
             saveUnfinishedOrders(); // Сохраняем заказы после изменения порядка
+            recalculateOrderPrices();
         }
+    }
+
+    async function recalculateOrderPrices() {
+        const promises = [];
+        
+        orders.forEach((order, index) => {
+            const lastOrder = index > 0 ? orders.at(index - 1) : { coordinates: startLocation };
+
+            console.log('Пересчет расстояния...', lastOrder.coordinates, order.coordinates);
+
+            promises.push(calculateDistance(lastOrder.coordinates, order.coordinates, 'map-orders').then(distance => {
+                order.distance = distance;
+                order.price = calculatePrice(order.weight, order.distance, order.isHighPriceDelivery);
+            }));
+
+        });
+
+        await Promise.all(promises);
+
+        console.log('Пересчитаны цены заказов:', orders);
+
+        renderOrderList();
+        saveUnfinishedOrders();
     }
 
     // Добавление обработчиков событий для drag-and-drop
