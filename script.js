@@ -452,12 +452,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обновляем функцию расчета цены
     function calculatePrice(weight, distance, isHighPriceDelivery = false) {
-        const pickupPrice = settings.pickupRate;
         const deliveryPrice = isHighPriceDelivery ? settings.highPriceDeliveryRate : settings.deliveryRate;
         const weightPrice = weight * settings.weightRate;
         const distancePrice = distance * settings.distanceRate;
 
-        return Math.round(pickupPrice + deliveryPrice + weightPrice + distancePrice);
+        return Math.round(deliveryPrice + weightPrice + distancePrice);
     }
 
     async function geocodeAddress(address) {
@@ -977,7 +976,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formattedTime = `${hours}ч ${minutes}м ${seconds}с`;
 
                 // Расчет дохода
-                const income = orders.reduce((sum, order) => sum + order.price, 0);
+                const income = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
 
                 // Создаем объект маршрута
                 const completedRoute = {
