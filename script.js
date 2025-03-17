@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .loading-dot {
-            width: 6px;
+            width: 600px;
             height: 6px;
             background-color: white;
             border-radius: 50%;
