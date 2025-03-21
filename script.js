@@ -1729,9 +1729,19 @@ function updateStatistics() {
 function renderEarningsChart(dailyEarnings) {
     const ctx = document.getElementById('earningsChart').getContext('2d');
     
-    // Получаем последние 7 дней
-    const dates = Object.keys(dailyEarnings).sort().slice(-7);
-    const earnings = dates.map(date => dailyEarnings[date] || 0);
+    // Создаем массив последовательных дат за последние 7 дней
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня
+    
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        last7Days.push(date.toLocaleDateString());
+    }
+    
+    // Получаем доходы для каждого дня (0, если нет доходов)
+    const earnings = last7Days.map(dateStr => dailyEarnings[dateStr] || 0);
 
     // Уничтожаем предыдущий график, если он существует
     if (window.earningsChart instanceof Chart) {
@@ -1741,7 +1751,7 @@ function renderEarningsChart(dailyEarnings) {
     window.earningsChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: dates.map(dateStr => {
+            labels: last7Days.map(dateStr => {
                 const date = new Date(dateStr);
                 const isValidDate = !isNaN(date.getTime());
                 
@@ -1755,7 +1765,7 @@ function renderEarningsChart(dailyEarnings) {
             datasets: [{
                 label: 'Доход',
                 data: earnings,
-                backgroundColor: '#ffd700',
+                backgroundColor: earnings.map(value => value > 0 ? '#ffd700' : 'rgba(255, 215, 0, 0.3)'),
                 borderColor: '#ffd700',
                 borderWidth: 1,
                 borderRadius: 4
@@ -1767,6 +1777,17 @@ function renderEarningsChart(dailyEarnings) {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const value = context.raw;
+                            return value > 0 ? `Доход: ${value}₽` : 'Нет дохода';
+                        }
+                    }
                 }
             },
             scales: {
