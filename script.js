@@ -1748,6 +1748,9 @@ function renderEarningsChart(dailyEarnings) {
         window.earningsChart.destroy();
     }
 
+    // Дни недели на русском
+    const weekdayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
     window.earningsChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1756,9 +1759,13 @@ function renderEarningsChart(dailyEarnings) {
                 const isValidDate = !isNaN(date.getTime());
                 
                 // Форматируем дату только если она корректная
-                const formattedDate = isValidDate 
-                    ? date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-                    : dateStr; // Используем исходную строку, если дата некорректная
+                let formattedDate = dateStr; // Используем исходную строку, если дата некорректная
+                
+                if (isValidDate) {
+                    const dayOfWeek = weekdayNames[date.getDay()];
+                    const formattedDay = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                    formattedDate = dayOfWeek + '\n' + formattedDay;
+                }
                 
                 return formattedDate;
             }),
@@ -1781,7 +1788,7 @@ function renderEarningsChart(dailyEarnings) {
                 tooltip: {
                     callbacks: {
                         title: function(tooltipItems) {
-                            return tooltipItems[0].label;
+                            return tooltipItems[0].label.replace('\n', ' ');
                         },
                         label: function(context) {
                             const value = context.raw;
@@ -1806,7 +1813,8 @@ function renderEarningsChart(dailyEarnings) {
                         display: false
                     },
                     ticks: {
-                        color: '#ccc'
+                        color: '#ccc',
+                        padding: 5
                     }
                 }
             }
