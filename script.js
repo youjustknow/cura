@@ -1666,7 +1666,7 @@ function updateStatistics() {
         });
     });
 
-    const averageOrderPrice = totalOrders > 0 ? Math.round(totalOrderPrice / totalOrders) : 0;
+    const averageOrderPrice = totalOrders > 0 ? Math.round(totalEarnings / totalOrders) : 0;
     const averageDistance = totalOrders > 0 ? Math.round(totalDistance / totalOrders * 10) / 10 : 0;
     const averageWeight = totalOrders > 0 ? Math.round(totalWeight / totalOrders * 10) / 10 : 0;
 
