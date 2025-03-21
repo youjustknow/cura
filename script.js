@@ -1741,7 +1741,17 @@ function renderEarningsChart(dailyEarnings) {
     window.earningsChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: dates.map(date => new Date(date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+            labels: dates.map(dateStr => {
+                const date = new Date(dateStr);
+                const isValidDate = !isNaN(date.getTime());
+                
+                // Форматируем дату только если она корректная
+                const formattedDate = isValidDate 
+                    ? date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+                    : dateStr; // Используем исходную строку, если дата некорректная
+                
+                return formattedDate;
+            }),
             datasets: [{
                 label: 'Доход',
                 data: earnings,
