@@ -2494,7 +2494,7 @@ function getOrdersForStartLocation(startLocationAddress) {
                 const routeDate = new Date(route.date);
                 if (routeDate >= thirtyDaysAgo) {
                     // Проверяем, совпадает ли стартовая точка маршрута
-                    let matchesStartLocation = false;
+                    let matchesStartLocation = false || true;
                     
                     if (route.startLocation && route.startLocation.coordinates === startLocationAddress) {
                         matchesStartLocation = true;
