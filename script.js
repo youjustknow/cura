@@ -2409,8 +2409,8 @@ function getStartLocationsFromStorage() {
     if (savedStartLocation) {
         try {
             const locationData = JSON.parse(savedStartLocation);
-            if (locationData && locationData.address && locationData.coordinates) {
-                startLocations.set(locationData.address, locationData);
+            if (locationData && locationData.coordinates) {
+                startLocations.set(locationData.coordinates, locationData);
             }
         } catch (error) {
             console.error('Ошибка при чтении стартовой точки:', error);
@@ -2424,13 +2424,13 @@ function getStartLocationsFromStorage() {
             const routes = JSON.parse(savedHistory);
             routes.forEach(route => {
                 const routeDate = new Date(route.date);
-                if (routeDate >= thirtyDaysAgo && route.startLocation && route.startLocation.address) {
-                    startLocations.set(route.startLocation.address, route.startLocation);
+                if (route.startLocation && route.startLocation.coordinates) {
+                    startLocations.set(route.startLocation.coordinates, route.startLocation);
                 }
                 
                 // Если в заказах есть информация о стартовой точке
                 if (route.orders && route.orders.length > 0 && route.orders[0].startLocation) {
-                    startLocations.set(route.orders[0].startLocation.address, route.orders[0].startLocation);
+                    startLocations.set(route.orders[0].startLocation.coordinates, route.orders[0].startLocation);
                 }
             });
         } catch (error) {
@@ -2447,15 +2447,15 @@ function getStartLocationsFromStorage() {
                 const shiftDate = new Date(shift.startTime);
                 if (shiftDate >= thirtyDaysAgo && shift.routes) {
                     shift.routes.forEach(route => {
-                        if (route.startLocation && route.startLocation.address) {
-                            startLocations.set(route.startLocation.address, route.startLocation);
+                        if (route.startLocation && route.startLocation.coordinates) {
+                            startLocations.set(route.startLocation.coordinates, route.startLocation);
                         }
                         
                         // Проверяем заказы в маршруте
                         if (route.orders && route.orders.length > 0) {
                             route.orders.forEach(order => {
-                                if (order.startLocation && order.startLocation.address) {
-                                    startLocations.set(order.startLocation.address, order.startLocation);
+                                if (order.startLocation && order.startLocation.coordinates) {
+                                    startLocations.set(order.startLocation.coordinates, order.startLocation);
                                 }
                             });
                         }
@@ -2901,9 +2901,9 @@ function populateStartLocationSelect() {
     
     // Заполняем список
     startLocations.forEach(location => {
-        if (location && location.address) {
+        if (location && location.coordinates) {
             const option = document.createElement('option');
-            option.value = location.address;
+            option.value = location.coordinates;
             option.textContent = location.address;
             select.appendChild(option);
         }
@@ -2926,7 +2926,7 @@ function updateDeliveryZoneMap() {
     
     // Ищем данные о выбранной стартовой точке
     const startLocations = getStartLocationsFromStorage();
-    const selectedLocation = startLocations.find(loc => loc.address === selectedAddress);
+    const selectedLocation = startLocations.find(loc => loc.coordinates === selectedAddress);
     
     if (!selectedLocation) {
         console.error('Не найдена информация о выбранной стартовой точке');
