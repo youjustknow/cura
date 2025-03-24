@@ -2658,7 +2658,7 @@ function initDeliveryZoneMap(startLocation, clientOrders) {
 }
 
 // Функция для создания полигона зоны доставки
-function createDeliveryZonePolygon(map, startCoords, orderCoords) {
+/*function createDeliveryZonePolygon(map, startCoords, orderCoords) {
     if (!orderCoords || orderCoords.length < 3) {
         return; // Нужно минимум 3 точки для создания полигона
     }
@@ -2688,7 +2688,7 @@ function createDeliveryZonePolygon(map, startCoords, orderCoords) {
     });
     
     map.geoObjects.add(polygon);
-}
+}*/
 
 // Функция для создания тепловой карты
 function createHeatmap(map, points) {
@@ -2705,7 +2705,7 @@ function createHeatmap(map, points) {
     ymaps.modules.require(['Heatmap'], function (Heatmap) {
     const heatmap = new Heatmap(heatmapData.map(r => r.coordinates), {
         radius: 15,
-        dissipating: true,
+        dissipating: false,
         opacity: 0.5,
         gradient: {
             0.1: 'rgba(128, 255, 0, 0.7)',
