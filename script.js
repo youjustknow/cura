@@ -2703,10 +2703,10 @@ function createHeatmap(map, points) {
     });
 
     ymaps.modules.require(['Heatmap'], function (Heatmap) {
-    const heatmap = new Heatmap(heatmapData, {
-        radius: 15,
+    const heatmap = new Heatmap(heatmapData.map(r => r.coordinates), {
+        radius: 50,
         dissipating: true,
-        opacity: 0.8,
+        opacity: 0.5,
         gradient: {
             0.1: 'rgba(128, 255, 0, 0.7)',
             0.2: 'rgba(255, 255, 0, 0.8)',
