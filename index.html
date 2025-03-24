@@ -189,95 +189,126 @@
         <!-- Экран статистики -->
         <div id="statsScreen" class="screen hidden">
             <h2>Статистика</h2>
+            <div class="stats-tip">Нажмите Alt+клик на заголовке раздела, чтобы открыть только этот раздел</div>
             <div class="stats-container">
                 <div class="stats-section">
-                    <h3>Общая статистика</h3>
-                    <div class="stats-grid">
-                        <div class="stats-item">
-                            <span class="stats-label">Всего смен</span>
-                            <span id="totalShifts" class="stats-value">0</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Всего заработано</span>
-                            <span id="totalEarnings" class="stats-value">0₽</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Средний доход за смену</span>
-                            <span id="averageShiftEarnings" class="stats-value">0₽</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Средний доход в час</span>
-                            <span id="averageHourlyEarnings" class="stats-value">0₽</span>
+                    <div class="stats-section-header">
+                        <h3>Общая статистика</h3>
+                        <div class="section-toggle">▼</div>
+                    </div>
+                    <div class="stats-section-content">
+                        <div class="stats-grid">
+                            <div class="stats-item">
+                                <span class="stats-label">Всего смен</span>
+                                <span id="totalShifts" class="stats-value">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Всего заработано</span>
+                                <span id="totalEarnings" class="stats-value">0₽</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Средний доход за смену</span>
+                                <span id="averageShiftEarnings" class="stats-value">0₽</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Средний доход в час</span>
+                                <span id="averageHourlyEarnings" class="stats-value">0₽/час</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="stats-section">
-                    <h3>Статистика по заказам</h3>
-                    <div class="stats-grid">
-                        <div class="stats-item">
-                            <span class="stats-label">Всего заказов</span>
-                            <span id="totalOrders" class="stats-value">0</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Средняя стоимость заказа</span>
-                            <span id="averageOrderPrice" class="stats-value">0₽</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Среднее расстояние</span>
-                            <span id="averageDistance" class="stats-value">0 км</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Средний вес</span>
-                            <span id="averageWeight" class="stats-value">0 кг</span>
+                    <div class="stats-section-header">
+                        <h3>Статистика по заказам</h3>
+                        <div class="section-toggle">▼</div>
+                    </div>
+                    <div class="stats-section-content">
+                        <div class="stats-grid">
+                            <div class="stats-item">
+                                <span class="stats-label">Всего заказов</span>
+                                <span id="totalOrders" class="stats-value">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Средняя стоимость заказа</span>
+                                <span id="averageOrderPrice" class="stats-value">0₽</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Среднее расстояние</span>
+                                <span id="averageDistance" class="stats-value">0 км</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Средний вес</span>
+                                <span id="averageWeight" class="stats-value">0 кг</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="stats-section">
-                    <h3>Временная статистика</h3>
-                    <div class="stats-grid">
-                        <div class="stats-item">
-                            <span class="stats-label">Средняя длительность смены</span>
-                            <span id="averageShiftDuration" class="stats-value">0ч</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Среднее время на заказ</span>
-                            <span id="averageOrderTime" class="stats-value">0м</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Лучший день</span>
-                            <span id="bestDay" class="stats-value">-</span>
-                        </div>
-                        <div class="stats-item">
-                            <span class="stats-label">Лучшая смена</span>
-                            <span id="bestShift" class="stats-value">-</span>
+                    <div class="stats-section-header">
+                        <h3>Временная статистика</h3>
+                        <div class="section-toggle">▼</div>
+                    </div>
+                    <div class="stats-section-content">
+                        <div class="stats-grid">
+                            <div class="stats-item">
+                                <span class="stats-label">Средняя длительность смены</span>
+                                <span id="averageShiftDuration" class="stats-value">0ч</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Среднее время на заказ</span>
+                                <span id="averageOrderTime" class="stats-value">0м</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Лучший день</span>
+                                <span id="bestDay" class="stats-value">-</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">Лучшая смена</span>
+                                <span id="bestShift" class="stats-value">-</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="stats-section">
-                    <h3>График доходов</h3>
-                    <div class="stats-chart">
-                        <canvas id="earningsChart"></canvas>
+                    <div class="stats-section-header">
+                        <h3>График доходов</h3>
+                        <div class="section-toggle">▼</div>
                     </div>
-                </div>
-
-                <div class="stats-section">
-                    <h3>Статистика по дням недели</h3>
-                    <div class="stats-chart">
-                        <canvas id="weekdayChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="stats-section">
-                    <h3>Распределение заказов</h3>
-                    <div class="stats-grid">
-                        <div class="stats-chart" style="height: 250px;">
-                            <canvas id="ordersDistributionChart"></canvas>
+                    <div class="stats-section-content">
+                        <div class="stats-chart">
+                            <canvas id="earningsChart"></canvas>
                         </div>
-                        <div class="stats-chart" style="height: 250px;">
-                            <canvas id="weightDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-header">
+                        <h3>Статистика по дням недели</h3>
+                        <div class="section-toggle">▼</div>
+                    </div>
+                    <div class="stats-section-content">
+                        <div class="stats-chart">
+                            <canvas id="weekdayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-header">
+                        <h3>Распределение заказов</h3>
+                        <div class="section-toggle">▼</div>
+                    </div>
+                    <div class="stats-section-content">
+                        <div class="stats-grid">
+                            <div class="stats-chart" style="height: 250px;">
+                                <canvas id="ordersDistributionChart"></canvas>
+                            </div>
+                            <div class="stats-chart" style="height: 250px;">
+                                <canvas id="weightDistributionChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>

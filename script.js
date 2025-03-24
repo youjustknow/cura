@@ -1771,7 +1771,7 @@ function updateStatistics() {
     document.getElementById('bestDay').textContent = bestDayDate ? `${bestDayDate} (${bestDayEarnings}₽)` : '-';
     document.getElementById('bestShift').textContent = bestShiftDate ? 
         `${bestShiftDate.toLocaleDateString()} (${bestShiftEarnings}₽)` : '-';
-
+    
     // Отрисовка графиков
     renderEarningsChart(dailyEarnings);
     renderWeekdayChart(completedShifts);
@@ -1780,6 +1780,9 @@ function updateStatistics() {
     
     // Обновляем зону доставки
     updateDeliveryZoneSection();
+    
+    // Инициализируем обработчики для сворачивания/разворачивания секций статистики
+    initStatsSectionToggles();
 }
 
 // Функция отрисовки графика доходов
@@ -2240,7 +2243,7 @@ generateTestDataBtn.style.right = '20px';
 generateTestDataBtn.style.zIndex = '1000';
 
 generateTestDataBtn.addEventListener('click', generateTestData);
-document.body.appendChild(generateTestDataBtn);
+//document.body.appendChild(generateTestDataBtn);
    
 // Инициализация
 updateShiftControls();
@@ -2789,20 +2792,25 @@ function createDeliveryZoneSection() {
     deliveryZoneSection = document.createElement('div');
     deliveryZoneSection.className = 'stats-section delivery-zone-section';
     deliveryZoneSection.innerHTML = `
-        <h2>Зона доставки</h2>
-        <div class="delivery-zone-controls">
-            <div class="select-container">
-                <label for="startLocationSelect">Выберите стартовую точку:</label>
-                <select id="startLocationSelect">
-                    <option value="">-- Выберите точку старта --</option>
-                </select>
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="heatmapCheckbox">
-                <label for="heatmapCheckbox">Показать тепловую карту</label>
-            </div>
+        <div class="stats-section-header">
+            <h3>Зона доставки</h3>
+            <div class="section-toggle">▲</div>
         </div>
-        <div id="deliveryZoneMap" class="map-container"></div>
+        <div class="stats-section-content">
+            <div class="delivery-zone-controls">
+                <div class="select-container">
+                    <label for="startLocationSelect">Выберите стартовую точку:</label>
+                    <select id="startLocationSelect">
+                        <option value="">-- Выберите точку старта --</option>
+                    </select>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="heatmapCheckbox">
+                    <label for="heatmapCheckbox">Показать тепловую карту</label>
+                </div>
+            </div>
+            <div id="deliveryZoneMap" class="map-container"></div>
+        </div>
     `;
     
     // Добавляем секцию в конец экрана статистики
@@ -2895,6 +2903,9 @@ function createDeliveryZoneSection() {
     if (heatmapCheckbox) {
         heatmapCheckbox.addEventListener('change', updateDeliveryZoneMap);
     }
+    
+    // После добавления секции инициализируем обработчики
+    initStatsSectionToggles();
 }
 
 // Функция для заполнения выпадающего списка стартовых точек
@@ -3014,4 +3025,59 @@ if (typeof ymaps !== 'undefined') {
     });
 } else {
     console.warn('API Яндекс.Карт не загружено. Функциональность карты доставки недоступна.');
+}
+
+// Функция для инициализации обработчиков сворачивания/разворачивания секций статистики
+function initStatsSectionToggles() {
+    const statsSectionHeaders = document.querySelectorAll('.stats-section-header');
+    
+    statsSectionHeaders.forEach(header => {
+        // Проверяем, не инициализирован ли уже обработчик
+        if (header.getAttribute('data-initialized') === 'true') {
+            return;
+        }
+        
+        const content = header.nextElementSibling;
+        const toggle = header.querySelector('.section-toggle');
+        
+        // Убеждаемся, что содержимое секции видимо по умолчанию
+        content.classList.remove('hidden');
+        toggle.textContent = '▲';
+        toggle.classList.remove('rotate');
+        
+        header.addEventListener('click', (event) => {
+            content.classList.toggle('hidden');
+            toggle.textContent = content.classList.contains('hidden') ? '▼' : '▲';
+            toggle.classList.toggle('rotate');
+            
+            // Если секция открывается и удерживается клавиша Alt, закрываем все остальные секции
+            if (!content.classList.contains('hidden') && event.altKey) {
+                closeOtherSections(header);
+            }
+            
+            // Если контент скрыт, прокручиваем к заголовку, чтобы он был виден
+            if (content.classList.contains('hidden')) {
+                header.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+        
+        // Отмечаем, что обработчик уже инициализирован
+        header.setAttribute('data-initialized', 'true');
+    });
+}
+
+// Функция для закрытия всех секций, кроме текущей
+function closeOtherSections(currentHeader) {
+    const allHeaders = document.querySelectorAll('.stats-section-header');
+    
+    allHeaders.forEach(header => {
+        if (header !== currentHeader) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.section-toggle');
+            
+            content.classList.add('hidden');
+            toggle.textContent = '▼';
+            toggle.classList.add('rotate');
+        }
+    });
 }
