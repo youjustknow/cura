@@ -2497,7 +2497,7 @@ function getOrdersForStartLocation(startLocationAddress) {
         try {
             const routes = JSON.parse(savedHistory);
             routes.forEach(route => {
-                const routeDate = new Date(route.date);
+                const routeDate = new Date(route.startTime);
                 if (routeDate >= thirtyDaysAgo) {
                     // Проверяем, совпадает ли стартовая точка маршрута
                     let matchesStartLocation = false || true;
