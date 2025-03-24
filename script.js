@@ -1159,7 +1159,9 @@ if (finishRouteBtn) {
                     executionTime: formattedTime,
                     executionTimeMs: diff,
                     income: income,
-                    orders: [...orders]
+                    orders: [...orders],
+                    // Добавляем информацию о стартовой точке
+                    startLocation: startLocationData
                 };
 
                 // Добавляем маршрут в текущую смену
@@ -1723,6 +1725,9 @@ function updateStatistics() {
     renderWeekdayChart(completedShifts);
     renderOrdersDistributionChart(completedShifts);
     renderWeightDistributionChart(completedShifts);
+    
+    // Обновляем зону доставки
+    updateDeliveryZoneSection();
 }
 
 // Функция отрисовки графика доходов
@@ -2136,8 +2141,8 @@ function generateTestData() {
     showAlert('Тестовые данные успешно сгенерированы');
 }
 
-// Добавляем обработчик для кнопки генерации тестовых данных
-/*const generateTestDataBtn = document.createElement('button');
+//Добавляем обработчик для кнопки генерации тестовых данных
+const generateTestDataBtn = document.createElement('button');
 generateTestDataBtn.textContent = 'Сгенерировать тестовые данные';
 generateTestDataBtn.className = 'modal-btn';
 generateTestDataBtn.style.position = 'fixed';
@@ -2146,7 +2151,7 @@ generateTestDataBtn.style.right = '20px';
 generateTestDataBtn.style.zIndex = '1000';
 
 generateTestDataBtn.addEventListener('click', generateTestData);
-document.body.appendChild(generateTestDataBtn);*/
+document.body.appendChild(generateTestDataBtn);
 
 // Инициализация
 updateShiftControls();
@@ -2308,3 +2313,592 @@ function applyColorPalette(palette) {
             document.querySelector('.accent-color-sample').style.backgroundColor = palette.accent;
         });
     }
+
+// Функция для получения всех стартовых точек из localStorage за последние 30 дней
+function getStartLocationsFromStorage() {
+    const startLocations = new Map(); // Используем Map для хранения уникальных точек по адресу
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    
+    // Проверяем текущую стартовую точку
+    const savedStartLocation = localStorage.getItem('startLocation');
+    if (savedStartLocation) {
+        try {
+            const locationData = JSON.parse(savedStartLocation);
+            if (locationData && locationData.address && locationData.coordinates) {
+                startLocations.set(locationData.address, locationData);
+            }
+        } catch (error) {
+            console.error('Ошибка при чтении стартовой точки:', error);
+        }
+    }
+    
+    // Проверяем историю маршрутов
+    const savedHistory = localStorage.getItem('routeHistory');
+    if (savedHistory) {
+        try {
+            const routes = JSON.parse(savedHistory);
+            routes.forEach(route => {
+                const routeDate = new Date(route.date);
+                if (routeDate >= thirtyDaysAgo && route.startLocation && route.startLocation.address) {
+                    startLocations.set(route.startLocation.address, route.startLocation);
+                }
+                
+                // Если в заказах есть информация о стартовой точке
+                if (route.orders && route.orders.length > 0 && route.orders[0].startLocation) {
+                    startLocations.set(route.orders[0].startLocation.address, route.orders[0].startLocation);
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при чтении истории маршрутов:', error);
+        }
+    }
+    
+    // Проверяем историю смен
+    const savedShifts = localStorage.getItem('shiftsHistory');
+    if (savedShifts) {
+        try {
+            const shifts = JSON.parse(savedShifts);
+            shifts.forEach(shift => {
+                const shiftDate = new Date(shift.startTime);
+                if (shiftDate >= thirtyDaysAgo && shift.routes) {
+                    shift.routes.forEach(route => {
+                        if (route.startLocation && route.startLocation.address) {
+                            startLocations.set(route.startLocation.address, route.startLocation);
+                        }
+                        
+                        // Проверяем заказы в маршруте
+                        if (route.orders && route.orders.length > 0) {
+                            route.orders.forEach(order => {
+                                if (order.startLocation && order.startLocation.address) {
+                                    startLocations.set(order.startLocation.address, order.startLocation);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при чтении истории смен:', error);
+        }
+    }
+    
+    // Добавляем точку из настроек, если нет других точек
+    if (startLocations.size === 0 && settings.defaultStartLocation) {
+        startLocations.set(settings.defaultStartLocation, {
+            address: settings.defaultStartLocation,
+            coordinates: null // Координаты будут получены при геокодировании
+        });
+    }
+    
+    return Array.from(startLocations.values());
+}
+
+// Функция для получения всех заказов для заданной стартовой точки
+function getOrdersForStartLocation(startLocationAddress) {
+    const orders = [];
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    
+    // Получаем заказы из истории маршрутов
+    const savedHistory = localStorage.getItem('routeHistory');
+    if (savedHistory) {
+        try {
+            const routes = JSON.parse(savedHistory);
+            routes.forEach(route => {
+                const routeDate = new Date(route.date);
+                if (routeDate >= thirtyDaysAgo) {
+                    // Проверяем, совпадает ли стартовая точка маршрута
+                    let matchesStartLocation = false;
+                    
+                    if (route.startLocation && route.startLocation.address === startLocationAddress) {
+                        matchesStartLocation = true;
+                    } else if (route.orders && route.orders.length > 0 && route.orders[0].startLocation && 
+                               route.orders[0].startLocation.address === startLocationAddress) {
+                        matchesStartLocation = true;
+                    }
+                    
+                    if (matchesStartLocation && route.orders && route.orders.length > 0) {
+                        route.orders.forEach(order => {
+                            if (order.coordinates) {
+                                orders.push({
+                                    address: order.address,
+                                    coordinates: order.coordinates,
+                                    weight: order.weight || 1,
+                                    date: routeDate
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при получении заказов из истории маршрутов:', error);
+        }
+    }
+    
+    // Получаем заказы из истории смен
+    const savedShifts = localStorage.getItem('shiftsHistory');
+    if (savedShifts) {
+        try {
+            const shifts = JSON.parse(savedShifts);
+            shifts.forEach(shift => {
+                const shiftDate = new Date(shift.startTime);
+                if (shiftDate >= thirtyDaysAgo && shift.routes) {
+                    shift.routes.forEach(route => {
+                        // Проверяем, совпадает ли стартовая точка маршрута
+                        let matchesStartLocation = false;
+                        
+                        if (route.startLocation && route.startLocation.address === startLocationAddress) {
+                            matchesStartLocation = true;
+                        } else if (route.orders && route.orders.length > 0 && route.orders[0].startLocation && 
+                                  route.orders[0].startLocation.address === startLocationAddress) {
+                            matchesStartLocation = true;
+                        }
+                        
+                        if (matchesStartLocation && route.orders && route.orders.length > 0) {
+                            route.orders.forEach(order => {
+                                if (order.coordinates) {
+                                    orders.push({
+                                        address: order.address,
+                                        coordinates: order.coordinates,
+                                        weight: order.weight || 1,
+                                        date: new Date(route.startTime)
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при получении заказов из истории смен:', error);
+        }
+    }
+    
+    return orders;
+}
+
+// Функция для инициализации карты с зоной доставки
+function initDeliveryZoneMap(startLocation, clientOrders) {
+    const mapContainer = document.getElementById('deliveryZoneMap');
+    if (!mapContainer) return;
+    
+    // Очищаем контейнер карты
+    mapContainer.innerHTML = '';
+    
+    // Если нет данных, показываем сообщение
+    if (!startLocation || !startLocation.coordinates || !clientOrders || clientOrders.length === 0) {
+        mapContainer.innerHTML = '<div class="no-data-message">Недостаточно данных для построения зоны доставки</div>';
+        return;
+    }
+    
+    // Парсим координаты стартовой точки
+    let startCoords;
+    try {
+        if (typeof startLocation.coordinates === 'string') {
+            startCoords = startLocation.coordinates.split(',').map(Number);
+        } else if (Array.isArray(startLocation.coordinates)) {
+            startCoords = startLocation.coordinates;
+        } else {
+            throw new Error('Неверный формат координат');
+        }
+    } catch (error) {
+        console.error('Ошибка при парсинге координат стартовой точки:', error);
+        mapContainer.innerHTML = '<div class="no-data-message">Ошибка при обработке координат</div>';
+        return;
+    }
+    
+    // Создаем карту
+    const myMap = new ymaps.Map('deliveryZoneMap', {
+        center: startCoords,
+        zoom: 12,
+        controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+    });
+    
+    // Добавляем стартовую точку на карту
+    const startMarker = new ymaps.Placemark(startCoords, {
+        hintContent: startLocation.address,
+        balloonContent: `<strong>Стартовая точка:</strong> ${startLocation.address}`
+    }, {
+        preset: 'islands#greenDotIcon',
+        iconColor: '#3caa3c'
+    });
+    myMap.geoObjects.add(startMarker);
+    
+    // Добавляем точки заказов на карту
+    const clientMarkers = [];
+    clientOrders.forEach(order => {
+        let orderCoords;
+        try {
+            if (typeof order.coordinates === 'string') {
+                orderCoords = order.coordinates.split(',').map(Number);
+            } else if (Array.isArray(order.coordinates)) {
+                orderCoords = order.coordinates;
+            } else {
+                return; // Пропускаем заказ с неверными координатами
+            }
+            
+            const marker = new ymaps.Placemark(orderCoords, {
+                hintContent: order.address,
+                balloonContent: `
+                    <strong>Адрес:</strong> ${order.address}<br>
+                    <strong>Вес:</strong> ${order.weight} кг<br>
+                    <strong>Дата:</strong> ${order.date.toLocaleDateString()}
+                `
+            }, {
+                preset: 'islands#blueDotIcon'
+            });
+            myMap.geoObjects.add(marker);
+            clientMarkers.push({coords: orderCoords, weight: order.weight});
+        } catch (error) {
+            console.error('Ошибка при добавлении метки заказа:', error);
+        }
+    });
+    
+    // Создаем полигон зоны доставки
+    createDeliveryZonePolygon(myMap, startCoords, clientMarkers.map(m => m.coords));
+    
+    // Проверяем, нужно ли создать тепловую карту
+    const heatmapCheckbox = document.getElementById('heatmapCheckbox');
+    if (heatmapCheckbox && heatmapCheckbox.checked) {
+        createHeatmap(myMap, clientMarkers);
+    }
+    
+    // Подгоняем масштаб карты, чтобы были видны все точки
+    myMap.setBounds(myMap.geoObjects.getBounds(), {
+        checkZoomRange: true,
+        zoomMargin: 30
+    });
+}
+
+// Функция для создания полигона зоны доставки
+function createDeliveryZonePolygon(map, startCoords, orderCoords) {
+    if (!orderCoords || orderCoords.length < 3) {
+        return; // Нужно минимум 3 точки для создания полигона
+    }
+    
+    // Преобразуем координаты в формат для алгоритма выпуклой оболочки
+    const points = [];
+    points.push({x: startCoords[0], y: startCoords[1]}); // Добавляем стартовую точку
+    
+    orderCoords.forEach(coords => {
+        points.push({x: coords[0], y: coords[1]});
+    });
+    
+    // Строим выпуклую оболочку
+    const hullPoints = getConvexHull(points);
+    
+    // Преобразуем обратно в формат для Яндекс.Карт
+    const hullCoordinates = hullPoints.map(point => [point.x, point.y]);
+    
+    // Создаем и добавляем полигон на карту
+    const polygon = new ymaps.Polygon([hullCoordinates], {
+        hintContent: 'Зона доставки'
+    }, {
+        fillColor: '#ff990055', // Полупрозрачный оранжевый
+        strokeColor: '#ff6600',
+        strokeWidth: 3,
+        strokeStyle: 'solid'
+    });
+    
+    map.geoObjects.add(polygon);
+}
+
+// Функция для создания тепловой карты
+function createHeatmap(map, points) {
+    if (!points || points.length === 0) return;
+    
+    // Преобразуем точки в формат для тепловой карты
+    const heatmapData = points.map(point => {
+        return {
+            weight: point.weight || 1,
+            coordinates: point.coords
+        };
+    });
+    
+    // Создаем тепловую карту
+    const heatmap = new ymaps.Heatmap(heatmapData, {
+        radius: 15,
+        dissipating: true,
+        opacity: 0.8,
+        gradient: {
+            0.1: 'rgba(128, 255, 0, 0.7)',
+            0.2: 'rgba(255, 255, 0, 0.8)',
+            0.7: 'rgba(234, 72, 58, 0.9)',
+            1.0: 'rgba(162, 36, 25, 1)'
+        }
+    });
+    
+    heatmap.setMap(map);
+}
+
+// Функция для получения выпуклой оболочки (алгоритм Грэхема)
+function getConvexHull(points) {
+    // Если точек меньше 3, выпуклая оболочка это и есть сами точки
+    if (points.length < 3) return points;
+    
+    // Находим точку с минимальной y-координатой (и самой левой, если таких несколько)
+    let bottomPoint = points[0];
+    for (let i = 1; i < points.length; i++) {
+        if (points[i].y < bottomPoint.y || (points[i].y === bottomPoint.y && points[i].x < bottomPoint.x)) {
+            bottomPoint = points[i];
+        }
+    }
+    
+    // Сортируем точки по полярному углу относительно bottomPoint
+    points.sort((a, b) => {
+        const angleA = Math.atan2(a.y - bottomPoint.y, a.x - bottomPoint.x);
+        const angleB = Math.atan2(b.y - bottomPoint.y, b.x - bottomPoint.x);
+        
+        if (angleA === angleB) {
+            // Если углы равны, выбираем более удаленную точку
+            const distA = Math.pow(a.x - bottomPoint.x, 2) + Math.pow(a.y - bottomPoint.y, 2);
+            const distB = Math.pow(b.x - bottomPoint.x, 2) + Math.pow(b.y - bottomPoint.y, 2);
+            return distA - distB;
+        }
+        
+        return angleA - angleB;
+    });
+    
+    // Строим выпуклую оболочку
+    const hull = [points[0], points[1]];
+    
+    for (let i = 2; i < points.length; i++) {
+        while (hull.length > 1 && !isLeftTurn(hull[hull.length - 2], hull[hull.length - 1], points[i])) {
+            hull.pop();
+        }
+        hull.push(points[i]);
+    }
+    
+    return hull;
+}
+
+// Вспомогательная функция для проверки поворота налево
+function isLeftTurn(p1, p2, p3) {
+    return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x) > 0;
+}
+
+// Функция создания HTML-элементов для секции зоны доставки
+function createDeliveryZoneSection() {
+    const statsScreen = document.getElementById('statsScreen');
+    if (!statsScreen) return;
+    
+    // Проверяем, не создана ли уже секция
+    let deliveryZoneSection = document.querySelector('.delivery-zone-section');
+    if (deliveryZoneSection) return;
+    
+    // Создаем секцию для зоны доставки
+    deliveryZoneSection = document.createElement('div');
+    deliveryZoneSection.className = 'stats-section delivery-zone-section';
+    deliveryZoneSection.innerHTML = `
+        <h2>Зона доставки</h2>
+        <div class="delivery-zone-controls">
+            <div class="select-container">
+                <label for="startLocationSelect">Выберите стартовую точку:</label>
+                <select id="startLocationSelect">
+                    <option value="">-- Выберите точку старта --</option>
+                </select>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="heatmapCheckbox">
+                <label for="heatmapCheckbox">Показать тепловую карту</label>
+            </div>
+        </div>
+        <div id="deliveryZoneMap" class="map-container"></div>
+    `;
+    
+    // Добавляем секцию в конец экрана статистики
+    statsScreen.appendChild(deliveryZoneSection);
+    
+    // Добавляем стили для новой секции
+    const style = document.createElement('style');
+    style.textContent = `
+        .delivery-zone-section {
+            margin-top: 30px;
+            padding-bottom: 40px;
+        }
+        .delivery-zone-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .select-container {
+            flex: 1;
+            margin-right: 20px;
+            min-width: 250px;
+        }
+        .select-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .select-container select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-container input {
+            margin-right: 8px;
+        }
+        .map-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .no-data-message {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #aaa;
+            font-style: italic;
+            background-color: #333;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Добавляем обработчики событий
+    const startLocationSelect = document.getElementById('startLocationSelect');
+    const heatmapCheckbox = document.getElementById('heatmapCheckbox');
+    
+    if (startLocationSelect) {
+        startLocationSelect.addEventListener('change', updateDeliveryZoneMap);
+    }
+    
+    if (heatmapCheckbox) {
+        heatmapCheckbox.addEventListener('change', updateDeliveryZoneMap);
+    }
+}
+
+// Функция для заполнения выпадающего списка стартовых точек
+function populateStartLocationSelect() {
+    const select = document.getElementById('startLocationSelect');
+    if (!select) return;
+    
+    // Очищаем список
+    select.innerHTML = '<option value="">-- Выберите точку старта --</option>';
+    
+    // Получаем все стартовые точки
+    const startLocations = getStartLocationsFromStorage();
+    
+    // Заполняем список
+    startLocations.forEach(location => {
+        if (location && location.address) {
+            const option = document.createElement('option');
+            option.value = location.address;
+            option.textContent = location.address;
+            select.appendChild(option);
+        }
+    });
+}
+
+// Функция для обновления карты с зоной доставки
+function updateDeliveryZoneMap() {
+    const select = document.getElementById('startLocationSelect');
+    if (!select) return;
+    
+    const selectedAddress = select.value;
+    if (!selectedAddress) {
+        const mapContainer = document.getElementById('deliveryZoneMap');
+        if (mapContainer) {
+            mapContainer.innerHTML = '<div class="no-data-message">Выберите стартовую точку</div>';
+        }
+        return;
+    }
+    
+    // Ищем данные о выбранной стартовой точке
+    const startLocations = getStartLocationsFromStorage();
+    const selectedLocation = startLocations.find(loc => loc.address === selectedAddress);
+    
+    if (!selectedLocation) {
+        console.error('Не найдена информация о выбранной стартовой точке');
+        return;
+    }
+    
+    // Если у стартовой точки нет координат, пытаемся получить их
+    if (!selectedLocation.coordinates) {
+        const loader = showLoadingIndicator();
+        geocodeAddress(selectedAddress)
+            .then(coordinates => {
+                hideLoadingIndicator(loader);
+                selectedLocation.coordinates = coordinates;
+                const clientOrders = getOrdersForStartLocation(selectedAddress);
+                ymaps.ready(() => initDeliveryZoneMap(selectedLocation, clientOrders));
+            })
+            .catch(error => {
+                hideLoadingIndicator(loader);
+                console.error('Ошибка при геокодировании стартовой точки:', error);
+                const mapContainer = document.getElementById('deliveryZoneMap');
+                if (mapContainer) {
+                    mapContainer.innerHTML = '<div class="no-data-message">Не удалось получить координаты для выбранной точки</div>';
+                }
+            });
+    } else {
+        // Если координаты есть, сразу отображаем карту
+        const clientOrders = getOrdersForStartLocation(selectedAddress);
+        ymaps.ready(() => initDeliveryZoneMap(selectedLocation, clientOrders));
+    }
+}
+
+// Функция обновления секции с зоной доставки
+function updateDeliveryZoneSection() {
+    // Создаем секцию, если ее еще нет
+    createDeliveryZoneSection();
+    
+    // Заполняем выпадающий список стартовых точек
+    populateStartLocationSelect();
+}
+
+// Добавляем создание секции зоны доставки при инициализации
+document.addEventListener('DOMContentLoaded', function() {
+    // Другие инициализации...
+    createDeliveryZoneSection();
+});
+
+// Инициализация карты доставки при загрузке страницы
+if (typeof ymaps !== 'undefined') {
+    ymaps.ready(() => {
+        // При загрузке страницы создаем секцию с картой доставки
+        createDeliveryZoneSection();
+        populateStartLocationSelect();
+        
+        // Если есть текущая стартовая точка, выбираем ее по умолчанию
+        const startLocationSelect = document.getElementById('startLocationSelect');
+        const savedStartLocation = localStorage.getItem('startLocation');
+        
+        if (startLocationSelect && savedStartLocation) {
+            try {
+                const locationData = JSON.parse(savedStartLocation);
+                if (locationData && locationData.address) {
+                    // Выбираем текущую точку в выпадающем списке
+                    const options = Array.from(startLocationSelect.options);
+                    const option = options.find(opt => opt.value === locationData.address);
+                    
+                    if (option) {
+                        option.selected = true;
+                        // Обновляем карту с зоной доставки
+                        updateDeliveryZoneMap();
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при выборе стартовой точки:', error);
+            }
+        }
+    });
+} else {
+    console.warn('API Яндекс.Карт не загружено. Функциональность карты доставки недоступна.');
+}
