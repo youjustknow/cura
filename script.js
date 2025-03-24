@@ -982,6 +982,16 @@ if (submitOrderBtn) {
                 const editedOrder = orders.find(o => o.id === orderId);
 
                 if (!editedOrder) {
+                    // Создаем объект с информацией о стартовой точке для заказа
+                    let orderStartLocation = null;
+                    if (startLocationData) {
+                        orderStartLocation = {
+                            address: startLocationData.address,
+                            coordinates: startLocationData.coordinates,
+                            timestamp: new Date().toISOString()
+                        };
+                    }
+
                     const order = {
                         id: nextOrderId++,
                         address,
@@ -990,7 +1000,9 @@ if (submitOrderBtn) {
                         isHighPriceDelivery,
                         completed: false,
                         distance: typeof distance === 'number' ? distance.toFixed(2): '?',
-                        coordinates: endCoordinates
+                        coordinates: endCoordinates,
+                        // Добавляем информацию о стартовой точке для заказа
+                        startLocation: orderStartLocation
                     };
 
                     console.log('Создан новый заказ:', order);
@@ -999,6 +1011,15 @@ if (submitOrderBtn) {
                     editedOrder.address = address;
                     editedOrder.weight = weight;
                     editedOrder.isHighPriceDelivery = isHighPriceDelivery;
+                    
+                    // Обновляем информацию о стартовой точке при редактировании заказа
+                    if (startLocationData) {
+                        editedOrder.startLocation = {
+                            address: startLocationData.address,
+                            coordinates: startLocationData.coordinates,
+                            timestamp: new Date().toISOString()
+                        };
+                    }
 
                     orderId = 0;
                 }
@@ -1456,10 +1477,32 @@ function createRouteElement(route) {
 
     const routeDetails = document.createElement('div');
     routeDetails.className = 'route-details hidden';
+    
+    // Добавляем информацию о стартовой точке маршрута, если она есть
+    if (route.startLocation && route.startLocation.address) {
+        const startLocationElement = document.createElement('div');
+        startLocationElement.className = 'start-location-info';
+        startLocationElement.innerHTML = `
+            <div class="start-location-header">Стартовая точка: ${route.startLocation.address}</div>
+        `;
+        routeDetails.appendChild(startLocationElement);
+    }
 
     route.orders.forEach(order => {
         const orderElement = document.createElement('div');
         orderElement.className = 'history-order-item';
+        
+        /*let startLocationInfo = '';
+        // Добавляем информацию о стартовой точке заказа, если она отличается от стартовой точки маршрута
+        if (order.startLocation && order.startLocation.address && 
+            (!route.startLocation || order.startLocation.address !== route.startLocation.address)) {
+            startLocationInfo = `
+                <div class="order-start-location">
+                    <span>Старт: ${order.startLocation.address}</span>
+                </div>
+            `;
+        }*/
+        
         orderElement.innerHTML = `
             <div class="order-info">
                 <span>${order.id}</span>
@@ -1470,6 +1513,7 @@ function createRouteElement(route) {
             <div class="order-distance">
                 <span>Расстояние: ${order.distance} км</span>
             </div>
+            ${startLocationInfo}
         `;
         routeDetails.appendChild(orderElement);
     });
@@ -2767,6 +2811,24 @@ function createDeliveryZoneSection() {
             color: #aaa;
             font-style: italic;
             background-color: #333;
+        }
+        .start-location-info {
+            background-color: rgba(0, 150, 0, 0.1);
+            border-left: 3px solid #00aa00;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .start-location-header {
+            font-weight: bold;
+            color: #00cc00;
+        }
+        .order-start-location {
+            margin-top: 4px;
+            font-size: 0.9em;
+            color: #999;
+            border-top: 1px dashed #555;
+            padding-top: 4px;
         }
     `;
     document.head.appendChild(style);
