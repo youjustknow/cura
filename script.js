@@ -1857,9 +1857,8 @@ function renderEarningsChart(dailyEarnings) {
                 zoom: {
                     pan: {
                         enabled: true,
-                        mode: 'x',
-                        modifierKey: 'shift'
-                    }
+                        mode: 'x'
+                    },
                 }
             },
             scales: {
@@ -1880,11 +1879,27 @@ function renderEarningsChart(dailyEarnings) {
                     ticks: {
                         color: '#ccc',
                         padding: 5
+                    },
+                    // Устанавливаем количество видимых меток (7 дней)
+                    min: 0,
+                    max: 6,
+                    // Включаем прокрутку
+                    ticks: {
+                        autoSkip: false,
+                        color: '#ccc',
+                        padding: 5
                     }
                 }
             }
         }
     });
+
+    // После инициализации графика сделаем видимыми только последние 7 дней
+    if (last30Days.length > 7) {
+        earningsChart.options.scales.x.min = last30Days.length - 7;
+        earningsChart.options.scales.x.max = last30Days.length - 1;
+        earningsChart.update();
+    }
 }
 
 // Функция отрисовки графика по дням недели
