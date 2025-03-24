@@ -2701,9 +2701,9 @@ function createHeatmap(map, points) {
             coordinates: point.coords
         };
     });
-    
-    // Создаем тепловую карту
-    const heatmap = new ymaps.Heatmap(heatmapData, {
+
+    ymaps.modules.require(['Heatmap'], function (Heatmap) {
+    const heatmap = new Heatmap(heatmapData, {
         radius: 15,
         dissipating: true,
         opacity: 0.8,
@@ -2716,6 +2716,9 @@ function createHeatmap(map, points) {
     });
     
     heatmap.setMap(map);
+   });
+    
+
 }
 
 // Функция для получения выпуклой оболочки (алгоритм Грэхема)
