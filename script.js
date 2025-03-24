@@ -2634,7 +2634,10 @@ function initDeliveryZoneMap(startLocation, clientOrders) {
             }, {
                 preset: 'islands#blueDotIcon'
             });
-            myMap.geoObjects.add(marker);
+            const heatmapcheckbox = document.getElementById('heatmapCheckbox');
+            if (!(heatmapcheckbox && heatmapcheckbox.checked)) {
+                myMap.geoObjects.add(marker);   
+            }
             clientMarkers.push({coords: orderCoords, weight: order.weight});
         } catch (error) {
             console.error('Ошибка при добавлении метки заказа:', error);
@@ -2642,7 +2645,7 @@ function initDeliveryZoneMap(startLocation, clientOrders) {
     });
     
     // Создаем полигон зоны доставки
-    createDeliveryZonePolygon(myMap, startCoords, clientMarkers.map(m => m.coords));
+    //createDeliveryZonePolygon(myMap, startCoords, clientMarkers.map(m => m.coords));
     
     // Проверяем, нужно ли создать тепловую карту
     const heatmapCheckbox = document.getElementById('heatmapCheckbox');
@@ -2704,9 +2707,9 @@ function createHeatmap(map, points) {
 
     ymaps.modules.require(['Heatmap'], function (Heatmap) {
     const heatmap = new Heatmap(heatmapData.map(r => r.coordinates), {
-        radius: 15,
+        radius: 10,
         dissipating: true,
-        opacity: 0.5,
+        opacity: 0.75,
         gradient: {
             0.1: 'rgba(128, 255, 0, 0.7)',
             0.2: 'rgba(255, 255, 0, 0.8)',
