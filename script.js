@@ -1436,7 +1436,7 @@ function renderShiftsHistory() {
             <div class="shift-info">
                 <div class="shift-time">
                     <span class="shift-value">${shift.startTime.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit'})}</span>
-                    <span class="shift-value">${shift.startTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: false })} - ${shift.endTime ? shift.endTime.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit', second: false}) : 'Не завершена'}</span>
+                    <span class="shift-value">${shift.startTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} - ${shift.endTime ? shift.endTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : 'Не завершена'}</span>
                     <span class="shift-label">Длительность</span>
                     <span class="shift-value">${shiftDuration} ч</span>
                 </div>
