@@ -2496,10 +2496,10 @@ function getOrdersForStartLocation(startLocationAddress) {
                     // Проверяем, совпадает ли стартовая точка маршрута
                     let matchesStartLocation = false;
                     
-                    if (route.startLocation && route.startLocation.address === startLocationAddress) {
+                    if (route.startLocation && route.startLocation.coordinates === startLocationAddress) {
                         matchesStartLocation = true;
                     } else if (route.orders && route.orders.length > 0 && route.orders[0].startLocation && 
-                               route.orders[0].startLocation.address === startLocationAddress) {
+                               route.orders[0].startLocation.coordinates === startLocationAddress) {
                         matchesStartLocation = true;
                     }
                     
@@ -2534,10 +2534,10 @@ function getOrdersForStartLocation(startLocationAddress) {
                         // Проверяем, совпадает ли стартовая точка маршрута
                         let matchesStartLocation = false;
                         
-                        if (route.startLocation && route.startLocation.address === startLocationAddress) {
+                        if (route.startLocation && route.startLocation.coordinates === startLocationAddress) {
                             matchesStartLocation = true;
                         } else if (route.orders && route.orders.length > 0 && route.orders[0].startLocation && 
-                                  route.orders[0].startLocation.address === startLocationAddress) {
+                                  route.orders[0].startLocation.coordinates === startLocationAddress) {
                             matchesStartLocation = true;
                         }
                         
