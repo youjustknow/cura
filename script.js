@@ -2155,6 +2155,7 @@ function renderWeightDistributionChart(completedShifts) {
 function generateTestData() {
     const now = new Date();
     const testShifts = [];
+    const routes = [];
     
     // Генерируем данные за последние 30 дней
     for (let i = 0; i < 30; i++) {
@@ -2214,6 +2215,7 @@ function generateTestData() {
             
             shift.routes.push(route);
             shift.totalIncome += route.income;
+            routes.push(route);
         }
         
         testShifts.push(shift);
@@ -2222,7 +2224,7 @@ function generateTestData() {
     // Сохраняем тестовые данные
     shiftsHistory = testShifts;
     localStorage.setItem('shiftsHistory', JSON.stringify(shiftsHistory));
-    
+    localStorage.setItem('routesHistory', JSON.stringify(routes));
     // Обновляем статистику
     updateStatistics();
     showAlert('Тестовые данные успешно сгенерированы');
