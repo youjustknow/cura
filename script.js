@@ -1016,6 +1016,7 @@ if (submitOrderBtn) {
                     editedOrder.address = address;
                     editedOrder.weight = weight;
                     editedOrder.isHighPriceDelivery = isHighPriceDelivery;
+                    editedOrder.price = price;
                     
                     // Обновляем информацию о стартовой точке при редактировании заказа
                     if (startLocationData) {
