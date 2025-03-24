@@ -2231,7 +2231,7 @@ generateTestDataBtn.style.right = '20px';
 generateTestDataBtn.style.zIndex = '1000';
 
 generateTestDataBtn.addEventListener('click', generateTestData);
-document.body.appendChild(generateTestDataBtn);
+//document.body.appendChild(generateTestDataBtn);
 
 // Инициализация
 updateShiftControls();
