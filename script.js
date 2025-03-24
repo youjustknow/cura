@@ -2234,7 +2234,7 @@ generateTestDataBtn.style.right = '20px';
 generateTestDataBtn.style.zIndex = '1000';
 
 generateTestDataBtn.addEventListener('click', generateTestData);
-//document.body.appendChild(generateTestDataBtn);
+document.body.appendChild(generateTestDataBtn);
    
 // Инициализация
 updateShiftControls();
@@ -2707,7 +2707,7 @@ function createHeatmap(map, points) {
 
     ymaps.modules.require(['Heatmap'], function (Heatmap) {
     const heatmap = new Heatmap(heatmapData.map(r => r.coordinates), {
-        radius: 10,
+        radius: 15,
         dissipating: true,
         opacity: 0.75,
         gradient: {
