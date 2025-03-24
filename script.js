@@ -217,6 +217,7 @@ let startLocationData = null;
 
 // Настройки по умолчанию
 const defaultSettings = {
+    apiKey: '',
     defaultStartLocation: null,
     distanceRate: 18,
     weightRate: 2,
@@ -233,7 +234,7 @@ let settings = { ...defaultSettings };
 const clientAddressInput = document.getElementById('clientAddress');
 const orderWeightInput = document.getElementById('orderWeight');
 const highPriceDeliveryCheckbox = document.getElementById('highPriceDelivery');
-const addressSuggestions = document.getElementById('addressSuggestions');
+//const addressSuggestions = document.getElementById('addressSuggestions');
 const startLocationInput = document.getElementById('startLocation');
 const startLocationSuggestions = document.getElementById('startLocationSuggestions');
 const setStartLocationBtn = document.getElementById('setStartLocationBtn');
@@ -483,6 +484,7 @@ function loadSettings() {
 // Функция сохранения настроек
 function saveSettings() {
     settings = {
+        apiKey: document.getElementById('apiKey').value,
         defaultStartLocation: document.getElementById('defaultStartLocation').value,
         distanceRate: parseFloat(document.getElementById('distanceRate').value) || defaultSettings.distanceRate,
         weightRate: parseFloat(document.getElementById('weightRate').value) || defaultSettings.weightRate,
@@ -509,6 +511,7 @@ function updateSettingsForm() {
     document.getElementById('deliveryRate').value = settings.deliveryRate;
     document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
     document.getElementById('themeColor').value = settings.themeColor;
+    document.getElementById('apiKey').value = settings.apiKey;
 }
 
 // Функция применения начальной точки из настроек
@@ -2106,7 +2109,7 @@ function renderWeightDistributionChart(completedShifts) {
                     font: {
                         size: 14
                     }
-                }
+               }
             }
         }
     });

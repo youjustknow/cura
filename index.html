@@ -11,6 +11,8 @@
         styleTag.href = 'styles.css?v=' + new Date().getTime();
         document.head.appendChild(styleTag);
     </script>
+
+ 
     
     <!-- PWA мета-теги -->
     <meta name="theme-color" content="#666">
@@ -76,7 +78,7 @@
                     <li>
                         <button id="showStatsBtn" class="menu-btn">
                             <span class="material-icons">analytics</span>
-                            Статистикаfffffff
+                            Статистика
                         </button>
                     </li>
                     <li>
@@ -294,6 +296,10 @@
                     <button id="setDefaultLocationBtn" class="secondary-button">Установить</button>
                 </div>
                 <div class="form-group">
+                    <label for="apiKey">API ключ</label>
+                    <input type="text" id="apiKey" autocomplete="off">
+                </div>
+                <div class="form-group">
                     <label for="distanceRate">Оплата за километр (₽)</label>
                     <input type="number" id="distanceRate" min="0" step="0.5">
                 </div>
@@ -420,6 +426,15 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const settings2 = JSON.parse(localStorage.getItem('settings'));
+        const apiKey = settings2 ? settings2.apiKey : '';
+        const lang = 'ru_RU';
+        const scriptTagYandex = document.createElement('script');
+        scriptTagYandex.src = 'https://api-maps.yandex.ru/2.1/?apikey=' + apiKey + '&lang=' + lang;
+        document.body.appendChild(scriptTagYandex);
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
