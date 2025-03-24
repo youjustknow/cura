@@ -2232,7 +2232,7 @@ generateTestDataBtn.style.zIndex = '1000';
 
 generateTestDataBtn.addEventListener('click', generateTestData);
 //document.body.appendChild(generateTestDataBtn);
-
+   
 // Инициализация
 updateShiftControls();
 
