@@ -2224,7 +2224,7 @@ function generateTestData() {
     // Сохраняем тестовые данные
     shiftsHistory = testShifts;
     localStorage.setItem('shiftsHistory', JSON.stringify(shiftsHistory));
-    localStorage.setItem('routesHistory', JSON.stringify(routes));
+    localStorage.setItem('routeHistory', JSON.stringify(routes));
     // Обновляем статистику
     updateStatistics();
     showAlert('Тестовые данные успешно сгенерированы');
