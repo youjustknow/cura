@@ -2198,6 +2198,10 @@ function generateTestData() {
                     weight: 1 + Math.random() * 9, // вес от 1 до 10 кг
                     price: 200 + Math.floor(Math.random() * 800), // цена от 200 до 1000
                     distance: 1 + Math.random() * 4, // расстояние от 1 до 5 км
+                    coordinates: [
+                        56.307861 + (Math.random() - 0.5) * 0.018, // ~1 км в широте
+                        43.989188 + (Math.random() - 0.5) * 0.028  // ~1 км в долготе
+                    ],
                     completed: true
                 };
                 route.income += order.price;
