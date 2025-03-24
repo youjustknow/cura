@@ -1,3 +1,8 @@
+const settingsMain = JSON.parse(localStorage.getItem('settings'));
+
+// Функция для геокодирования адреса с подробной обработкой ошибок
+const YANDEX_API_KEY = settingsMain?.apiKey ?? '';
+
 let orderId = 0;
 
 // Добавляем стили для индикатора загрузки
@@ -242,8 +247,6 @@ const startLocationInfo = document.getElementById('startLocationInfo');
 loadSettings();
 console.log('Настройки загружены при старте:', settings);
 
-// Функция для геокодирования адреса с подробной обработкой ошибок
-const YANDEX_API_KEY = settings.apiKey;
 
 // Элементы бокового меню
 const sidebar = document.querySelector('.sidebar');
