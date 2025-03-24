@@ -5,8 +5,6 @@ const YANDEX_API_KEY = settingsMain?.apiKey ?? '';
 
 let orderId = 0;
 
-Chart.register(zoomPlugin);
-
 // Добавляем стили для индикатора загрузки
 
 // Добавляем стили для индикатора загрузки
