@@ -2934,7 +2934,7 @@ function populateStartLocationSelect() {
     if (!select) return;
     
     // Очищаем список
-    select.innerHTML = '<option value="">-- Выберите точку старта --</option>';
+    select.innerHTML = '';
     
     // Получаем все стартовые точки
     const startLocations = getStartLocationsFromStorage();
