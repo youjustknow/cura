@@ -1,4 +1,3 @@
-
 let orderId = 0;
 
 // Добавляем стили для индикатора загрузки
@@ -1963,15 +1962,46 @@ function renderOrdersDistributionChart(completedShifts) {
         6: Array(15).fill(0), // Воскресенье
     };
     
+    // Создаем объект для отслеживания уникальных дат для каждого дня недели и часа
+    const processedDates = {
+        0: Array(15).fill().map(() => new Set()), // Понедельник    
+        1: Array(15).fill().map(() => new Set()), // Вторник
+        2: Array(15).fill().map(() => new Set()), // Среда
+        3: Array(15).fill().map(() => new Set()), // Четверг
+        4: Array(15).fill().map(() => new Set()), // Пятница
+        5: Array(15).fill().map(() => new Set()), // Суббота
+        6: Array(15).fill().map(() => new Set()), // Воскресенье
+    };
+    
     completedShifts.forEach(shift => {
         shift.routes.forEach(route => {
-            const dayOfWeek = new Date(route.startTime).getDay();
-            route.orders.forEach(order => {
-                const hour = new Date(route.startTime).getHours();
-                if (hour >= 8 && hour < 22) {
-                    weekdayData[dayOfWeek == 0 ? 6 : dayOfWeek - 1][hour - 8]++;
+            const routeDate = new Date(route.startTime);
+            const dayOfWeek = routeDate.getDay();
+            const mappedDayIndex = dayOfWeek == 0 ? 6 : dayOfWeek - 1;
+            const hour = routeDate.getHours();
+            
+            if (hour >= 8 && hour < 22) {
+                const hourIndex = hour - 8;
+                const dateKey = routeDate.toDateString();
+                
+                // Добавляем заказы текущего маршрута в соответствующий день и час
+                const orderCount = route.orders.length;
+                if (orderCount > 0) {
+                    weekdayData[mappedDayIndex][hourIndex] += orderCount;
+                    
+                    // Добавляем дату в набор уникальных дат для этого дня недели и часа
+                    processedDates[mappedDayIndex][hourIndex].add(dateKey);
                 }
-            });
+            }
+        });
+    });
+    
+    // Рассчитываем среднее арифметическое количество заказов для каждого дня недели и часа
+    const averageWeekdayData = {};
+    Object.keys(weekdayData).forEach(dayIndex => {
+        averageWeekdayData[dayIndex] = weekdayData[dayIndex].map((total, hourIndex) => {
+            const uniqueDaysCount = processedDates[dayIndex][hourIndex].size;
+            return uniqueDaysCount > 0 ? Math.round((total / uniqueDaysCount) * 10) / 10 : 0;
         });
     });
 
@@ -1987,7 +2017,7 @@ function renderOrdersDistributionChart(completedShifts) {
         type: 'line',
         data: {
             labels: Array.from({length: 15}, (_, i) => `${i + 8}:00`),
-            datasets: Object.entries(weekdayData).map(([dayIndex, data], i) => ({
+            datasets: Object.entries(averageWeekdayData).map(([dayIndex, data], i) => ({
                 label: weekdays[dayIndex],
                 data: data,
                 borderColor: colors[i],
@@ -2012,7 +2042,7 @@ function renderOrdersDistributionChart(completedShifts) {
                 },
                 title: {
                     display: true,
-                    text: 'Распределение заказов по часам и дням недели',
+                    text: 'Среднее количество заказов по часам и дням недели',
                     color: '#ccc',
                     font: {
                         size: 14
