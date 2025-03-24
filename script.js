@@ -5,6 +5,8 @@ const YANDEX_API_KEY = settingsMain?.apiKey ?? '';
 
 let orderId = 0;
 
+Chart.register(zoomPlugin);
+
 // Добавляем стили для индикатора загрузки
 
 // Добавляем стили для индикатора загрузки
@@ -1791,15 +1793,15 @@ function renderEarningsChart(dailyEarnings) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня
     
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
+    const last30Days = [];
+    for (let i = 30; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(today.getDate() - i);
-        last7Days.push(date.toLocaleDateString());
+        last30Days.push(date.toLocaleDateString());
     }
     
     // Получаем доходы для каждого дня (0, если нет доходов)
-    const earnings = last7Days.map(dateStr => dailyEarnings[dateStr] || 0);
+    const earnings = last30Days.map(dateStr => dailyEarnings[dateStr] || 0);
 
     // Уничтожаем предыдущий график, если он существует
     if (window.earningsChart instanceof Chart) {
@@ -1812,7 +1814,7 @@ function renderEarningsChart(dailyEarnings) {
     window.earningsChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: last7Days.map(dateStr => {
+            labels: last30Days.map(dateStr => {
                 const date = new Date(dateStr);
                 const isValidDate = !isNaN(date.getTime());
                 
@@ -1852,6 +1854,13 @@ function renderEarningsChart(dailyEarnings) {
                             const value = context.raw;
                             return value > 0 ? `Доход: ${value}₽` : 'Нет дохода';
                         }
+                    }
+                },
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                        modifierKey: 'shift'
                     }
                 }
             },
