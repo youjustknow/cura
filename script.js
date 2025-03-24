@@ -2763,7 +2763,7 @@ function isLeftTurn(p1, p2, p3) {
 
 // Функция создания HTML-элементов для секции зоны доставки
 function createDeliveryZoneSection() {
-    const statsScreen = document.getElementById('statsScreen');
+    const statsScreen = document.querySelector('.stats-container');
     if (!statsScreen) return;
     
     // Проверяем, не создана ли уже секция
