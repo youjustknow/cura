@@ -2138,15 +2138,17 @@ function renderOrdersDistributionChart(completedShifts) {
     });
 
     completedShifts.forEach(shift => {
-        for (let hour = 8; hour < 22; hour++) {
+        const startHour = shift.startTime.getHours();
+        const endHour = shift.endTime.getHours();
+
+        for (let hour = startHour; hour < endHour; hour++) {
             const hourIndex = hour - 8;
-            const uniqueDays = new Set();
             const mappedDayIndex = shift.startTime.getDay() == 0 ? 6 : shift.startTime.getDay() - 1;
 
             processedDates[mappedDayIndex][hourIndex].add(shift.startTime.toDateString());
         }
     });
-    
+
     // Рассчитываем среднее арифметическое количество заказов для каждого дня недели и часа
     const averageWeekdayData = {};
     Object.keys(weekdayData).forEach(dayIndex => {
