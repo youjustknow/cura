@@ -2,37 +2,45 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 :root {
-    --primary-color: #ff8c00;
-    --primary-dark: #cc7000;
-    --primary-light: #ffa333;
-    --accent-color: #ffd700;
-    --background-color: #333;
-    --background-light: #444;
-    --background-lighter: #555;
-    --background-darkest: #383838;
-    --background-darker: #4a4a4a;
-    --border-color: #666;
-    --text-color: #fff;
-    --text-dark: #ddd;
-    --text-muted: #ccc;
-    --text-faded: #888;
-    --danger-color: #ff5722;
-    --danger-dark: #d32f2f;
-    --success-color: #4caf50;
-    --success-dark: #45a049;
-    --info-color: #2196F3;
-    --info-dark: #1976D2;
-    --warning-color: #FFC107;
-    --accent-light: #ffed4a;
+    --primary-color: #007aff;
+    --primary-dark: #0062cc;
+    --primary-light: #66afff;
+    --accent-color: #007aff;
+    --background-color: #1a1a1c;
+    --background-light: rgba(45, 45, 47, 0.6);
+    --background-lighter: rgba(55, 55, 57, 0.6);
+    --background-darkest: rgba(30, 30, 32, 0.9);
+    --background-darker: rgba(40, 40, 42, 0.7);
+    --border-color: rgba(80, 80, 80, 0.2);
+    --text-color: #ffffff;
+    --text-dark: #eaeaea;
+    --text-muted: #aaaaaa;
+    --text-faded: #777777;
+    --danger-color: #ff3b30;
+    --danger-dark: #d70015;
+    --success-color: #34c759;
+    --success-dark: #248a3d;
+    --info-color: #5ac8fa;
+    --info-dark: #0071e3;
+    --warning-color: #ff9500;
+    --accent-light: #64d2ff;
+    
+    /* Адаптивные цвета текста */
+    --text-on-light: #1d1d1f;
+    --text-on-dark: #ffffff;
+    --text-muted-on-light: #666666;
+    --text-muted-on-dark: #aaaaaa;
 }
 
 body {
     background-color: var(--background-color);
     color: var(--text-color);
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 .app {
@@ -65,22 +73,25 @@ body {
 
 /* Кнопка добавления заказа */
 .add-order-button {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(to bottom right, var(--accent-color), var(--primary-color));
-    border: 2px solid var(--accent-color);
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: var(--accent-color);
     color: white;
     font-size: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.add-order-button:hover {
+    transform: scale(1.05);
 }
 
 .plus-icon {
@@ -96,25 +107,33 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 18px;
-    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
 .form-group input[type="text"],
 .form-group input[type="number"] {
     width: 100%;
-    padding: 10px;
-    border: 2px solid var(--accent-color);
-    border-radius: 5px;
-    background-color: var(--background-light);
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: rgba(60, 60, 62, 0.8);
     color: var(--text-color);
     font-size: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
 }
 
 .suggestions {
@@ -136,66 +155,78 @@ body {
 }
 
 button {
-    padding: 10px 15px;
+    padding: 12px 16px;
     background-color: var(--accent-color);
-    color: var(--background-color);
+    color: white;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Список заказов */
 .order-list {
     width: 100%;
     margin-bottom: 70px;
-    overflow-y: scroll;
+    overflow-y: auto;
     margin-top: 20px;
+    padding: 0 4px;
 }
 
 .order-item {
     background-color: var(--background-light);
-    border: 2px solid var(--accent-color);
-    border-radius: 10px;
-    margin-bottom: 15px;
-    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-on-dark);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
+}
+
+.order-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-weight: 500;
+    margin-bottom: 8px;
     color: var(--text-muted);
+    font-size: 14px;
 }
 
 .order-data {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    font-size: 16px;
 }
 
 .order-price {
     display: flex;
     justify-content: space-between;
     border-top: 1px solid var(--border-color);
-    padding-top: 10px;
-    font-weight: bold;
+    padding-top: 12px;
+    font-weight: 600;
 }
 
 .order-actions {
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-.order-actions button {
-    background-color: var(--background-lighter);
-    color: var(--text-color);
-    padding: 5px 10px;
-    font-size: 14px;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 /* Кнопки действий */
@@ -203,8 +234,8 @@ button {
     width: 100%;
     padding: 15px;
     background-color: var(--primary-color);
-    color: var(--text-color);
-    font-size: 18px;
+    color: white;
+    font-size: 15px;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -236,7 +267,7 @@ button {
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
-    font-size: 18px;
+    font-size: 15px;
 }
 
 #okBtn {
@@ -244,20 +275,13 @@ button {
 }
 .secondary-button {
     background-color: var(--background-lighter);
-    color: var(--text-color);
+    color: var(--text-on-dark);
     padding: 5px 10px;
     font-size: 14px;
     margin-top: 5px;
 }
 
 /* Модифицируем отображение заказа, чтобы включить информацию о расстоянии */
-.order-data {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    margin-bottom: 5px;
-    font-size: 18px;
-}
-
 .order-distance {
     margin-top: 5px;
     padding-top: 5px;
@@ -265,6 +289,7 @@ button {
     display: flex;
     justify-content: space-between;
 }
+
 /* Стили для экрана истории */
 .history-button {
     position: absolute;
@@ -309,7 +334,7 @@ button {
 }
 
 .date-text {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: bold;
 }
 
@@ -387,11 +412,13 @@ button {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .modal.hidden {
@@ -400,16 +427,19 @@ button {
 
 .modal-content {
     background-color: var(--background-light);
-    border: 2px solid var(--accent-color);
-    border-radius: 10px;
+    border-radius: 14px;
     width: 90%;
     max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     animation: modalAppear 0.3s ease;
+    overflow: hidden;
 }
 
 @keyframes modalAppear {
     from {
-        transform: translateY(-20px);
+        transform: translateY(-30px);
         opacity: 0;
     }
     to {
@@ -419,52 +449,39 @@ button {
 }
 
 .modal-header {
-    padding: 15px;
-    border-bottom: 2px solid var(--accent-color);
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
     margin: 0;
-    color: var(--accent-color);
-    font-size: 20px;
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .modal-body {
     padding: 20px;
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .modal-footer {
-    padding: 15px;
+    padding: 16px;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    border-top: 1px solid var(--border-color);
 }
 
 .modal-btn {
-    padding: 10px 20px;
+    padding: 10px 16px;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
-    background-color: var(--accent-color);
-    color: var(--background-color);
-    font-weight: bold;
     transition: background-color 0.2s ease;
-}
-
-.modal-btn:hover {
-    background-color: var(--accent-light);
-}
-
-.modal-btn-secondary {
-    background-color: var(--background-lighter);
-    color: var(--text-color);
-}
-
-.modal-btn-secondary:hover {
-    background-color: var(--border-color);
 }
 
 /* Кнопка выхода */
@@ -558,9 +575,9 @@ button {
     border-radius: 50%;
 }
 
-h2 {
-    text-align: center;
-    margin-top: 5px;
+h2, h3, h4 {
+    color: var(--text-color);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
 }
 
 #saveSettingsBtn {
@@ -655,12 +672,14 @@ h2 {
     top: 0;
     left: 0;
     height: 100%;
-    width: 250px;
-    background-color: var(--background-color);
-    transform: translateX(-250px);
+    width: 280px;
+    background-color: var(--background-light);
+    transform: translateX(-280px);
     transition: transform 0.3s ease;
     z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .sidebar.open {
@@ -674,11 +693,13 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.3);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 999;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 
 .sidebar-overlay.active {
@@ -689,38 +710,38 @@ h2 {
 .menu-toggle {
     position: fixed;
     top: 20px;
-    left: 0;
+    left: 20px;
     width: 40px;
     height: 40px;
     background-color: var(--background-light);
-    border-radius: 0 5px 5px 0;
+    border-radius: 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    padding: 8px;
+    gap: 6px;
     z-index: 1001;
-    transition: left 0.3s ease;
-}
-
-.sidebar.open + .menu-toggle,
-.sidebar.open .menu-toggle {
-    left: 250px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .menu-toggle span {
     display: block;
-    width: 24px;
+    width: 22px;
     height: 2px;
-    background-color: var(--accent-color);
+    background-color: var(--text-color);
     transition: all 0.3s ease;
+}
+
+.sidebar.open + .menu-toggle,
+.sidebar.open .menu-toggle {
+    left: 260px;
 }
 
 .sidebar.open .menu-toggle span:nth-child(1),
 .sidebar.open + .menu-toggle span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
+    transform: translateY(8px) rotate(45deg);
 }
 
 .sidebar.open .menu-toggle span:nth-child(2),
@@ -730,32 +751,34 @@ h2 {
 
 .sidebar.open .menu-toggle span:nth-child(3),
 .sidebar.open + .menu-toggle span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 .menu {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 20px 0;
+    padding: 60px 0 20px;
 }
 
 .menu-header {
     padding: 0 20px 20px;
-    border-bottom: 2px solid var(--background-light);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .menu-header h2 {
-    color: var(--accent-color);
+    color: var(--text-color);
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: left
 }
 
 .menu-items {
     list-style: none;
     padding: 0;
     margin: 0;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .menu-items li {
@@ -765,7 +788,7 @@ h2 {
 
 .menu-btn {
     width: 100%;
-    padding: 15px 20px;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -779,12 +802,13 @@ h2 {
 }
 
 .menu-btn:hover {
-    background-color: var(--background-light);
+    background-color: var(--background-darker);
 }
 
 .menu-btn.active {
-    background-color: var(--primary-color);
-    color: var(--background-color);
+    background-color: var(--background-darker);
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 .menu-btn.danger {
@@ -792,12 +816,12 @@ h2 {
 }
 
 .menu-btn.danger:hover {
-    background-color: var(--danger-color);
-    color: var(--text-color);
+    background-color: rgba(255, 59, 48, 0.1);
 }
 
 .material-icons {
     font-size: 20px;
+    color: var(--text-color);
 }
 
 /* Добавляем стили для иконок Material Icons */
@@ -837,9 +861,9 @@ h2 {
 
 .shift-button {
     padding: 15px 30px;
-    font-size: 18px;
+    font-size: 15px;
     background: linear-gradient(to bottom right, var(--success-color), var(--success-dark));
-    color: var(--text-color);
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -910,9 +934,9 @@ h2 {
 /* Стили для кнопки информации о смене */
 .shift-info-button {
     padding: 15px 30px;
-    font-size: 18px;
+    font-size: 15px;
     background: linear-gradient(to bottom right, var(--info-color), var(--info-dark));
-    color: var(--text-color);
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -936,17 +960,21 @@ h2 {
 /* Стили для информации о смене */
 .shift-info-grid {
     display: grid;
-    gap: 15px;
-    padding: 10px;
+    gap: 14px;
+    padding: 16px;
 }
 
 .info-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 16px;
     background-color: var(--background-lighter);
-    border-radius: 5px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-on-dark);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
 }
 
 .info-label {
@@ -956,7 +984,7 @@ h2 {
 
 .info-value {
     color: var(--success-color);
-    font-weight: bold;
+    font-weight: 600;
     font-size: 16px;
 }
 
@@ -974,27 +1002,29 @@ h2 {
 .time-input-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .time-input-group label {
     color: var(--text-muted);
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .time-input-group input[type="time"] {
-    padding: 10px;
-    border: 2px solid var(--accent-color);
-    border-radius: 5px;
-    background-color: var(--background-color);
-    color: var(--text-color);
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: rgba(60, 60, 62, 0.8);
+    color: var(--text-on-dark);
     font-size: 16px;
     width: 100%;
 }
 
-.time-input-group input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    cursor: pointer;
+.time-input-group input[type="time"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
 }
 
 /* Стили для статистики */
@@ -1003,39 +1033,38 @@ h2 {
     margin-top: 20px;
     overflow-y: auto;
     height: calc(100vh - 100px);
+    padding: 0 4px;
 }
 
 .stats-section {
     background-color: var(--background-light);
-    border-radius: 10px;
-    padding: 0;
+    border-radius: 14px;
     margin-bottom: 20px;
     overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .stats-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 16px 20px;
     cursor: pointer;
-    background-color: var(--background-darker);
-    transition: background-color 0.2s ease;
-}
-
-.stats-section-header:hover {
     background-color: var(--background-light);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .stats-section h3 {
-    color: var(--accent-color);
+    color: var(--text-color);
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
+    font-weight: 600;
 }
 
 .section-toggle {
-    color: var(--accent-color);
-    font-size: 16px;
+    color: var(--text-muted);
     transition: transform 0.3s ease;
 }
 
@@ -1044,11 +1073,9 @@ h2 {
 }
 
 .stats-section-content {
-    padding: 20px;
-    border-top: 1px solid var(--border-color);
     transition: all 0.3s ease-out;
     overflow: hidden;
-    max-height: 2000px; /* Достаточно большое значение для любого содержимого */
+    max-height: 2000px;
 }
 
 .stats-section-content.hidden {
@@ -1061,16 +1088,18 @@ h2 {
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    gap: 16px;
 }
 
 .stats-item {
     background-color: var(--background-lighter);
-    padding: 15px;
-    border-radius: 8px;
+    padding: 16px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .stats-label {
@@ -1081,12 +1110,12 @@ h2 {
 .stats-value {
     color: var(--accent-color);
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .stats-chart {
     width: 100%;
-    height: 300px;
+    height: 250px;
     background-color: var(--background-lighter);
     border-radius: 8px;
     position: relative;
@@ -1127,8 +1156,9 @@ h2 {
         grid-template-columns: 1fr 1fr;
     }
     
-    .stats-chart {
-        height: 250px;
+    .add-order-button {
+        bottom: 30px;
+        right: 30px;
     }
 }
 
@@ -1137,8 +1167,14 @@ h2 {
         grid-template-columns: 1fr;
     }
     
-    .stats-chart {
-        height: 200px;
+    .add-order-button {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .menu-toggle {
+        top: 15px;
+        left: 15px;
     }
 }
 
@@ -1208,4 +1244,140 @@ h2 {
 
 .data-control-buttons .material-icons {
     font-size: 20px;
+}
+
+/* Обновляем стили для переключателей */
+.toggle-slider {
+    background-color: rgba(80, 80, 80, 0.5);
+}
+
+.toggle-slider:before {
+    background-color: var(--text-color);
+}
+
+/* Утилитарные классы для адаптивного текста */
+.light-bg {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--text-on-light);
+}
+
+.light-bg .text-muted {
+    color: var(--text-muted-on-light);
+}
+
+.dark-bg {
+    background-color: var(--background-light);
+    color: var(--text-on-dark);
+}
+
+.dark-bg .text-muted {
+    color: var(--text-muted-on-dark);
+}
+
+/* Миксин для контрастного текста (автоматическое определение) */
+[data-adaptive-text="true"] {
+    color: var(--text-on-dark);
+}
+
+[data-adaptive-text="true"].light-background {
+    color: var(--text-on-light);
+}
+
+/* Обновленные стили для элементов с контрастным фоном */
+.order-item {
+    background-color: var(--background-light);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-on-dark);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: var(--background-lighter);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-on-dark);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
+}
+
+/* Функция для контраста между цветами фона и текста */
+.primary-button {
+    background-color: var(--primary-color);
+    color: white; /* Всегда белый текст на цветном фоне */
+}
+
+.secondary-button {
+    background-color: var(--background-lighter);
+    color: var(--text-on-dark); /* Адаптивный цвет */
+}
+
+/* Стили для текста на градиентных фонах */
+.shift-button, 
+.shift-info-button {
+    color: white; /* Всегда белый для высокого контраста */
+}
+
+/* Адаптивные стили для input полей */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.time-input-group input[type="time"] {
+    background-color: rgba(60, 60, 62, 0.8);
+    color: var(--text-on-dark);
+}
+
+/* Функция переключения темы */
+body.light-theme {
+    --background-color: #f5f5f7;
+    --background-light: rgba(255, 255, 255, 0.8);
+    --background-lighter: rgba(255, 255, 255, 0.6);
+    --background-darkest: rgba(0, 0, 0, 0.05);
+    --background-darker: rgba(0, 0, 0, 0.03);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --text-color: var(--text-on-light);
+    --text-dark: #444;
+    --text-muted: var(--text-muted-on-light);
+    --text-faded: #999;
+}
+
+body.light-theme .form-group input[type="text"],
+body.light-theme .form-group input[type="number"],
+body.light-theme .time-input-group input[type="time"] {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--text-on-light);
+}
+
+body.light-theme .order-item,
+body.light-theme .info-item,
+body.light-theme .secondary-button {
+    color: var(--text-on-light);
+}
+
+/* Улучшенная читаемость информационных блоков */
+.stats-item .stats-value {
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 1);
+}
+
+.info-value {
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 1);
+}
+
+/* Улучшение контраста для ключевой информации */
+.shift-income .shift-value,
+#predictedIncome,
+.stats-value {
+    font-weight: 600;
+}
+
+h2 {
+    text-align: center;
 }
