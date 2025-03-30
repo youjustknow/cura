@@ -2127,18 +2127,24 @@ function renderOrdersDistributionChart(completedShifts) {
             
             if (hour >= 8 && hour < 22) {
                 const hourIndex = hour - 8;
-                const dateKey = routeDate.toDateString();
                 
                 // Добавляем заказы текущего маршрута в соответствующий день и час
                 const orderCount = route.orders.length;
                 if (orderCount > 0) {
                     weekdayData[mappedDayIndex][hourIndex] += orderCount;
-                    
-                    // Добавляем дату в набор уникальных дат для этого дня недели и часа
-                    processedDates[mappedDayIndex][hourIndex].add(dateKey);
                 }
             }
         });
+    });
+
+    completedShifts.forEach(shift => {
+        for (let hour = 8; hour < 22; hour++) {
+            const hourIndex = hour - 8;
+            const uniqueDays = new Set();
+            const mappedDayIndex = shift.startTime.getDay() == 0 ? 6 : shift.startTime.getDay() - 1;
+
+            processedDates[mappedDayIndex][hourIndex].add(shift.startTime.toDateString());
+        }
     });
     
     // Рассчитываем среднее арифметическое количество заказов для каждого дня недели и часа
