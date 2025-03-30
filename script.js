@@ -1841,9 +1841,11 @@ function updateStatistics() {
     const averageDistance = totalOrders > 0 ? Math.round(totalDistance / totalOrders * 10) / 10 : 0;
     const averageWeight = totalOrders > 0 ? Math.round(totalWeight / totalOrders * 10) / 10 : 0;
 
+    const totalRouteExecutionTime = completedShifts.reduce((sum, shift) => sum + shift.routes.reduce((sum, route) => sum + route.executionTimeMs, 0), 0);
+
     // Временная статистика
     const averageShiftDuration = totalShifts > 0 ? Math.round(totalHours / totalShifts * 10) / 10 : 0;
-    const averageOrderTime = totalOrders > 0 ? Math.round(totalHours * 60 / totalOrders) : 0;
+    const averageOrderTime = totalOrders > 0 ? (totalRouteExecutionTime / 1000 / 60 * 2 / totalOrders).toFixed(0) : 0;
 
     // Поиск лучшего дня и смены
     let bestDayEarnings = 0;
