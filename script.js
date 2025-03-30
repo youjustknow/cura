@@ -823,6 +823,125 @@ if (saveSettingsBtn) {
     });
 }
 
+// Обработчики для кнопок экспорта и импорта данных
+const exportDataBtn = document.getElementById('exportDataBtn');
+const importDataBtn = document.getElementById('importDataBtn');
+const importFileInput = document.getElementById('importFileInput');
+
+if (exportDataBtn) {
+    exportDataBtn.addEventListener('click', () => {
+        exportAppData();
+    });
+}
+
+if (importDataBtn) {
+    importDataBtn.addEventListener('click', () => {
+        importFileInput.click();
+    });
+}
+
+if (importFileInput) {
+    importFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            importAppData(file);
+        }
+    });
+}
+
+// Функция для экспорта данных приложения
+function exportAppData() {
+    try {
+        // Собираем все данные из localStorage
+        const appData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            try {
+                // Пробуем распарсить JSON
+                const value = localStorage.getItem(key);
+                appData[key] = value;
+            } catch (e) {
+                console.error(`Ошибка при экспорте данных для ключа ${key}:`, e);
+                appData[key] = localStorage.getItem(key);
+            }
+        }
+
+        // Создаем и скачиваем файл
+        const dataStr = JSON.stringify(appData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const dataUrl = URL.createObjectURL(dataBlob);
+        
+        const downloadLink = document.createElement('a');
+        const now = new Date();
+        const dateTimeString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}`;
+        downloadLink.download = `cura_backup_${dateTimeString}.json`;
+        downloadLink.href = dataUrl;
+        downloadLink.style.display = 'none';
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(dataUrl);
+        
+        showAlert('Данные успешно экспортированы');
+    } catch (error) {
+        console.error('Ошибка при экспорте данных:', error);
+        showAlert('Ошибка при экспорте данных: ' + error.message);
+    }
+}
+
+// Функция для импорта данных приложения
+async function importAppData(file) {
+    try {
+        const confirm = await showConfirm('Импорт данных заменит все текущие данные приложения. Продолжить?');
+        if (!confirm) {
+            importFileInput.value = ''; // Сбрасываем выбор файла
+            return;
+        }
+        
+        const loader = showLoadingIndicator();
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                
+                // Очищаем текущее хранилище
+                localStorage.clear();
+                
+                // Импортируем данные
+                for (const key in importedData) {
+                    localStorage.setItem(key, importedData[key]);
+                }
+                
+                hideLoadingIndicator(loader);
+                
+                await showAlert('Данные успешно импортированы. Приложение будет перезагружено.');
+                
+                // Перезагружаем страницу для применения импортированных данных
+                window.location.reload();
+            } catch (error) {
+                hideLoadingIndicator(loader);
+                console.error('Ошибка при чтении или применении данных:', error);
+                showAlert('Ошибка при импорте данных: ' + error.message);
+                importFileInput.value = ''; // Сбрасываем выбор файла
+            }
+        };
+        
+        reader.onerror = function() {
+            hideLoadingIndicator(loader);
+            showAlert('Ошибка при чтении файла');
+            importFileInput.value = ''; // Сбрасываем выбор файла
+        };
+        
+        reader.readAsText(file);
+    } catch (error) {
+        console.error('Ошибка при импорте данных:', error);
+        showAlert('Ошибка при импорте данных: ' + error.message);
+        importFileInput.value = ''; // Сбрасываем выбор файла
+    }
+}
+
 // Функции для работы с модальными окнами
 function showAlert(message) {
     const modal = document.getElementById('alertModal');
