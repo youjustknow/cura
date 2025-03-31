@@ -1617,7 +1617,7 @@ function createRouteElement(route) {
         const orderElement = document.createElement('div');
         orderElement.className = 'history-order-item';
         
-        /*let startLocationInfo = '';
+        let startLocationInfo = '';
         // Добавляем информацию о стартовой точке заказа, если она отличается от стартовой точки маршрута
         if (order.startLocation && order.startLocation.address && 
             (!route.startLocation || order.startLocation.address !== route.startLocation.address)) {
@@ -1626,7 +1626,7 @@ function createRouteElement(route) {
                     <span>Старт: ${order.startLocation.address}</span>
                 </div>
             `;
-        }*/
+        }
         
         orderElement.innerHTML = `
             <div class="order-info">
