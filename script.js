@@ -653,7 +653,7 @@ async function calculateDistance(startCoords, endCoords, mapId = 'map') {
 
                     const distanceInKm = parseFloat(distance.text.replace(',', '.')) / (distance.text.includes('км') ? 1 : 1000);
                     
-                    resolve(distanceInKm.toFixed(1));
+                    resolve(parseFloat(distanceInKm.toFixed(1)));
                 }
             });
             
