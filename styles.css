@@ -119,10 +119,11 @@ body {
 .suggestions {
     list-style: none;
     background-color: var(--background-light);
-    border: 1px solid var(--accent-color);
-    border-radius: 0 0 5px 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 10px 10px;
     max-height: 150px;
     overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .suggestions li {
@@ -165,10 +166,11 @@ button {
 
 .order-item {
     background-color: var(--background-light);
-    border: 2px solid var(--accent-color);
-    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 13px;
     margin-bottom: 15px;
     padding: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
@@ -407,12 +409,15 @@ button {
 }
 
 .modal-content {
-    background-color: var(--background-light);
-    border: 2px solid var(--accent-color);
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    animation: modalAppear 0.3s ease;
+    background-color: var(--background-color);
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 13px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalAppear 0.3s ease-out;
+    position: relative;
 }
 
 @keyframes modalAppear {
@@ -771,18 +776,20 @@ h2 {
 }
 
 .menu-btn {
-    width: 100%;
-    padding: 15px 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    width: 100%;
+    padding: 15px;
     background: none;
     border: none;
     color: var(--text-color);
     font-size: 16px;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
 }
 
 .menu-btn:hover {
@@ -990,13 +997,15 @@ h2 {
 }
 
 .time-input-group input[type="time"] {
-    padding: 10px;
-    border: 2px solid var(--accent-color);
-    border-radius: 5px;
-    background-color: var(--background-color);
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--background-light);
     color: var(--text-color);
     font-size: 16px;
-    width: 100%;
+    margin-bottom: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
 }
 
 .time-input-group input[type="time"]::-webkit-calendar-picker-indicator {
