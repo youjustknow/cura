@@ -1171,93 +1171,36 @@ if (submitOrderBtn) {
     });
 }
 
-// Отображение списка заказов
-function renderOrderList() {
-    if (orderList) orderList.innerHTML = '';
-    if (executionOrderList) executionOrderList.innerHTML = '';
-
-    const listToRender = routeStartTime ? executionOrderList: orderList;
-
-    if (listToRender) {
-        orders.forEach(order => {
-            const orderElement = createOrderElement(order);
-            listToRender.appendChild(orderElement);
-        });
-
-        setupDragAndDrop();
-    }
-}
-
-// Создание элемента заказа
-function createOrderElement(order) {
-    const orderElement = document.createElement('div');
-    orderElement.className = 'order-item';
-    orderElement.setAttribute('data-id', order.id);
-
-    const header = document.createElement('div');
-    header.className = 'order-header';
-    header.innerHTML = '<span>Номер</span><span>Адрес</span><span>Вес</span>';
-
-    const data = document.createElement('div');
-    data.className = 'order-data';
-    data.innerHTML = `<span>${order.id}</span><span>${order.address}</span><span>${order.weight}</span>`;
-
-    const price = document.createElement('div');
-    price.className = 'order-price';
-    price.innerHTML = `<span>Цена</span><span>${order.price}р</span>`;
-
-    const distance = document.createElement('div');
-    distance.className = 'order-distance';
-    distance.innerHTML = `<span>Расстояние</span><span>${order.distance} км</span>`;
-
-    orderElement.appendChild(header);
-    orderElement.appendChild(data);
-    orderElement.appendChild(price);
-    orderElement.appendChild(distance);
-
-    // Добавляем кнопки редактирования и удаления только если маршрут не начат
-    if (!routeStartTime) {
-        const actions = document.createElement('div');
-        actions.className = 'order-actions';
-
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Редактировать';
-        editBtn.addEventListener('click', () => {
-            // Реализация редактирования заказа
-            clientAddressInput.value = order.address;
-            orderWeightInput.value = order.weight;
-            if (highPriceDeliveryCheckbox) highPriceDeliveryCheckbox.checked = order.isHighPriceDelivery;
-
-            orderId = order.id;
-
-            // Удаляем текущий заказ, после редактирования будет создан новый
-            //orders = orders.filter(o => o.id !== order.id);
-
-            showScreen('orderForm');
-        });
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Удалить';
-        deleteBtn.addEventListener('click',
-            () => {
-                orders = orders.filter(o => o.id !== order.id);
-                recalculateOrderPrices();
-                renderOrderList();
-                saveUnfinishedOrders(); // Сохраняем заказы после удаления
-            });
-
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        orderElement.appendChild(actions);
-    }
-
-    return orderElement;
+// Обработчик отмены заполнения формы заказа
+const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+if (cancelOrderBtn) {
+    cancelOrderBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Вы действительно хотите отменить заполнение заказа?');
+        if (confirmed) {
+            // Сбрасываем значения полей формы
+            clientAddressInput.value = '';
+            orderWeightInput.value = '';
+            if (highPriceDeliveryCheckbox) highPriceDeliveryCheckbox.checked = false;
+            
+            orderId = 0;
+            
+            // Возвращаемся к предыдущему экрану
+            if (orders.length > 0) {
+                showScreen('orderList');
+            } else {
+                showScreen('initial');
+            }
+        }
+    });
 }
 
 // Обработчик начала маршрута
 if (startRouteBtn) {
     startRouteBtn.addEventListener('click', async () => {
         if (orders.length > 0) {
+            const confirmed = await showConfirm('Вы действительно хотите начать маршрут?');
+            if (!confirmed) return;
+            
             const loader = showLoadingIndicator();
             
             setTimeout(() => {
@@ -1283,6 +1226,9 @@ if (startRouteBtn) {
 if (finishRouteBtn) {
     finishRouteBtn.addEventListener('click', async () => {
         if (routeStartTime) {
+            const confirmed = await showConfirm('Вы действительно хотите завершить маршрут?');
+            if (!confirmed) return;
+            
             const loader = showLoadingIndicator();
             
             setTimeout(() => {
@@ -3229,4 +3175,92 @@ function closeOtherSections(currentHeader) {
             toggle.classList.add('rotate');
         }
     });
+}
+
+// Отображение списка заказов
+function renderOrderList() {
+    if (orderList) orderList.innerHTML = '';
+    if (executionOrderList) executionOrderList.innerHTML = '';
+
+    // Если нет заказов и не в режиме выполнения маршрута, показываем начальный экран
+    if (orders.length === 0 && !routeStartTime) {
+        showScreen('initial');
+        return;
+    }
+
+    const listToRender = routeStartTime ? executionOrderList : orderList;
+
+    if (listToRender) {
+        orders.forEach(order => {
+            const orderElement = createOrderElement(order);
+            listToRender.appendChild(orderElement);
+        });
+
+        setupDragAndDrop();
+    }
+}
+
+// Создание элемента заказа
+function createOrderElement(order) {
+    const orderElement = document.createElement('div');
+    orderElement.className = 'order-item';
+    orderElement.setAttribute('data-id', order.id);
+
+    const header = document.createElement('div');
+    header.className = 'order-header';
+    header.innerHTML = '<span>Номер</span><span>Адрес</span><span>Вес</span>';
+
+    const data = document.createElement('div');
+    data.className = 'order-data';
+    data.innerHTML = `<span>${order.id}</span><span>${order.address}</span><span>${order.weight}</span>`;
+
+    const price = document.createElement('div');
+    price.className = 'order-price';
+    price.innerHTML = `<span>Цена</span><span>${order.price}р</span>`;
+
+    const distance = document.createElement('div');
+    distance.className = 'order-distance';
+    distance.innerHTML = `<span>Расстояние</span><span>${order.distance} км</span>`;
+
+    orderElement.appendChild(header);
+    orderElement.appendChild(data);
+    orderElement.appendChild(price);
+    orderElement.appendChild(distance);
+
+    // Добавляем кнопки редактирования и удаления только если маршрут не начат
+    if (!routeStartTime) {
+        const actions = document.createElement('div');
+        actions.className = 'order-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Редактировать';
+        editBtn.addEventListener('click', () => {
+            // Реализация редактирования заказа
+            clientAddressInput.value = order.address;
+            orderWeightInput.value = order.weight;
+            if (highPriceDeliveryCheckbox) highPriceDeliveryCheckbox.checked = order.isHighPriceDelivery;
+            
+            orderId = order.id;
+            
+            showScreen('orderForm');
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Удалить';
+        deleteBtn.addEventListener('click', async () => {
+            const confirmed = await showConfirm('Вы действительно хотите удалить этот заказ?');
+            if (confirmed) {
+                orders = orders.filter(o => o.id !== order.id);
+                recalculateOrderPrices();
+                renderOrderList();
+                saveUnfinishedOrders(); // Сохраняем заказы после удаления
+            }
+        });
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+        orderElement.appendChild(actions);
+    }
+
+    return orderElement;
 }
