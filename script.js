@@ -1872,19 +1872,29 @@ function updateStatistics() {
 function renderEarningsChart(dailyEarnings) {
     const ctx = document.getElementById('earningsChart').getContext('2d');
     
-    // Создаем массив последовательных дат за последние 7 дней
+    // Создаем массив последовательных дат
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня
+    today.setHours(0, 0, 0, 0);
     
-    const last30Days = [];
-    for (let i = 30; i >= 0; i--) {
+    const last31Days = [];
+    const dateFormats = [];
+    
+    for (let i = 31; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(today.getDate() - i);
-        last30Days.push(date.toLocaleDateString());
+        
+        // Сохраняем полный объект Date вместо строки
+        last31Days.push(date);
+        
+        // Для совместимости сохраним также строковое представление
+        dateFormats.push(date.toLocaleDateString());
     }
     
-    // Получаем доходы для каждого дня (0, если нет доходов)
-    const earnings = last30Days.map(dateStr => dailyEarnings[dateStr] || 0);
+    // Получаем доходы для каждого дня (используем строковое представление для поиска в dailyEarnings)
+    const earnings = last31Days.map(date => {
+        const dateStr = date.toLocaleDateString();
+        return dailyEarnings[dateStr] || 0;
+    });
 
     // Уничтожаем предыдущий график, если он существует
     if (window.earningsChart instanceof Chart) {
@@ -1894,31 +1904,69 @@ function renderEarningsChart(dailyEarnings) {
     // Дни недели на русском
     const weekdayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
+    // Регистрируем плагин zoom (если он еще не зарегистрирован)
+    if (Chart.registry.plugins.get('zoom') === undefined && window.ChartZoom) {
+        Chart.register(window.ChartZoom.default);
+    }
+    
+    // Создаем упрощенные метки для дат
+    const labels = last31Days.map(date => {
+        // Получаем число, день недели и месяц
+        const day = date.getDate();
+        const weekday = weekdayNames[date.getDay()];
+        
+        // Добавляем месяц только для 1-го числа и для первой метки
+        const isFirstDayOfMonth = day === 1;
+        const isFirstLabel = date === last31Days[0];
+        
+        // Отображаем только число без дня недели
+        let label = `${day}`;
+        
+        // Если это первый день месяца или первая метка, добавляем сокращенное название месяца
+        if (isFirstDayOfMonth || isFirstLabel) {
+            const month = date.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '');
+            label = `${day}, ${month}`;
+        }
+        
+        return label;
+    });
+
     window.earningsChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: last30Days.map(dateStr => {
-                const date = new Date(dateStr);
-                const isValidDate = !isNaN(date.getTime());
-                
-                // Форматируем дату только если она корректная
-                let formattedDate = dateStr; // Используем исходную строку, если дата некорректная
-                
-                if (isValidDate) {
-                    const dayOfWeek = weekdayNames[date.getDay()];
-                    const formattedDay = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-                    formattedDate = dayOfWeek + '\n' + formattedDay;
-                }
-                
-                return formattedDate;
-            }),
+            labels: labels,
             datasets: [{
                 label: 'Доход',
                 data: earnings,
-                backgroundColor: earnings.map(value => value > 0 ? '#ffd700' : 'rgba(255, 215, 0, 0.3)'),
-                borderColor: '#ffd700',
-                borderWidth: 1,
-                borderRadius: 4
+                backgroundColor: earnings.map((value, index) => {
+                    // Сегодняшний день выделяем особым цветом
+                    const isToday = last31Days[index].toDateString() === new Date().toDateString();
+                    
+                    if (isToday && value > 0) {
+                        return 'rgba(150, 255, 50, 1.0)'; // Яркий зеленый для сегодняшнего дня с доходом
+                    } else if (isToday) {
+                        return 'rgba(150, 255, 50, 0.3)'; // Полупрозрачный зеленый для сегодняшнего дня без дохода
+                    } else if (value > 0) {
+                        return 'rgba(120, 255, 0, 0.8)'; // Обычный зеленый для дней с доходом
+                    } else {
+                        return 'rgba(120, 255, 0, 0.15)'; // Полупрозрачный зеленый для дней без дохода
+                    }
+                }),
+                borderColor: earnings.map((value, index) => {
+                    // Сегодняшний день выделяем особым цветом границы
+                    const isToday = last31Days[index].toDateString() === new Date().toDateString();
+                    return isToday ? '#90ff20' : '#80ff00';
+                }),
+                borderWidth: earnings.map((value, index) => {
+                    // Увеличиваем толщину границы для дней с доходом
+                    return value > 0 ? 2 : 1;
+                }),
+                borderRadius: 3,
+                // Увеличиваем размеры столбцов
+                barPercentage: 0.9,
+                categoryPercentage: 0.9,
+                // Минимальная высота для столбцов
+                minBarLength: 2
             }]
         },
         options: {
@@ -1929,12 +1977,22 @@ function renderEarningsChart(dailyEarnings) {
                     display: false
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
                     callbacks: {
                         title: function(tooltipItems) {
-                            return tooltipItems[0].label.replace('\n', ' ');
+                            // Получаем дату напрямую из массива
+                            const date = last31Days[tooltipItems[0].dataIndex];
+                            // Форматируем дату в виде "Понедельник, 1 января"
+                            const day = date.getDate();
+                            const month = date.toLocaleDateString('ru-RU', { month: 'long' });
+                            const weekday = date.toLocaleDateString('ru-RU', { weekday: 'long' });
+                            return weekday.charAt(0).toUpperCase() + weekday.slice(1) + ', ' + day + ' ' + month;
                         },
                         label: function(context) {
                             const value = context.raw;
+                            // Показываем ноль как "Нет дохода"
                             return value > 0 ? `Доход: ${value}₽` : 'Нет дохода';
                         }
                     }
@@ -1942,19 +2000,23 @@ function renderEarningsChart(dailyEarnings) {
                 zoom: {
                     pan: {
                         enabled: true,
-                        mode: 'x'
-                    },
+                        mode: 'x',
+                        threshold: 5  // Порог для определения начала панорамирования
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: '#555'
+                        color: 'rgba(85, 85, 85, 0.3)'
                     },
                     ticks: {
                         color: '#ccc',
-                        callback: value => `${value}₽`
+                        callback: value => `${value}₽`,
+                        font: {
+                            size: 11
+                        }
                     }
                 },
                 x: {
@@ -1963,26 +2025,183 @@ function renderEarningsChart(dailyEarnings) {
                     },
                     ticks: {
                         color: '#ccc',
-                        padding: 5
-                    },
-                    // Устанавливаем количество видимых меток (7 дней)
-                    min: 0,
-                    max: 6,
-                    // Включаем прокрутку
-                    ticks: {
-                        autoSkip: false,
-                        color: '#ccc',
-                        padding: 5
+                        padding: 8,
+                        autoSkip: false, // Отключаем автоматический пропуск для 7 дней
+                        maxRotation: 0,
+                        minRotation: 0,
+                        maxTicksLimit: 7, // Соответствует новому количеству видимых дней
+                        font: {
+                            size: 11, // Увеличиваем размер для лучшей читаемости
+                            weight: 'bold' // Делаем шрифт дат полужирным для лучшей читаемости
+                        }
                     }
+                }
+            },
+            // Настройка отзывчивости
+            animation: {
+                duration: 500
+            },
+            layout: {
+                padding: {
+                    left: 5,
+                    right: 5,
+                    top: 10,
+                    bottom: 5
+                }
+            },
+            // Изменение курсора при взаимодействии
+            onHover: (event, elements) => {
+                if (!event || !event.native) return;
+                
+                const canvas = event.native.target;
+                if (elements && elements.length > 0) {
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    canvas.style.cursor = 'grab';
                 }
             }
         }
     });
 
-    // После инициализации графика сделаем видимыми только последние 7 дней
-    if (last30Days.length > 7) {
-        earningsChart.options.scales.x.min = last30Days.length - 7;
-        earningsChart.options.scales.x.max = last30Days.length - 1;
+    // Добавляем кнопки навигации для мобильных устройств
+    const chartContainer = ctx.canvas.parentNode;
+    
+    // Удаляем старые элементы управления, если они существуют
+    const oldControls = document.getElementById('chart-controls');
+    if (oldControls) {
+        oldControls.remove();
+    }
+    
+    // Удаляем старую подсказку
+    const oldHint = document.getElementById('chart-scroll-hint');
+    if (oldHint) {
+        oldHint.remove();
+    }
+    
+    // Создаем новый контейнер для элементов управления
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'chart-controls';
+    controlsContainer.style.display = 'flex';
+    controlsContainer.style.justifyContent = 'center';
+    controlsContainer.style.margin = '10px 0';
+    controlsContainer.style.gap = '10px';
+    
+    // Кнопка "Влево"
+    const leftButton = document.createElement('button');
+    leftButton.textContent = '← Назад';
+    leftButton.title = 'Показать более ранние даты';
+    leftButton.style.padding = '5px 10px';
+    leftButton.style.background = '#555';
+    leftButton.style.border = 'none';
+    leftButton.style.borderRadius = '4px';
+    leftButton.style.color = '#fff';
+    leftButton.style.cursor = 'pointer';
+    leftButton.style.transition = 'background 0.2s';
+    
+    // Кнопка "Сегодня"
+    const todayButton = document.createElement('button');
+    todayButton.textContent = 'Сегодня';
+    todayButton.title = 'Перейти к текущей дате';
+    todayButton.style.padding = '5px 10px';
+    todayButton.style.background = '#666';
+    todayButton.style.border = 'none';
+    todayButton.style.borderRadius = '4px';
+    todayButton.style.color = '#fff';
+    todayButton.style.cursor = 'pointer';
+    todayButton.style.transition = 'background 0.2s';
+    
+    // Кнопка "Вправо"
+    const rightButton = document.createElement('button');
+    rightButton.textContent = 'Вперед →';
+    rightButton.title = 'Показать более поздние даты';
+    rightButton.style.padding = '5px 10px';
+    rightButton.style.background = '#555';
+    rightButton.style.border = 'none';
+    rightButton.style.borderRadius = '4px';
+    rightButton.style.color = '#fff';
+    rightButton.style.cursor = 'pointer';
+    rightButton.style.transition = 'background 0.2s';
+    
+    // Добавляем эффект при наведении на кнопки
+    leftButton.addEventListener('mouseover', () => {
+        leftButton.style.background = '#666';
+    });
+    leftButton.addEventListener('mouseout', () => {
+        leftButton.style.background = '#555';
+    });
+    
+    todayButton.addEventListener('mouseover', () => {
+        todayButton.style.background = '#777';
+    });
+    todayButton.addEventListener('mouseout', () => {
+        todayButton.style.background = '#666';
+    });
+    
+    rightButton.addEventListener('mouseover', () => {
+        rightButton.style.background = '#666';
+    });
+    rightButton.addEventListener('mouseout', () => {
+        rightButton.style.background = '#555';
+    });
+    
+    // Добавляем обработчики на кнопки
+    leftButton.addEventListener('click', () => {
+        const chart = window.earningsChart;
+        if (chart && chart.options.scales.x.min > 0) {
+            // Смещаем видимую область на 7 дней назад
+            const newMin = Math.max(0, chart.options.scales.x.min - 7);
+            const newMax = newMin + Math.min(7, last31Days.length - newMin - 1);
+            chart.options.scales.x.min = newMin;
+            chart.options.scales.x.max = newMax;
+            chart.update();
+        }
+    });
+    
+    rightButton.addEventListener('click', () => {
+        const chart = window.earningsChart;
+        if (chart && chart.options.scales.x.max < last31Days.length - 1) {
+            // Смещаем видимую область на 7 дней вперед
+            const newMax = Math.min(last31Days.length - 1, chart.options.scales.x.max + 7);
+            const newMin = Math.max(0, newMax - 7);
+            chart.options.scales.x.min = newMin;
+            chart.options.scales.x.max = newMax;
+            chart.update();
+        }
+    });
+    
+    // Обработчик для кнопки "Сегодня"
+    todayButton.addEventListener('click', () => {
+        const chart = window.earningsChart;
+        if (chart) {
+            // Показываем последние 7 дней, включая текущий
+            chart.options.scales.x.min = last31Days.length - 7;
+            chart.options.scales.x.max = last31Days.length - 1;
+            chart.update();
+        }
+    });
+    
+    // Подсказка о способах прокрутки
+    const scrollHint = document.createElement('div');
+    scrollHint.id = 'chart-scroll-hint';
+    scrollHint.textContent = 'Прокручивайте график перетаскиванием или колесом мыши';
+    scrollHint.style.textAlign = 'center';
+    scrollHint.style.fontSize = '12px';
+    scrollHint.style.color = '#aaa';
+    scrollHint.style.marginTop = '5px';
+    
+    // Добавляем кнопки и подсказку на страницу
+    controlsContainer.appendChild(leftButton);
+    controlsContainer.appendChild(todayButton);
+    controlsContainer.appendChild(rightButton);
+    
+    // Сначала добавляем подсказку, затем кнопки для лучшего визуального порядка
+    chartContainer.parentNode.insertBefore(scrollHint, chartContainer.nextSibling);
+    chartContainer.parentNode.insertBefore(controlsContainer, scrollHint.nextSibling);
+    
+    // Устанавливаем начальное отображение - последние 7 дней 
+    if (last31Days.length > 7) {
+        earningsChart.options.scales.x.min = last31Days.length - 7;
+        earningsChart.options.scales.x.max = last31Days.length - 1;
         earningsChart.update();
     }
 }
