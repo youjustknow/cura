@@ -176,7 +176,6 @@ button {
     margin-bottom: 70px;
     overflow-y: scroll;
     margin-top: 20px;
-    padding-bottom: 80px;
 }
 
 .order-item {
@@ -1180,7 +1179,7 @@ h2 {
 
 /* Настройка карты, чтобы она не уходила под нижнюю панель */
 #map, #map-orders {
-    margin-bottom: 80px;
+    margin-bottom: 20px;
 }
 
 /* Добавляем отступ для списка заказов на экране выполнения маршрута */
