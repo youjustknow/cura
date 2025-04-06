@@ -51,6 +51,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    padding-bottom: 130px;
 }
 
 .reset-button {
@@ -63,23 +64,36 @@ body {
     border-radius: 5px;
 }
 
-/* Кнопка добавления заказа */
+/* Кнопка добавления заказа - общие стили */
 .add-order-button {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: linear-gradient(to bottom right, var(--accent-color), var(--primary-color));
     border: 2px solid var(--accent-color);
-    font-size: 24px;
+    font-size: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    transform: none;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+}
+
+/* Специфичные стили для кнопки на начальном экране */
+#initialScreen .add-order-button {
+    width: 60px;
+    height: 60px;
+    position: fixed;
+    bottom: 80px;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
 }
 
 .plus-icon {
@@ -162,6 +176,7 @@ button {
     margin-bottom: 70px;
     overflow-y: scroll;
     margin-top: 20px;
+    padding-bottom: 80px;
 }
 
 .order-item {
@@ -215,10 +230,11 @@ button {
     padding: 15px;
     background-color: var(--primary-color);
     font-size: 18px;
-    position: absolute;
-    bottom: 0;
+    position: fixed;
+    bottom: 60px;
     left: 0;
     border-radius: 0;
+    z-index: 999;
 }
 
 .action-button:hover {
@@ -234,6 +250,7 @@ button {
     width: 90%;
     margin: 0 auto;
     margin-top: 20px;
+    margin-bottom: 80px;
     text-align: center;
 }
 
@@ -250,8 +267,14 @@ button {
 }
 
 #okBtn {
-    margin-top: 20px;
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    border-radius: 0;
 }
+
 .secondary-button {
     background-color: var(--background-lighter);
     color: var(--text-color);
@@ -275,6 +298,7 @@ button {
     display: flex;
     justify-content: space-between;
 }
+
 /* Стили для экрана истории */
 .history-button {
     position: absolute;
@@ -291,6 +315,7 @@ button {
     margin-top: 20px;
     overflow-y: auto;
     max-height: calc(100vh - 150px);
+    padding-bottom: 100px;
 }
 
 .date-group {
@@ -336,6 +361,7 @@ button {
 
 .routes-container {
     padding: 10px;
+    padding-bottom: 80px;
 }
 
 .routes-container.hidden {
@@ -401,7 +427,7 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .modal.hidden {
@@ -418,6 +444,8 @@ button {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     animation: modalAppear 0.3s ease-out;
     position: relative;
+    margin-bottom: 80px;
+    max-height: calc(100vh - 160px);
 }
 
 @keyframes modalAppear {
@@ -512,6 +540,8 @@ button {
     max-width: 600px;
     width: 100%;
     overflow-y: scroll;
+    margin-bottom: 80px;
+    max-height: calc(100vh - 200px);
 }
 
 #settingsScreen {
@@ -578,6 +608,11 @@ h2 {
 #saveSettingsBtn {
     width: 100%;
     padding: 15px;
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    border-radius: 0;
+    z-index: 999;
 }
 
 #backFromSettingsBtn {
@@ -663,158 +698,75 @@ h2 {
 
 /* Стили для бокового меню */
 .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    background-color: var(--background-color);
-    transform: translateX(-250px);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    display: none;
 }
 
 .sidebar.open {
-    transform: translateX(0);
+    display: none;
 }
 
-/* Добавляем затемнение */
+/* Скрываем оверлей */
 .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: 999;
+    display: none;
 }
 
 .sidebar-overlay.active {
-    opacity: 1;
-    visibility: visible;
+    display: none;
 }
 
+/* Скрываем кнопку меню */
 .menu-toggle {
+    display: none;
+}
+
+/* Стили для нижней панели навигации */
+.bottom-navbar {
     position: fixed;
-    top: 20px;
+    bottom: 0;
     left: 0;
-    width: 40px;
-    height: 40px;
-    background-color: var(--background-light);
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
+    width: 100%;
+    height: 60px;
+    background-color: var(--background-color);
     display: flex;
-    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--background-lighter);
+}
+
+.nav-btn {
+    display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    padding: 8px;
-    z-index: 1001;
-    transition: left 0.3s ease;
-}
-
-.sidebar.open + .menu-toggle,
-.sidebar.open .menu-toggle {
-    left: 250px;
-}
-
-.menu-toggle span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background-color: var(--accent-color);
-    transition: all 0.3s ease;
-}
-
-.sidebar.open .menu-toggle span:nth-child(1),
-.sidebar.open + .menu-toggle span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-}
-
-.sidebar.open .menu-toggle span:nth-child(2),
-.sidebar.open + .menu-toggle span:nth-child(2) {
-    opacity: 0;
-}
-
-.sidebar.open .menu-toggle span:nth-child(3),
-.sidebar.open + .menu-toggle span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-}
-
-.menu {
+    width: 20%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    padding: 0;
 }
 
-.menu-header {
-    padding: 0 20px 20px;
-    border-bottom: 2px solid var(--background-light);
-}
-
-.menu-header h2 {
-    color: var(--accent-color);
-    margin: 0;
+.nav-btn .material-icons {
     font-size: 24px;
 }
 
-.menu-items {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: scroll;
+.nav-btn.active {
+    color: var(--accent-color);
 }
 
-.menu-items li {
-    padding: 0;
-    margin: 0;
+/* Адаптируем остальные элементы под нижнюю навигацию */
+.screen {
+    padding-bottom: 130px;
 }
 
-.menu-btn {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 15px;
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-size: 16px;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    border-radius: 10px;
-    margin-bottom: 5px;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+/* Корректируем положение кнопки добавления */
+.add-order-button {
+    bottom: 80px;
 }
 
-.menu-btn:hover {
-    background-color: var(--background-light);
-}
-
-.menu-btn.active {
-    background-color: var(--primary-color);
-    color: var(--background-color);
-}
-
-.menu-btn.danger {
-    color: var(--danger-color);
-}
-
-.menu-btn.danger:hover {
-    background-color: var(--danger-color);
-    color: var(--text-color);
-}
-
-.material-icons {
-    font-size: 20px;
-}
-
-/* Добавляем стили для иконок Material Icons */
+/* Стили для иконок Material Icons */
 @font-face {
     font-family: 'Material Icons';
     font-style: normal;
@@ -915,6 +867,7 @@ h2 {
 .shift-routes {
     padding: 15px;
     background-color: var(--background-darkest);
+    padding-bottom: 80px;
 }
 
 .hidden {
@@ -1018,7 +971,9 @@ h2 {
     max-width: 1200px;
     margin-top: 20px;
     overflow-y: auto;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 160px);
+    margin-bottom: 80px;
+    padding-bottom: 80px;
 }
 
 .stats-section {
@@ -1064,7 +1019,7 @@ h2 {
     border-top: 1px solid var(--border-color);
     transition: all 0.3s ease-out;
     overflow: hidden;
-    max-height: 2000px; /* Достаточно большое значение для любого содержимого */
+    max-height: 2000px;
 }
 
 .stats-section-content.hidden {
@@ -1224,4 +1179,98 @@ h2 {
 
 .data-control-buttons .material-icons {
     font-size: 20px;
+}
+
+/* Настройка карты, чтобы она не уходила под нижнюю панель */
+#map, #map-orders {
+    margin-bottom: 80px;
+}
+
+/* Добавляем отступ для списка заказов на экране выполнения маршрута */
+#executionOrderList {
+    margin-bottom: 80px;
+    padding-bottom: 60px;
+}
+
+/* Фиксируем кнопки начала и завершения маршрута */
+
+#finishRouteBtn {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    border-radius: 0;
+}
+
+/* Модальные окна должны быть над нижней панелью */
+.modal {
+    z-index: 2000;
+}
+
+/* Увеличиваем отступы для списков в истории */
+.history-list {
+    padding-bottom: 100px;
+}
+
+/* Исправление для окна завершения маршрута */
+#routeCompletionScreen .completion-container {
+    margin-bottom: 100px;
+}
+
+/* Убедимся, что кнопка добавления заказа выше нижней панели */
+.add-order-button {
+    z-index: 900;
+}
+
+/* Форма настроек нуждается в отступе снизу */
+#settingsScreen .settings-form {
+    margin-bottom: 0px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Исправляем стили для экрана статистики */
+#statsScreen .stats-container {
+    padding-bottom: 80px;
+}
+
+/* Обеспечиваем достаточный отступ для всех экранов с прокруткой */
+.screen {
+    padding-bottom: 0px;
+}
+
+/* Стилизуем кнопку начала маршрута как круглую кнопку */
+#startRouteBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom right, var(--success-color), var(--success-dark));
+    border: 2px solid var(--success-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    transform: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+    padding: 0;
+}
+
+#startRouteBtn .material-icons {
+    font-size: 20px;
+    color: var(--text-color);
+}
+
+/* Фиксируем кнопки начала и завершения маршрута */
+#finishRouteBtn {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    border-radius: 0;
 }

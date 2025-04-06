@@ -48,51 +48,23 @@
     <div class="sidebar-overlay"></div>
     
     <div class="app">
-        <!-- Боковое меню -->
-        <div class="sidebar">
-            <nav class="menu">
-                <div class="menu-header">
-                    <h2>Меню</h2>
-                </div>
-                <ul class="menu-items">
-                    <li>
-                        <button id="showMainBtn" class="menu-btn active">
-                            <span class="material-icons">home</span>
-                            Главная
-                        </button>
-                    </li>
-                    <li>
-                        <button id="showHistoryBtn" class="menu-btn">
-                            <span class="material-icons">history</span>
-                            История маршрутов
-                        </button>
-                    </li>
-                    <li>
-                        <button id="showShiftsHistoryBtn" class="menu-btn">
-                            <span class="material-icons">work_history</span>
-                            История смен
-                        </button>
-                    </li>
-                    <li>
-                        <button id="showStatsBtn" class="menu-btn">
-                            <span class="material-icons">analytics</span>
-                            Статистика
-                        </button>
-                    </li>
-                    <li>
-                        <button id="showSettingsBtn" class="menu-btn">
-                            <span class="material-icons">settings</span>
-                            Настройки
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <!-- Кнопка меню -->
-        <div class="menu-toggle">
-            <span></span>
-            <span></span>
-            <span></span>
+        <!-- Нижняя панель навигации вместо бокового меню -->
+        <div class="bottom-navbar">
+            <button id="showHistoryBtn" class="nav-btn">
+                <span class="material-icons">schedule</span>
+            </button>
+            <button id="showShiftsHistoryBtn" class="nav-btn">
+                <span class="material-icons">event_note</span>
+            </button>
+            <button id="showMainBtn" class="nav-btn active">
+                <span class="material-icons">home</span>
+            </button>
+            <button id="showStatsBtn" class="nav-btn">
+                <span class="material-icons">trending_up</span>
+            </button>
+            <button id="showSettingsBtn" class="nav-btn">
+                <span class="material-icons">tune</span>
+            </button>
         </div>
 
         <!-- Начальный экран с кнопкой добавления -->
@@ -149,8 +121,10 @@
             <button id="listAddOrderBtn" class="add-order-button">
                 <span class="plus-icon">+</span>
             </button>
-            <div id="map" style="width: 100%; height: 200px;"></div>
-            <button id="startRouteBtn" class="action-button">Начать</button>
+            <button id="startRouteBtn">
+                <span class="material-icons">play_arrow</span>
+            </button>
+            <div id="map" style="width: 100%; /*! height: 200px; */"></div>
         </div>
 
         <!-- Экран выполнения маршрута -->
@@ -495,8 +469,24 @@
         document.body.appendChild(scriptTag);
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.2.0/chartjs-plugin-zoom.min.js" integrity="sha512-FRGbE3pigbYamZnw4+uT4t63+QJOfg4MXSgzPn2t8AWg9ofmFvZ/0Z37ZpCawjfXLBSVX2p2CncsmUH2hzsgJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const showStatsBtn = document.getElementById('showStatsBtn');
+        if (showStatsBtn) {
+            showStatsBtn.addEventListener('click', () => {
+                setActiveMenuButton(showStatsBtn);
+                
+                // Показываем индикатор загрузки при обновлении статистики
+                const loader = showLoadingIndicator();
+                
+                // Используем setTimeout, чтобы дать браузеру время отрисовать индикатор загрузки
+                setTimeout(() => {
+                    updateStatistics();
+                    showScreen('statsScreen');
+                    hideLoadingIndicator(loader);
+                }, 100);
+            });
+        }
+    </script>
 
 </body>
 </html>

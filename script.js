@@ -250,10 +250,10 @@ console.log('Настройки загружены при старте:', settin
 
 // Элементы бокового меню
 const sidebar = document.querySelector('.sidebar');
-const menuToggle = document.querySelector('.menu-toggle');
-const menuButtons = document.querySelectorAll('.menu-btn');
-const showMainBtn = document.getElementById('showMainBtn');
 const sidebarOverlay = document.querySelector('.sidebar-overlay');
+const bottomNavbar = document.querySelector('.bottom-navbar');
+const navButtons = document.querySelectorAll('.nav-btn');
+const showMainBtn = document.getElementById('showMainBtn');
 
 // Кнопки
 const addOrderBtns = {
@@ -287,7 +287,7 @@ const totalIncomeElement = document.getElementById('totalIncome');
 
 // Функция для переключения активного состояния кнопок меню
 function setActiveMenuButton(activeButton) {
-    menuButtons.forEach(button => {
+    navButtons.forEach(button => {
         button.classList.remove('active');
     });
     if (activeButton) {
@@ -295,47 +295,18 @@ function setActiveMenuButton(activeButton) {
     }
 }
 
-// Функция для открытия/закрытия меню
-function toggleMenu() {
-    sidebar.classList.toggle('open');
-    sidebarOverlay.classList.toggle('active');
-}
-
 // Обработчик для переключения меню
-if (menuToggle) {
-    menuToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMenu();
-    });
-}
-
-// Обработчик клика по оверлею
-if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', () => {
-        toggleMenu();
-    });
-}
-
-// Обработчик клика по меню (предотвращаем закрытие при клике внутри)
-if (sidebar) {
-    sidebar.addEventListener('click', (e) => {
+if (bottomNavbar) {
+    bottomNavbar.addEventListener('click', (e) => {
         e.stopPropagation();
     });
 }
-
-// Обновляем обработчики кнопок меню
-menuButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        toggleMenu(); // Закрываем меню при клике на пункт
-    });
-});
 
 // Обновляем обработчик для кнопки "Главная"
 if (showMainBtn) {
     showMainBtn.addEventListener('click', () => {
         setActiveMenuButton(showMainBtn);
         showScreen('initial');
-        sidebar.classList.remove('open');
     });
 }
 
@@ -348,7 +319,6 @@ if (showHistoryBtn) {
         setTimeout(() => {
             renderRouteHistory();
             showScreen('routeHistory');
-            sidebar.classList.remove('open');
             hideLoadingIndicator(loader);
         }, 100);
     });
@@ -360,7 +330,6 @@ if (showSettingsBtn) {
         setActiveMenuButton(showSettingsBtn);
         updateSettingsForm();
         showScreen('settings');
-        sidebar.classList.remove('open');
     });
 }
 
@@ -950,7 +919,8 @@ function showAlert(message) {
 
     messageElement.textContent = message;
     modal.classList.remove('hidden');
-    sidebar.classList.remove('open'); // Закрываем боковое меню при показе модального окна
+    // Удаляем строку, вызывающую ошибку
+    // sidebar.classList.remove('open');
 
     return new Promise(resolve => {
         okButton.onclick = () => {
@@ -968,7 +938,8 @@ function showConfirm(message) {
 
     messageElement.textContent = message;
     modal.classList.remove('hidden');
-    sidebar.classList.remove('open'); // Закрываем боковое меню при показе модального окна
+    // Удаляем строку, вызывающую ошибку
+    // sidebar.classList.remove('open');
 
     return new Promise(resolve => {
         yesButton.onclick = () => {
@@ -1057,6 +1028,8 @@ function checkForUnfinishedRoute() {
             // Проверяем наличие незавершенных заказов
             if (!loadUnfinishedOrders()) {
                 showScreen('initial');
+                // Обновляем отображение кнопок добавления заказа
+                updateAddOrderButton('initial');
             }
         }
     });
@@ -1072,12 +1045,6 @@ if (submitOrderBtn) {
         if (address && weight > 0) {
             try {
                 const loader = showLoadingIndicator();
-                
-                if (!startLocation) {
-                    console.log('Начальная точка не установлена, используем случайные координаты');
-                    startLocation = [Math.random() * 10,
-                        Math.random() * 10];
-                }
 
                 // Геокодируем адрес клиента
                 console.log(`Геокодирование адреса клиента: ${address}`);
@@ -1089,7 +1056,9 @@ if (submitOrderBtn) {
                     return;
                 }
 
-                const lastOrder = orders.at(-1) ?? { coordinates: startLocation };
+                // Копируем существующие заказы перед обработкой нового
+                let currentOrders = [...orders];
+                const lastOrder = currentOrders.length > 0 ? currentOrders[currentOrders.length - 1] : { coordinates: startLocation };
 
                 // Рассчитываем расстояние
                 console.log('Расчет расстояния...');
@@ -1105,7 +1074,7 @@ if (submitOrderBtn) {
                 const price = calculatePrice(weight, distance, isHighPriceDelivery);
                 console.log(`Рассчитанная цена: ${price}р`);
 
-                const editedOrder = orders.find(o => o.id === orderId);
+                const editedOrder = currentOrders.find(o => o.id === orderId);
 
                 if (!editedOrder) {
                     // Создаем объект с информацией о стартовой точке для заказа
@@ -1132,24 +1101,32 @@ if (submitOrderBtn) {
                     };
 
                     console.log('Создан новый заказ:', order);
-                    orders.push(order);
+                    // Добавляем заказ к копии существующих заказов
+                    currentOrders.push(order);
                 } else {
-                    editedOrder.address = address;
-                    editedOrder.weight = weight;
-                    editedOrder.isHighPriceDelivery = isHighPriceDelivery;
-                    editedOrder.price = price;
-                    
-                    // Обновляем информацию о стартовой точке при редактировании заказа
-                    if (startLocationData) {
-                        editedOrder.startLocation = {
-                            address: startLocationData.address,
-                            coordinates: startLocationData.coordinates,
-                            timestamp: new Date().toISOString()
+                    // Находим индекс редактируемого заказа
+                    const editIndex = currentOrders.findIndex(o => o.id === orderId);
+                    if (editIndex !== -1) {
+                        // Обновляем существующий заказ
+                        currentOrders[editIndex] = {
+                            ...currentOrders[editIndex],
+                            address,
+                            weight,
+                            isHighPriceDelivery,
+                            price,
+                            // Обновляем информацию о стартовой точке при редактировании заказа
+                            startLocation: startLocationData ? {
+                                address: startLocationData.address,
+                                coordinates: startLocationData.coordinates,
+                                timestamp: new Date().toISOString()
+                            } : currentOrders[editIndex].startLocation
                         };
                     }
-
                     orderId = 0;
                 }
+                
+                // Обновляем основной массив заказов новой версией
+                orders = currentOrders;
                 
                 hideLoadingIndicator(loader);
                 renderOrderList();
@@ -1461,8 +1438,11 @@ function updateShiftControls() {
             // Активная смена
             startShiftBtn.classList.add('hidden');
             endShiftBtn.classList.remove('hidden');
-            addOrderBtn.classList.remove('hidden');
             shiftInfoBtn.classList.remove('hidden');
+            
+            // Обновляем отображение кнопки добавления в зависимости от текущего экрана
+            const currentScreen = getCurrentScreen();
+            updateAddOrderButton(currentScreen);
 
             // Обновляем информацию о смене
             updateShiftInfo();
@@ -1470,16 +1450,30 @@ function updateShiftControls() {
             // Завершенная смена
             startShiftBtn.classList.remove('hidden');
             endShiftBtn.classList.add('hidden');
-            addOrderBtn.classList.add('hidden');
             shiftInfoBtn.classList.add('hidden');
+            
+            // Скрываем кнопку добавления заказа
+            addOrderBtn.classList.add('hidden');
         }
     } else {
         // Нет смены
         startShiftBtn.classList.remove('hidden');
         endShiftBtn.classList.add('hidden');
-        addOrderBtn.classList.add('hidden');
         shiftInfoBtn.classList.add('hidden');
+        
+        // Скрываем кнопку добавления заказа
+        addOrderBtn.classList.add('hidden');
     }
+}
+
+// Функция для определения текущего экрана
+function getCurrentScreen() {
+    for (const [id, screen] of Object.entries(screens)) {
+        if (screen && !screen.classList.contains('hidden')) {
+            return id;
+        }
+    }
+    return 'initial'; // По умолчанию возвращаем начальный экран
 }
 
 // Функция отображения истории смен
@@ -1608,15 +1602,43 @@ function showScreen(screenId) {
         // Обновляем активную кнопку меню
         if (screenId === 'initial') {
             setActiveMenuButton(showMainBtn);
+            // Обновляем кнопку добавления заказа на начальном экране
+            updateAddOrderButton('initial');
         } else if (screenId === 'routeHistory') {
             setActiveMenuButton(showHistoryBtn);
         } else if (screenId === 'settings') {
             setActiveMenuButton(showSettingsBtn);
         } else if (screenId === 'shiftsHistory') {
             setActiveMenuButton(showShiftsHistoryBtn);
+        } else if (screenId === 'statsScreen') {
+            setActiveMenuButton(showStatsBtn);
+        } else if (screenId === 'orderList') {
+            // Отдельно обрабатываем экран списка заказов
+            updateAddOrderButton('orderList');
         } else {
             setActiveMenuButton(null);
         }
+    }
+}
+
+// Функция управления отображением кнопок добавления заказа
+function updateAddOrderButton(screenId) {
+    // Получаем все кнопки добавления заказа
+    const allAddButtons = document.querySelectorAll('.add-order-button');
+    
+    // Скрываем все кнопки
+    allAddButtons.forEach(btn => {
+        btn.classList.add('hidden');
+    });
+    
+    // Показываем нужную кнопку в зависимости от экрана
+    if (screenId === 'initial' && currentShift && !currentShift.endTime) {
+        // На начальном экране показываем кнопку, только если смена активна
+        addOrderBtn.classList.remove('hidden');
+    } else if (screenId === 'orderList') {
+        // На экране списка заказов показываем кнопку добавления
+        const listAddOrderBtn = document.getElementById('listAddOrderBtn');
+        if (listAddOrderBtn) listAddOrderBtn.classList.remove('hidden');
     }
 }
 
@@ -1638,19 +1660,16 @@ if (endShiftBtn) {
 if (showShiftsHistoryBtn) {
     showShiftsHistoryBtn.addEventListener('click', () => {
         setActiveMenuButton(showShiftsHistoryBtn);
-        
         const loader = showLoadingIndicator();
         setTimeout(() => {
             renderShiftsHistory();
             showScreen('shiftsHistory');
-            sidebar.classList.remove('open');
             hideLoadingIndicator(loader);
         }, 100);
     });
 }
 
-// Обработчик для кнопки статистики
-const showStatsBtn = document.getElementById('showStatsBtn');
+// Обновляем обработчик для кнопки "Статистика"
 if (showStatsBtn) {
     showStatsBtn.addEventListener('click', () => {
         setActiveMenuButton(showStatsBtn);
@@ -1662,7 +1681,6 @@ if (showStatsBtn) {
         setTimeout(() => {
             updateStatistics();
             showScreen('statsScreen');
-            sidebar.classList.remove('open');
             hideLoadingIndicator(loader);
         }, 100);
     });
@@ -3263,4 +3281,19 @@ function createOrderElement(order) {
     }
 
     return orderElement;
+}
+
+// Обработчик для кнопки добавления заказа на начальном экране
+if (addOrderBtn) {
+    addOrderBtn.addEventListener('click', () => {
+        showScreen('orderForm');
+    });
+}
+
+// Обработчик для кнопки добавления заказа на экране списка заказов
+const listAddOrderBtn = document.getElementById('listAddOrderBtn');
+if (listAddOrderBtn) {
+    listAddOrderBtn.addEventListener('click', () => {
+        showScreen('orderForm');
+    });
 }
