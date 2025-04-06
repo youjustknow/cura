@@ -90,7 +90,7 @@
                     <label for="startLocation">Начальная точка</label>
                     <input type="text" id="startLocation" autocomplete="off">
                     <ul id="startLocationSuggestions" class="suggestions hidden"></ul>
-                    <button id="setStartLocationBtn" class="secondary-button">Установить</button>
+                    <button id="setStartLocationBtn" class="secondary-button" style="margin-top: 10px;">Установить</button>
                     <div id="startLocationInfo" class="start-location-info hidden"></div>
                 </div>
                 <div class="form-group">
@@ -103,8 +103,8 @@
                     <input type="number" id="orderWeight" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label for="highPriceDelivery">Бонус полигона</label>
-                    <input type="checkbox" id="highPriceDelivery">
+                    <label for="highPriceDelivery"></label>
+                    <input type="checkbox" id="highPriceDelivery">Бонус полигона</input>
                 </div>
                 <div class="form-actions">
                     <button id="submitOrderBtn">Добавить</button>
@@ -140,12 +140,12 @@
             <div class="completion-container">
                 <div class="completion-details">
                     <div class="detail-row">
-                        <span>Время выполнения</span>
-                        <span id="executionTime"></span>
+                        <span style="color: var(--background-color);">Время выполнения</span>
+                        <span id="executionTime" style="color: var(--background-color);"></span>
                     </div>
                     <div class="detail-row">
-                        <span>Доход</span>
-                        <span id="totalIncome"></span>
+                        <span style="color: var(--background-color);">Доход</span>
+                        <span id="totalIncome" style="color: var(--background-color);"></span>
                     </div>
                 </div>
                 <button id="okBtn" class="action-button">ОК</button>
@@ -324,7 +324,7 @@
                     <label for="highPriceDeliveryRate">Повышенная оплата за выдачу заказа (₽)</label>
                     <input type="number" id="highPriceDeliveryRate" min="0">
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display: none;">
                     <label for="themeColor">Основной цвет приложения</label>
                     <div class="color-group">
                         <input type="color" id="themeColor">

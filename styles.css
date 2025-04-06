@@ -6,28 +6,28 @@
 }
 
 :root {
-    --primary-color: #ff8c00;
-    --primary-dark: #cc7000;
-    --primary-light: #ffa333;
-    --accent-color: #ffd700;
-    --background-color: #333;
-    --background-light: #444;
-    --background-lighter: #555;
-    --background-darkest: #383838;
-    --background-darker: #4a4a4a;
-    --border-color: #666;
+    --primary-color: #4A4A5C;     /* Темно-серый */
+    --primary-dark: #121615;      /* Почти черный (глубокий темный) */
+    --primary-light: #6d4d60;     /* Темно-фиолетовый */
+    --accent-color: #4b927e;      /* Темно-зеленый */
+    --deep-green: #3b7566;        /* Глубокий зеленый */
+    --background-color: var(--primary-dark);
+    --background-light: var(--primary-color);
+    --background-lighter: var(--primary-light);
+    --background-darker: var(--primary-dark);
+    --background-darkest: var(--primary-dark);
+    --border-color: var(--deep-green);
     --text-color: #fff;
-    --text-dark: #ddd;
+    --white-color: #fff;
     --text-muted: #ccc;
-    --text-faded: #888;
-    --danger-color: #ff5722;
-    --danger-dark: #d32f2f;
-    --success-color: #4caf50;
-    --success-dark: #45a049;
-    --info-color: #21B8F3;
-    --info-dark: #1976D2;
-    --warning-color: #FFC107;
-    --accent-light: #ffed4a;
+    --text-faded: #aaa;
+    --danger-color: var(--primary-light);
+    --danger-dark: var(--primary-dark);
+    --success-color: var(--accent-color);
+    --success-dark: var(--deep-green);
+    --info-color: var(--deep-green);
+    --info-dark: var(--primary-dark);
+    --warning-color: var(--primary-light);
 }
 
 body {
@@ -58,8 +58,8 @@ body {
     position: absolute;
     top: 20px;
     left: 20px;
-    background-color: var(--danger-color);
-    color: var(--text-color);
+    background-color: var(--primary-light);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -69,8 +69,8 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(to bottom right, var(--accent-color), var(--primary-color));
-    border: 2px solid var(--accent-color);
+    background-color: var(--accent-color);
+    border: 2px solid var(--deep-green);
     font-size: 20px;
     display: flex;
     justify-content: center;
@@ -103,9 +103,10 @@ body {
 /* Форма заказа */
 .order-form {
     width: 100%;
-    background-color: #333;
+    background-color: var(--border-color);
     padding: 20px;
     border-radius: 10px;
+    margin-top: 5%;
 }
 
 .form-group {
@@ -123,9 +124,9 @@ body {
 .form-group input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid var(--accent-color);
+    border: 2px solid var(--background-darkest);
     border-radius: 5px;
-    background-color: var(--background-light);
+    background-color: var(--accent-color);
     color: var(--text-color);
     font-size: 16px;
 }
@@ -179,7 +180,7 @@ button {
 }
 
 .order-item {
-    background-color: var(--background-light);
+    background-color: var(--accent-color);
     border: 1px solid var(--border-color);
     border-radius: 13px;
     margin-bottom: 15px;
@@ -227,7 +228,7 @@ button {
 .action-button {
     width: 100%;
     padding: 15px;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
     font-size: 18px;
     position: fixed;
     bottom: 60px;
@@ -242,8 +243,8 @@ button {
 
 /* Экран завершения */
 .completion-container {
-    background-color: var(--background-light);
-    border: 2px solid var(--accent-color);
+    background-color: var(--accent-color);
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     padding: 20px;
     width: 90%;
@@ -275,11 +276,13 @@ button {
 }
 
 .secondary-button {
-    background-color: var(--background-lighter);
-    color: var(--text-color);
-    padding: 5px 10px;
-    font-size: 14px;
-    margin-top: 5px;
+    background-color: var(--background-color);
+    color: var(--accent-color);
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 /* Модифицируем отображение заказа, чтобы включить информацию о расстоянии */
@@ -303,8 +306,8 @@ button {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: var(--background-lighter);
-    color: var(--text-color);
+    background-color: var(--primary-color);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -421,7 +424,7 @@ button {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(18, 22, 21, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -511,8 +514,8 @@ button {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: var(--danger-color);
-    color: var(--text-color);
+    background-color: var(--primary-light);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
     z-index: 10;
@@ -523,15 +526,15 @@ button {
     position: absolute;
     top: 20px;
     right: 120px;
-    background-color: var(--background-lighter);
-    color: var(--text-color);
+    background-color: var(--primary-color);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 /* Экран настроек */
 .settings-form {
-    background-color: var(--background-light);
+    background-color: var(--border-color);
     border-radius: 10px;
     padding: 20px;
     max-width: 600px;
@@ -629,29 +632,29 @@ h2 {
 }
 
 .history-button {
-    background-color: #555;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .settings-button {
-    background-color: #555;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .reset-button {
-    background-color: var(--danger-color);
-    color: white;
+    background-color: var(--primary-light);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .exit-button {
-    background-color: var(--danger-color);
-    color: white;
+    background-color: var(--primary-light);
+    color: var(--white-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -688,9 +691,9 @@ h2 {
 .start-location-info {
     margin-top: 10px;
     padding: 10px;
-    background-color: #555;
+    background-color: var(--accent-color);
     border-radius: 5px;
-    color: var(--accent-color);
+    color: var(--text-faded);
 }
 
 /* Стили для бокового меню */
@@ -801,7 +804,7 @@ h2 {
 .shift-button {
     padding: 15px 30px;
     font-size: 18px;
-    background: linear-gradient(to bottom right, var(--success-color), var(--success-dark));
+    background-color: var(--accent-color);
     color: var(--text-color);
     border: none;
     border-radius: 5px;
@@ -816,7 +819,7 @@ h2 {
 }
 
 #endShiftBtn {
-    background: linear-gradient(to bottom right, var(--danger-color), var(--danger-dark));
+    background-color: var(--primary-light);
 }
 
 /* Стили для истории смен */
@@ -875,7 +878,7 @@ h2 {
 .shift-info-button {
     padding: 15px 30px;
     font-size: 18px;
-    background: linear-gradient(to bottom right, var(--info-color), var(--info-dark));
+    background-color: var(--deep-green);
     color: var(--text-color);
     border: none;
     border-radius: 5px;
@@ -909,7 +912,6 @@ h2 {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: var(--background-lighter);
     border-radius: 5px;
 }
 
@@ -925,7 +927,7 @@ h2 {
 }
 
 #predictedIncome {
-    color: var(--info-color);
+    color: var(--background-light);
 }
 
 /* Стили для выбора времени смены */
@@ -973,7 +975,7 @@ h2 {
 }
 
 .stats-section {
-    background-color: var(--background-light);
+    background-color: var(--accent-color);
     border-radius: 10px;
     padding: 0;
     margin-bottom: 20px;
@@ -987,6 +989,7 @@ h2 {
     padding: 20px;
     cursor: pointer;
     background-color: var(--background-darker);
+    border-bottom: 3px solid var(--border-color);
     transition: background-color 0.2s ease;
 }
 
@@ -1012,7 +1015,6 @@ h2 {
 
 .stats-section-content {
     padding: 20px;
-    border-top: 1px solid var(--border-color);
     transition: all 0.3s ease-out;
     overflow: hidden;
     max-height: 2000px;
@@ -1032,7 +1034,7 @@ h2 {
 }
 
 .stats-item {
-    background-color: var(--background-lighter);
+    background-color: var(--border-color);
     padding: 15px;
     border-radius: 8px;
     display: flex;
@@ -1054,7 +1056,7 @@ h2 {
 .stats-chart {
     width: 100%;
     height: 300px;
-    background-color: var(--background-lighter);
+    background-color: var(--border-color);
     border-radius: 8px;
     position: relative;
     padding: 15px;
@@ -1236,8 +1238,8 @@ h2 {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(to bottom right, var(--success-color), var(--success-dark));
-    border: 2px solid var(--success-color);
+    background-color: var(--accent-color);
+    border: 2px solid var(--deep-green);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1253,7 +1255,7 @@ h2 {
 
 #startRouteBtn .material-icons {
     font-size: 20px;
-    color: var(--text-color);
+    color: var(--background-color);
 }
 
 /* Фиксируем кнопки начала и завершения маршрута */

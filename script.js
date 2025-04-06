@@ -227,7 +227,7 @@ const defaultSettings = {
     pickupRate: 63,
     deliveryRate: 86,
     highPriceDeliveryRate: 110,
-    themeColor: '#ff8c00'
+    themeColor: '#4A4A5C' // Темно-серый из новой палитры
 };
 
 // Текущие настройки
@@ -437,6 +437,10 @@ function loadSettings() {
     if (savedSettings) {
         try {
             const parsed = JSON.parse(savedSettings);
+            // Удаляем themeColor из сохраненных настроек, чтобы всегда использовать статическую палитру
+            if (parsed.themeColor) {
+                delete parsed.themeColor;
+            }
             settings = { ...defaultSettings, ...parsed };
             console.log('Загружены настройки:', settings);
         } catch (error) {
@@ -447,11 +451,9 @@ function loadSettings() {
     updateSettingsForm();
     applyDefaultStartLocation();
     
-    // Применение цветовой палитры
-    if (settings.themeColor) {
-        const palette = generateColorPalette(settings.themeColor);
-        applyColorPalette(palette);
-    }
+    // Применение статической цветовой палитры
+    const palette = generateColorPalette();
+    applyColorPalette(palette);
 }
 
 // Функция сохранения настроек
@@ -464,14 +466,15 @@ function saveSettings() {
         pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
         deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
         highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate,
-        themeColor: document.getElementById('themeColor').value || defaultSettings.themeColor
+        // Игнорируем значение из поля ввода, всегда используем статическую палитру
+        themeColor: '#4A4A5C'
     };
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Настройки сохранены:', settings);
     
-    // Применение новой цветовой палитры
-    const palette = generateColorPalette(settings.themeColor);
+    // Применение статической цветовой палитры
+    const palette = generateColorPalette();
     applyColorPalette(palette);
 }
 
@@ -2640,66 +2643,13 @@ function clearUnfinishedOrders() {
 }
 
 // Функции для генерации и применения цветовой палитры
-function generateColorPalette(primaryColor) {
-    // Конвертировать HEX в RGB
-    const hexToRgb = (hex) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : null;
-    };
-
-    // Конвертировать RGB в HEX
-    const rgbToHex = (r, g, b) => {
-        return '#' + [r, g, b].map(x => {
-            const hex = Math.min(255, Math.max(0, Math.round(x))).toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        }).join('');
-    };
-
-    // Затемнение цвета
-    const darken = (hex, amount) => {
-        const rgb = hexToRgb(hex);
-        const darkenColor = {
-            r: rgb.r * (1 - amount),
-            g: rgb.g * (1 - amount),
-            b: rgb.b * (1 - amount)
-        };
-        return rgbToHex(darkenColor.r, darkenColor.g, darkenColor.b);
-    };
-
-    // Осветление цвета
-    const lighten = (hex, amount) => {
-        const rgb = hexToRgb(hex);
-        const lightenColor = {
-            r: rgb.r + (255 - rgb.r) * amount,
-            g: rgb.g + (255 - rgb.g) * amount,
-            b: rgb.b + (255 - rgb.b) * amount
-        };
-        return rgbToHex(lightenColor.r, lightenColor.g, lightenColor.b);
-    };
-
-    // Получение дополнительного (акцент) цвета
-    const getAccentColor = (hex) => {
-        const rgb = hexToRgb(hex);
-        
-        // Создание золотистого акцента на основе основного цвета
-        let accentRgb = {
-            r: Math.min(255, rgb.r * 1.3),
-            g: Math.min(255, rgb.g * 1.2),
-            b: Math.max(0, rgb.b * 0.7)
-        };
-        
-        return rgbToHex(accentRgb.r, accentRgb.g, accentRgb.b);
-    };
-
+function generateColorPalette() {
+    // Статическая палитра с новыми цветами
     return {
-        primary: primaryColor,
-        primaryDark: darken(primaryColor, 0.2),
-        primaryLight: lighten(primaryColor, 0.2),
-        accent: getAccentColor(primaryColor)
+        primary: '#4A4A5C',       // Темно-серый
+        primaryDark: '#121615',   // Почти черный (глубокий темный)
+        primaryLight: '#3A3036',  // Темно-фиолетовый
+        accent: '#2F5D50'         // Темно-зеленый
     };
 }
 
@@ -2708,6 +2658,7 @@ function applyColorPalette(palette) {
     document.documentElement.style.setProperty('--primary-dark', palette.primaryDark);
     document.documentElement.style.setProperty('--primary-light', palette.primaryLight);
     document.documentElement.style.setProperty('--accent-color', palette.accent);
+    document.documentElement.style.setProperty('--deep-green', '#1D3B33'); // Глубокий зеленый
     
     // Обновляем тег meta theme-color для поддержки мобильных устройств
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -2716,27 +2667,24 @@ function applyColorPalette(palette) {
     }
 }
     
-    // Обработчик изменения цвета темы
-    const themeColorInput = document.getElementById('themeColor');
-    if (themeColorInput) {
-        // Инициализация превью цветовой палитры при загрузке
-        const initialPalette = generateColorPalette(settings.themeColor);
-        document.querySelector('.primary-color-sample').style.backgroundColor = initialPalette.primary;
-        document.querySelector('.primary-dark-sample').style.backgroundColor = initialPalette.primaryDark;
-        document.querySelector('.primary-light-sample').style.backgroundColor = initialPalette.primaryLight;
-        document.querySelector('.accent-color-sample').style.backgroundColor = initialPalette.accent;
-
-        themeColorInput.addEventListener('input', function() {
-            const color = this.value;
-            const palette = generateColorPalette(color);
-            
-            // Обновляем превью
-            document.querySelector('.primary-color-sample').style.backgroundColor = palette.primary;
-            document.querySelector('.primary-dark-sample').style.backgroundColor = palette.primaryDark;
-            document.querySelector('.primary-light-sample').style.backgroundColor = palette.primaryLight;
-            document.querySelector('.accent-color-sample').style.backgroundColor = palette.accent;
-        });
-    }
+// Обработчик изменения цвета темы
+const themeColorInput = document.getElementById('themeColor');
+if (themeColorInput) {
+    // Убираем возможность выбора цвета и обработчики событий
+    themeColorInput.disabled = true;
+    themeColorInput.style.opacity = '0.5';
+    themeColorInput.value = '#4A4A5C';
+    
+    // Инициализация превью цветовой палитры при загрузке
+    const initialPalette = generateColorPalette();
+    document.querySelector('.primary-color-sample').style.backgroundColor = initialPalette.primary;
+    document.querySelector('.primary-dark-sample').style.backgroundColor = initialPalette.primaryDark;
+    document.querySelector('.primary-light-sample').style.backgroundColor = initialPalette.primaryLight;
+    document.querySelector('.accent-color-sample').style.backgroundColor = initialPalette.accent;
+    
+    // Удаляем все обработчики событий с themeColorInput
+    themeColorInput.replaceWith(themeColorInput.cloneNode(true));
+}
 
 // Функция для получения всех стартовых точек из localStorage за последние 30 дней
 function getStartLocationsFromStorage() {
@@ -3174,9 +3122,10 @@ function createDeliveryZoneSection() {
             width: 100%;
             padding: 8px 12px;
             border-radius: 4px;
-            background-color: #333;
+            background-color: var(--border-color);
             color: #fff;
             border: 1px solid #555;
+            border: 1px solid var(--background-color);
         }
         .checkbox-container {
             display: flex;
