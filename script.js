@@ -2088,7 +2088,7 @@ function renderEarningsChart(dailyEarnings) {
     
     // Кнопка "Влево"
     const leftButton = document.createElement('button');
-    leftButton.textContent = '← Назад';
+    leftButton.textContent = '←';
     leftButton.title = 'Показать более ранние даты';
     leftButton.style.padding = '5px 10px';
     leftButton.style.background = '#555';
@@ -2112,7 +2112,7 @@ function renderEarningsChart(dailyEarnings) {
     
     // Кнопка "Вправо"
     const rightButton = document.createElement('button');
-    rightButton.textContent = 'Вперед →';
+    rightButton.textContent = '→';
     rightButton.title = 'Показать более поздние даты';
     rightButton.style.padding = '5px 10px';
     rightButton.style.background = '#555';
@@ -2150,7 +2150,7 @@ function renderEarningsChart(dailyEarnings) {
         if (chart && chart.options.scales.x.min > 0) {
             // Смещаем видимую область на 7 дней назад
             const newMin = Math.max(0, chart.options.scales.x.min - 7);
-            const newMax = newMin + Math.min(7, last31Days.length - newMin - 1);
+            const newMax = newMin + Math.min(7, last31Days.length - newMin);
             chart.options.scales.x.min = newMin;
             chart.options.scales.x.max = newMax;
             chart.update();
@@ -2161,7 +2161,7 @@ function renderEarningsChart(dailyEarnings) {
         const chart = window.earningsChart;
         if (chart && chart.options.scales.x.max < last31Days.length - 1) {
             // Смещаем видимую область на 7 дней вперед
-            const newMax = Math.min(last31Days.length - 1, chart.options.scales.x.max + 7);
+            const newMax = Math.min(last31Days.length, chart.options.scales.x.max + 7);
             const newMin = Math.max(0, newMax - 7);
             chart.options.scales.x.min = newMin;
             chart.options.scales.x.max = newMax;
@@ -3153,7 +3153,6 @@ function createDeliveryZoneSection() {
     style.textContent = `
         .delivery-zone-section {
             margin-top: 30px;
-            padding-bottom: 40px;
         }
         .delivery-zone-controls {
             display: flex;
