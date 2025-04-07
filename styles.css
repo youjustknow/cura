@@ -11,27 +11,14 @@
     --primary-light: #6d4d60;     /* Темно-фиолетовый */
     --accent-color: #4b927e;      /* Темно-зеленый */
     --deep-green: #3b7566;        /* Глубокий зеленый */
-    --background-color: var(--primary-dark);
-    --background-light: var(--primary-color);
-    --background-lighter: var(--primary-light);
-    --background-darker: var(--primary-dark);
-    --background-darkest: var(--primary-dark);
-    --border-color: var(--deep-green);
     --text-color: #fff;
-    --white-color: #fff;
+    --text-color: #fff;
     --text-muted: #ccc;
     --text-faded: #aaa;
-    --danger-color: var(--primary-light);
-    --danger-dark: var(--primary-dark);
-    --success-color: var(--accent-color);
-    --success-dark: var(--deep-green);
-    --info-color: var(--deep-green);
-    --info-dark: var(--primary-dark);
-    --warning-color: var(--primary-light);
 }
 
 body {
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     color: var(--text-color);
 }
 
@@ -59,7 +46,7 @@ body {
     top: 20px;
     left: 20px;
     background-color: var(--primary-light);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -103,7 +90,7 @@ body {
 /* Форма заказа */
 .order-form {
     width: 100%;
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
     padding: 20px;
     border-radius: 10px;
     margin-top: 5%;
@@ -124,7 +111,7 @@ body {
 .form-group input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid var(--background-darkest);
+    border: 2px solid var(--primary-dark);
     border-radius: 5px;
     background-color: var(--accent-color);
     color: var(--text-color);
@@ -133,8 +120,8 @@ body {
 
 .suggestions {
     list-style: none;
-    background-color: var(--background-light);
-    border: 1px solid var(--border-color);
+    background-color: var(--primary-color);
+    border: 1px solid var(--deep-green);
     border-radius: 0 0 10px 10px;
     max-height: 150px;
     overflow-y: auto;
@@ -147,13 +134,13 @@ body {
 }
 
 .suggestions li:hover {
-    background-color: var(--background-lighter);
+    background-color: var(--primary-light);
 }
 
 button {
     padding: 10px 15px;
     background-color: var(--accent-color);
-    color: var(--background-color);
+    color: var(--primary-dark);
     border: none;
     border-radius: 5px;
     font-size: 16px;
@@ -181,7 +168,7 @@ button {
 
 .order-item {
     background-color: var(--accent-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--deep-green);
     border-radius: 13px;
     margin-bottom: 15px;
     padding: 15px;
@@ -206,7 +193,7 @@ button {
 .order-price {
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--deep-green);
     padding-top: 10px;
     font-weight: bold;
 }
@@ -218,8 +205,8 @@ button {
 }
 
 .order-actions button {
-    background-color: var(--background-lighter);
-    color: var(--text-color);
+    background-color: var(--deep-green);
+    color: var(--accent-color);
     padding: 5px 10px;
     font-size: 14px;
 }
@@ -244,7 +231,7 @@ button {
 /* Экран завершения */
 .completion-container {
     background-color: var(--accent-color);
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--deep-green);
     border-radius: 10px;
     padding: 20px;
     width: 90%;
@@ -276,7 +263,7 @@ button {
 }
 
 .secondary-button {
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     color: var(--accent-color);
     padding: 10px 15px;
     font-size: 16px;
@@ -296,9 +283,11 @@ button {
 .order-distance {
     margin-top: 5px;
     padding-top: 5px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--primary-dark);
     display: flex;
     justify-content: space-between;
+    color: var(--text-muted);
+    font-size: 14px;
 }
 
 /* Стили для экрана истории */
@@ -307,7 +296,7 @@ button {
     top: 20px;
     right: 20px;
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -322,13 +311,13 @@ button {
 
 .date-group {
     margin-bottom: 20px;
-    background-color: var(--background-light);
+    background-color: var(--primary-dark);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .date-header {
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     padding: 15px;
     border-bottom: 2px solid var(--accent-color);
     cursor: pointer;
@@ -370,7 +359,7 @@ button {
 }
 
 .route-item {
-    background-color: var(--background-lighter);
+    background-color: var(--primary-light);
     margin: 5px 0;
     border-radius: 5px;
     overflow: hidden;
@@ -381,18 +370,18 @@ button {
     display: flex;
     justify-content: space-between;
     cursor: pointer;
-    background-color: var(--background-darker);
+    background-color: var(--accent-color);
     transition: background-color 0.2s ease;
 }
 
 .route-header:hover {
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
 }
 
 .route-details {
     padding: 10px;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--background-lighter);
+    border-top: 1px solid var(--accent-color);
+    background-color: var(--deep-green);
 }
 
 .route-details.hidden {
@@ -402,7 +391,7 @@ button {
 .history-order-item {
     padding: 10px;
     margin: 5px 0;
-    background-color: var(--background-light);
+    background-color: var(--deep-green);
     border-radius: 5px;
 }
 
@@ -410,11 +399,6 @@ button {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
-}
-
-.order-distance {
-    color: var(--text-muted);
-    font-size: 14px;
 }
 
 /* Стили для модальных окон */
@@ -436,7 +420,7 @@ button {
 }
 
 .modal-content {
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     margin: 15% auto;
     padding: 20px;
     border-radius: 13px;
@@ -491,7 +475,7 @@ button {
     font-size: 16px;
     cursor: pointer;
     background-color: var(--accent-color);
-    color: var(--background-color);
+    color: var(--primary-dark);
     font-weight: bold;
     transition: background-color 0.2s ease;
 }
@@ -501,12 +485,12 @@ button {
 }
 
 .modal-btn-secondary {
-    background-color: var(--background-lighter);
-    color: var(--text-color);
+    background-color: var(--deep-green);
+    color: var(--accent-color);
 }
 
 .modal-btn-secondary:hover {
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
 }
 
 /* Кнопка выхода */
@@ -515,7 +499,7 @@ button {
     top: 20px;
     right: 20px;
     background-color: var(--primary-light);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
     z-index: 10;
@@ -527,14 +511,14 @@ button {
     top: 20px;
     right: 120px;
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 /* Экран настроек */
 .settings-form {
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
     border-radius: 10px;
     padding: 20px;
     max-width: 600px;
@@ -569,7 +553,7 @@ button {
     padding: 10px;
     border: 2px solid var(--accent-color);
     border-radius: 5px;
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     color: var(--text-color);
     font-size: 16px;
 }
@@ -633,28 +617,28 @@ h2 {
 
 .history-button {
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .settings-button {
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .reset-button {
     background-color: var(--primary-light);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 .exit-button {
     background-color: var(--primary-light);
-    color: var(--white-color);
+    color: var(--text-color);
     padding: 10px 15px;
     border-radius: 5px;
 }
@@ -693,7 +677,7 @@ h2 {
     padding: 10px;
     background-color: var(--accent-color);
     border-radius: 5px;
-    color: var(--text-faded);
+    color: var(--deep-green);
 }
 
 /* Стили для бокового меню */
@@ -726,13 +710,13 @@ h2 {
     left: 0;
     width: 100%;
     height: 60px;
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-    border-top: 1px solid var(--background-lighter);
+    border-top: 1px solid var(--primary-light);
 }
 
 .nav-btn {
@@ -825,13 +809,13 @@ h2 {
 /* Стили для истории смен */
 .shift-group {
     margin-bottom: 30px;
-    background-color: var(--background-light);
+    background-color: var(--primary-color);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .shift-header {
-    background-color: var(--background-color);
+    background-color: var(--primary-dark);
     padding: 20px;
     border-bottom: 2px solid var(--accent-color);
     cursor: pointer;
@@ -867,7 +851,7 @@ h2 {
 
 .shift-routes {
     padding: 15px;
-    background-color: var(--background-darkest);
+    background-color: var(--primary-dark);
 }
 
 .hidden {
@@ -921,13 +905,13 @@ h2 {
 }
 
 .info-value {
-    color: var(--success-color);
+    color: var(--accent-color);
     font-weight: bold;
     font-size: 16px;
 }
 
 #predictedIncome {
-    color: var(--background-light);
+    color: var(--primary-color);
 }
 
 /* Стили для выбора времени смены */
@@ -953,7 +937,7 @@ h2 {
     padding: 12px 15px;
     border: 2px solid var(--accent-color);
     border-radius: 10px;
-    background-color: var(--background-light);
+    background-color: var(--deep-green);
     color: var(--text-color);
     font-size: 16px;
     margin-bottom: 10px;
@@ -988,13 +972,13 @@ h2 {
     align-items: center;
     padding: 20px;
     cursor: pointer;
-    background-color: var(--background-darker);
-    border-bottom: 3px solid var(--border-color);
+    background-color: var(--deep-green);
+    border-bottom: 3px solid var(--accent-color);
     transition: background-color 0.2s ease;
 }
 
 .stats-section-header:hover {
-    background-color: var(--background-light);
+    background-color: var(--primary-color);
 }
 
 .stats-section h3 {
@@ -1034,7 +1018,7 @@ h2 {
 }
 
 .stats-item {
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
     padding: 15px;
     border-radius: 8px;
     display: flex;
@@ -1056,7 +1040,7 @@ h2 {
 .stats-chart {
     width: 100%;
     height: 300px;
-    background-color: var(--border-color);
+    background-color: var(--deep-green);
     border-radius: 8px;
     position: relative;
     padding: 15px;
@@ -1149,7 +1133,7 @@ h2 {
 .stats-tip {
     margin: 10px 0;
     padding: 10px;
-    background-color: var(--background-darker);
+    background-color: var(--primary-dark);
     border-left: 3px solid var(--accent-color);
     color: var(--text-muted);
     font-size: 14px;
@@ -1255,7 +1239,7 @@ h2 {
 
 #startRouteBtn .material-icons {
     font-size: 20px;
-    color: var(--background-color);
+    color: var(--primary-dark);
 }
 
 /* Фиксируем кнопки начала и завершения маршрута */

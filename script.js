@@ -3122,10 +3122,10 @@ function createDeliveryZoneSection() {
             width: 100%;
             padding: 8px 12px;
             border-radius: 4px;
-            background-color: var(--border-color);
+            background-color: var(--deep-green);
             color: #fff;
             border: 1px solid #555;
-            border: 1px solid var(--background-color);
+            border: 1px solid var(--primary-dark);
         }
         .checkbox-container {
             display: flex;
@@ -3150,17 +3150,6 @@ function createDeliveryZoneSection() {
             color: #aaa;
             font-style: italic;
             background-color: #333;
-        }
-        .start-location-info {
-            background-color: rgba(0, 150, 0, 0.1);
-            border-left: 3px solid #00aa00;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-        .start-location-header {
-            font-weight: bold;
-            color: #00cc00;
         }
         .order-start-location {
             margin-top: 4px;
