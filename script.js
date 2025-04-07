@@ -2094,7 +2094,7 @@ function renderEarningsChart(dailyEarnings) {
     leftButton.textContent = '←';
     leftButton.title = 'Показать более ранние даты';
     leftButton.style.padding = '5px 10px';
-    leftButton.style.background = '#555';
+    leftButton.style.background = 'var(--deep-green-top)';
     leftButton.style.border = 'none';
     leftButton.style.borderRadius = '4px';
     leftButton.style.color = '#fff';
@@ -2106,7 +2106,7 @@ function renderEarningsChart(dailyEarnings) {
     todayButton.textContent = 'Сегодня';
     todayButton.title = 'Перейти к текущей дате';
     todayButton.style.padding = '5px 10px';
-    todayButton.style.background = '#666';
+    todayButton.style.background = 'var(--accent-color)';
     todayButton.style.border = 'none';
     todayButton.style.borderRadius = '4px';
     todayButton.style.color = '#fff';
@@ -2118,7 +2118,7 @@ function renderEarningsChart(dailyEarnings) {
     rightButton.textContent = '→';
     rightButton.title = 'Показать более поздние даты';
     rightButton.style.padding = '5px 10px';
-    rightButton.style.background = '#555';
+    rightButton.style.background = 'var(--deep-green-top)';
     rightButton.style.border = 'none';
     rightButton.style.borderRadius = '4px';
     rightButton.style.color = '#fff';
