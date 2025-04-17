@@ -6,13 +6,13 @@
 }
 
 :root {
-    --primary-color: #4A4A5C;     /* Темно-серый */
-    --primary-dark: #121615;      /* Почти черный */
-    --primary-dark-header: #19201e;      /* Почти черный for headers */
-    --primary-light: #31232c;     /* Темно-фиолетовый */
+    --primary-color: #626284;     /* Темно-серый */
+    --primary-dark: #31413d;      /* Почти черный */
+    --primary-dark-header: #354641;      /* Почти черный for headers */
+    --primary-light: #55394b;     /* Темно-фиолетовый */
     --accent-color: #4b927e;      /* Темно-зеленый */
-    --deep-green: #22443b;        /* Глубокий зеленый */
-    --deep-green-top: #264d42; 
+    --deep-green: #2f6c5c;        /* Глубокий зеленый */
+    --deep-green-top: #357764; 
     --text-color: #fff;
     --text-color: #fff;
     --text-muted: #ccc;

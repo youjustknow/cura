@@ -450,10 +450,6 @@ function loadSettings() {
     }
     updateSettingsForm();
     applyDefaultStartLocation();
-    
-    // Применение статической цветовой палитры
-    const palette = generateColorPalette();
-    applyColorPalette(palette);
 }
 
 // Функция сохранения настроек
@@ -466,16 +462,10 @@ function saveSettings() {
         pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
         deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
         highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate,
-        // Игнорируем значение из поля ввода, всегда используем статическую палитру
-        themeColor: '#4A4A5C'
     };
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Настройки сохранены:', settings);
-    
-    // Применение статической цветовой палитры
-    const palette = generateColorPalette();
-    applyColorPalette(palette);
 }
 
 // Функция обновления формы настроек
@@ -2640,50 +2630,6 @@ function loadUnfinishedOrders() {
 function clearUnfinishedOrders() {
     localStorage.removeItem('unfinishedOrders');
     localStorage.removeItem('nextOrderId');
-}
-
-// Функции для генерации и применения цветовой палитры
-function generateColorPalette() {
-    // Статическая палитра с новыми цветами
-    return {
-        primary: '#4A4A5C',       // Темно-серый
-        primaryDark: '#121615',   // Почти черный (глубокий темный)
-        primaryLight: '#3A3036',  // Темно-фиолетовый
-        accent: '#2F5D50'         // Темно-зеленый
-    };
-}
-
-function applyColorPalette(palette) {
-    document.documentElement.style.setProperty('--primary-color', palette.primary);
-    document.documentElement.style.setProperty('--primary-dark', palette.primaryDark);
-    document.documentElement.style.setProperty('--primary-light', palette.primaryLight);
-    document.documentElement.style.setProperty('--accent-color', palette.accent);
-    document.documentElement.style.setProperty('--deep-green', '#1D3B33'); // Глубокий зеленый
-    
-    // Обновляем тег meta theme-color для поддержки мобильных устройств
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', palette.primary);
-    }
-}
-    
-// Обработчик изменения цвета темы
-const themeColorInput = document.getElementById('themeColor');
-if (themeColorInput) {
-    // Убираем возможность выбора цвета и обработчики событий
-    themeColorInput.disabled = true;
-    themeColorInput.style.opacity = '0.5';
-    themeColorInput.value = '#4A4A5C';
-    
-    // Инициализация превью цветовой палитры при загрузке
-    const initialPalette = generateColorPalette();
-    document.querySelector('.primary-color-sample').style.backgroundColor = initialPalette.primary;
-    document.querySelector('.primary-dark-sample').style.backgroundColor = initialPalette.primaryDark;
-    document.querySelector('.primary-light-sample').style.backgroundColor = initialPalette.primaryLight;
-    document.querySelector('.accent-color-sample').style.backgroundColor = initialPalette.accent;
-    
-    // Удаляем все обработчики событий с themeColorInput
-    themeColorInput.replaceWith(themeColorInput.cloneNode(true));
 }
 
 // Функция для получения всех стартовых точек из localStorage за последние 30 дней
