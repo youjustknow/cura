@@ -515,13 +515,11 @@ button {
 
 .settings-form input[type="color"] {
     -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
-    width: 50px;
-    height: 50px;
+    width: 80px;
+    height: 40px;
+    background-color: transparent;
     border: none;
-    border-radius: 50%;
-    padding: 0;
     cursor: pointer;
 }
 
@@ -1125,4 +1123,35 @@ h2 {
     width: 100%;
     z-index: 999;
     border-radius: 15px;
+}
+
+/* Стили для выпадающего списка рейтинга */
+.form-group:has(.rating-select) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.form-group:has(.rating-select) label {
+    margin-bottom: 0;
+}
+
+.rating-select {
+    width: 150px;
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid var(--deep-green);
+    background-color: var(--primary-dark);
+    color: var(--text-color);
+    font-size: 16px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+.rating-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }

@@ -227,6 +227,7 @@ const defaultSettings = {
     pickupRate: 63,
     deliveryRate: 86,
     highPriceDeliveryRate: 110,
+    courierRating: 20,
     themeColor: '#4A4A5C' // Темно-серый из новой палитры
 };
 
@@ -462,10 +463,16 @@ function saveSettings() {
         pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
         deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
         highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate,
+        courierRating: parseInt(document.getElementById('courierRating').value) || defaultSettings.courierRating,
     };
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Настройки сохранены:', settings);
+    
+    // Если есть заказы, пересчитываем их цены с учетом новых настроек
+    if (orders.length > 0) {
+        recalculateOrderPrices();
+    }
 }
 
 // Функция обновления формы настроек
@@ -478,6 +485,7 @@ function updateSettingsForm() {
     document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
     document.getElementById('themeColor').value = settings.themeColor;
     document.getElementById('apiKey').value = settings.apiKey;
+    document.getElementById('courierRating').value = settings.courierRating;
 }
 
 // Функция применения начальной точки из настроек
@@ -535,8 +543,9 @@ function calculatePrice(weight, distance, isHighPriceDelivery = false) {
     const deliveryPrice = isHighPriceDelivery ? settings.highPriceDeliveryRate : settings.deliveryRate;
     const weightPrice = weight * settings.weightRate;
     const distancePrice = distance * settings.distanceRate;
+    const ratingBonus = settings.courierRating || 0;
 
-    return Math.round(deliveryPrice + weightPrice + distancePrice);
+    return Math.round(deliveryPrice + weightPrice + distancePrice + ratingBonus);
 }
 
 // Обновляем функцию geocodeAddress чтобы использовать индикатор загрузки
