@@ -282,6 +282,13 @@ button {
     overflow: hidden;
 }
 
+.shift-group {
+    margin-bottom: 20px;
+    background-color: var(--deep-green);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
 .date-header {
     background-color: var(--primary-dark-header);
     padding: 15px;
