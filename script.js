@@ -1954,7 +1954,7 @@ function renderEarningsChart(dailyEarnings) {
                     // Увеличиваем толщину границы для дней с доходом
                     return value > 0 ? 2 : 1;
                 }),
-                borderRadius: 3,
+                borderRadius: 9,
                 // Увеличиваем размеры столбцов
                 barPercentage: 0.9,
                 categoryPercentage: 0.9,
@@ -2086,7 +2086,7 @@ function renderEarningsChart(dailyEarnings) {
     leftButton.style.padding = '5px 10px';
     leftButton.style.background = 'var(--deep-green-top)';
     leftButton.style.border = 'none';
-    leftButton.style.borderRadius = '4px';
+    leftButton.style.borderRadius = '20px';
     leftButton.style.color = '#fff';
     leftButton.style.cursor = 'pointer';
     leftButton.style.transition = 'background 0.2s';
@@ -2098,7 +2098,7 @@ function renderEarningsChart(dailyEarnings) {
     todayButton.style.padding = '5px 10px';
     todayButton.style.background = 'var(--accent-color)';
     todayButton.style.border = 'none';
-    todayButton.style.borderRadius = '4px';
+    todayButton.style.borderRadius = '20px';
     todayButton.style.color = '#fff';
     todayButton.style.cursor = 'pointer';
     todayButton.style.transition = 'background 0.2s';
@@ -2110,32 +2110,10 @@ function renderEarningsChart(dailyEarnings) {
     rightButton.style.padding = '5px 10px';
     rightButton.style.background = 'var(--deep-green-top)';
     rightButton.style.border = 'none';
-    rightButton.style.borderRadius = '4px';
+    rightButton.style.borderRadius = '20px';
     rightButton.style.color = '#fff';
     rightButton.style.cursor = 'pointer';
     rightButton.style.transition = 'background 0.2s';
-    
-    // Добавляем эффект при наведении на кнопки
-    leftButton.addEventListener('mouseover', () => {
-        leftButton.style.background = '#666';
-    });
-    leftButton.addEventListener('mouseout', () => {
-        leftButton.style.background = '#555';
-    });
-    
-    todayButton.addEventListener('mouseover', () => {
-        todayButton.style.background = '#777';
-    });
-    todayButton.addEventListener('mouseout', () => {
-        todayButton.style.background = '#666';
-    });
-    
-    rightButton.addEventListener('mouseover', () => {
-        rightButton.style.background = '#666';
-    });
-    rightButton.addEventListener('mouseout', () => {
-        rightButton.style.background = '#555';
-    });
     
     // Добавляем обработчики на кнопки
     leftButton.addEventListener('click', () => {
@@ -3067,7 +3045,7 @@ function createDeliveryZoneSection() {
         .select-container select {
             width: 100%;
             padding: 8px 12px;
-            border-radius: 4px;
+            border-radius: 9px;
             background-color: var(--deep-green);
             color: #fff;
             border: 1px solid #555;
