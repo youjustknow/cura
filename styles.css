@@ -5,14 +5,13 @@
     font-family: SF Pro Rounded, SF Pro Rounded;
 }
 
-:root {
-    --primary-color: #626284;     /* Темно-серый */
-    --primary-dark: #31413d;      /* Почти черный */
-    --primary-dark-header: #354641;      /* Почти черный for headers */
-    --primary-light: #55394b;     /* Темно-фиолетовый */
-    --accent-color: #4b927e;      /* Темно-зеленый */
-    --deep-green: #2f6c5c;        /* Глубокий зеленый */
-    --deep-green-top: #357764; 
+:root { /* Темно-серый */
+    --primary-dark: #220f0c;      /* Почти черный */
+    --primary-dark-header: #5a261d;      /* Почти черный for headers */
+    --primary-light: #6c2d2c;     /* Темно-фиолетовый */
+    --accent-color: #c06555;      /* Темно-зеленый */
+    --deep-green: #753429;        /* Глубокий зеленый */
+    --deep-green-top: #b95240; 
     --text-color: #fff;
     --text-color: #fff;
     --text-muted: #ccc;
@@ -121,25 +120,6 @@ body {
     font-size: 16px;
 }
 
-.suggestions {
-    list-style: none;
-    background-color: var(--primary-color);
-    border: 1px solid var(--deep-green);
-    border-radius: 0 0 10px 10px;
-    max-height: 150px;
-    overflow-y: auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.suggestions li {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.suggestions li:hover {
-    background-color: var(--primary-light);
-}
-
 button {
     padding: 10px 15px;
     background-color: var(--accent-color);
@@ -226,10 +206,6 @@ button {
     z-index: 999;
 }
 
-.action-button:hover {
-    background-color: var(--primary-dark);
-}
-
 /* Экран завершения */
 .completion-container {
     background-color: var(--primary-dark-header);
@@ -289,17 +265,6 @@ button {
     justify-content: space-between;
     color: var(--text-muted);
     font-size: 14px;
-}
-
-/* Стили для экрана истории */
-.history-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 5px;
 }
 
 .history-list {
@@ -373,10 +338,6 @@ button {
     cursor: pointer;
     background-color: var(--primary-dark-header);
     transition: background-color 0.2s ease;
-}
-
-.route-header:hover {
-    background-color: var(--deep-green);
 }
 
 .route-details {
@@ -481,17 +442,9 @@ button {
     transition: background-color 0.2s ease;
 }
 
-.modal-btn:hover {
-    background-color: var(--accent-light);
-}
-
 .modal-btn-secondary {
     background-color: var(--deep-green);
     color: var(--accent-color);
-}
-
-.modal-btn-secondary:hover {
-    background-color: var(--deep-green);
 }
 
 /* Кнопка выхода */
@@ -504,17 +457,6 @@ button {
     padding: 10px 15px;
     border-radius: 5px;
     z-index: 10;
-}
-
-/* Кнопка настроек */
-.settings-button {
-    position: absolute;
-    top: 20px;
-    right: 120px;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 5px;
 }
 
 /* Экран настроек */
@@ -616,20 +558,6 @@ h2 {
     gap: 10px;
 }
 
-.history-button {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 5px;
-}
-
-.settings-button {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 5px;
-}
-
 .reset-button {
     background-color: var(--primary-light);
     color: var(--text-color);
@@ -652,14 +580,6 @@ h2 {
     transition: all 0.3s ease;
 }
 
-.exit-button:hover,
-.settings-button:hover,
-.history-button:hover,
-.reset-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
 /* Обновленные стили для формы */
 .form-header {
     display: flex;
@@ -676,7 +596,7 @@ h2 {
 .start-location-info {
     margin-top: 10px;
     padding: 10px;
-    background-color: var(--primary-dark);
+    background-color: var(--deep-green);
     border-radius: 5px;
     color: var(--text-faded);
 }
@@ -798,21 +718,8 @@ h2 {
     min-width: 200px;
 }
 
-.shift-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 #endShiftBtn {
     background-color: var(--primary-light);
-}
-
-/* Стили для истории смен */
-.shift-group {
-    margin-bottom: 30px;
-    background-color: var(--primary-color);
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 .shift-header {
@@ -875,11 +782,6 @@ h2 {
     gap: 10px;
 }
 
-.shift-info-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 .shift-info-button .material-icons {
     font-size: 20px;
 }
@@ -911,7 +813,7 @@ h2 {
 }
 
 #predictedIncome {
-    color: var(--primary-color);
+    color: var(--text-color);
 }
 
 /* Стили для выбора времени смены */
@@ -975,10 +877,6 @@ h2 {
     background-color: var(--primary-dark-header);
     border-bottom: 3px solid var(--accent-color);
     transition: background-color 0.2s ease;
-}
-
-.stats-section-header:hover {
-    background-color: var(--primary-color);
 }
 
 .stats-section h3 {
@@ -1094,41 +992,6 @@ h2 {
     .stats-chart {
         height: 200px;
     }
-}
-
-.settings-form .color-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.color-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-left: 10px;
-}
-
-.color-sample {
-    width: 30px;
-    height: 15px;
-    border-radius: 3px;
-}
-
-.primary-color-sample {
-    background-color: var(--primary-color);
-}
-
-.primary-dark-sample {
-    background-color: var(--primary-dark);
-}
-
-.primary-light-sample {
-    background-color: var(--primary-light);
-}
-
-.accent-color-sample {
-    background-color: var(--accent-color);
 }
 
 .stats-tip {
