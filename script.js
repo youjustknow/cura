@@ -3398,7 +3398,7 @@ function createOrderElement(order) {
 
     const data = document.createElement('div');
     data.className = 'order-data';
-    data.innerHTML = `<span>${order.id}</span><span>${order.address}</span><span>${order.weight}</span>`;
+    data.innerHTML = `<span>${order.id}</span><span style="color: var(--accent-color);">${order.address}</span><span>${order.weight}</span>`;
 
     const price = document.createElement('div');
     price.className = 'order-price';

@@ -607,6 +607,7 @@ h2 {
     border-radius: 15px;
     color: var(--text-faded);
     margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 /* Стили для бокового меню */
