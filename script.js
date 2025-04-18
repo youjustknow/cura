@@ -601,8 +601,8 @@ async function calculateDistance(startCoords, endCoords, mapId = 'map') {
                     endCoords
                 ],
                 params: {
-                    // Тип маршрутизации - пешеходная маршрутизация
-                    routingMode: 'pedestrian'
+                    // Тип маршрутизации - велосипедная маршрутизация
+                    routingMode: 'bicycle'
                 }
             }, {
                 // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком
