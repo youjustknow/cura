@@ -7,11 +7,11 @@
 
 :root { /* Темно-серый */
     --primary-dark: #220f0c;      /* Почти черный */
-    --primary-dark-header: #5a261d;      /* Почти черный for headers */
-    --primary-light: #6c2d2c;     /* Темно-фиолетовый */
-    --accent-color: #c06555;      /* Темно-зеленый */
-    --deep-green: #753429;        /* Глубокий зеленый */
-    --deep-green-top: #b95240; 
+    --primary-dark-header: #813022;      /* Почти черный for headers */
+    --primary-light: #8b2d2b;     /* Темно-фиолетовый */
+    --accent-color: #d85e49;      /* Темно-зеленый */
+    --deep-green: #a83e2b;        /* Глубокий зеленый */
+    --deep-green-top: #dd4e35; 
     --text-color: #fff;
     --text-color: #fff;
     --text-muted: #ccc;
