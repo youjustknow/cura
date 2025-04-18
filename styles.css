@@ -920,13 +920,21 @@ h2 {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+/* Добавляем стиль для секции "Распределение заказов", 
+   чтобы графики отображались вертикально друг под другом */
+.distribution-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 15px;
 }
 
 .stats-item {
     background-color: var(--deep-green);
-    padding: 15px;
+    padding: 12px;
     border-radius: 15px;
     display: flex;
     flex-direction: column;
@@ -940,7 +948,7 @@ h2 {
 
 .stats-value {
     color: var(--text-color);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
 }
 
@@ -984,7 +992,7 @@ h2 {
 
 @media (max-width: 768px) {
     .stats-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .stats-chart {
@@ -994,7 +1002,7 @@ h2 {
 
 @media (max-width: 480px) {
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .stats-chart {
