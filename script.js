@@ -495,6 +495,9 @@ function updateSettingsForm() {
     document.getElementById('themeColor').value = settings.themeColor;
     document.getElementById('apiKey').value = settings.apiKey;
     document.getElementById('courierRating').value = settings.courierRating;
+    
+    // Обновляем статус уведомлений
+    updateNotificationStatus();
 }
 
 // Функция применения начальной точки из настроек
@@ -1496,6 +1499,9 @@ function updateShiftControls() {
 
             // Обновляем информацию о смене
             updateShiftInfo();
+            
+            // Проверяем превышение продолжительности смены
+            checkShiftDuration();
         } else {
             // Завершенная смена
             startShiftBtn.classList.remove('hidden');
@@ -1790,6 +1796,24 @@ function updateShiftInfo() {
         currentShiftIncome.textContent = `${info.currentIncome}₽`;
         currentHourlyIncome.textContent = `${info.hourlyIncome}₽/час`;
         predictedIncome.textContent = `${info.predictedShiftIncome}₽`;
+        
+        // Проверяем превышение продолжительности смены и визуально отображаем
+        const now = new Date();
+        if (currentShift && !currentShift.endTime && now > currentShift.plannedEndTime) {
+            // Смена превысила запланированную продолжительность
+            shiftDuration.classList.add('overdue');
+            
+            // Добавляем информацию о превышении
+            const overdueDuration = formatDuration(now - currentShift.plannedEndTime);
+            shiftDuration.setAttribute('data-overdue', `Превышение: ${overdueDuration}`);
+        } else {
+            // Смена не превысила запланированную продолжительность
+            shiftDuration.classList.remove('overdue');
+            shiftDuration.removeAttribute('data-overdue');
+        }
+        
+        // Проверяем превышение продолжительности смены
+        checkShiftDuration();
     }
 }
 
@@ -3461,4 +3485,195 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
     if (installAppBtn) {
         installAppBtn.style.display = 'none';
     }
+}
+
+// Функция для запроса разрешения на отправку уведомлений
+async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+        console.log('Этот браузер не поддерживает уведомления');
+        return false;
+    }
+    
+    if (Notification.permission === 'granted') {
+        console.log('Разрешение на отправку уведомлений уже предоставлено');
+        return true;
+    }
+    
+    if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('Разрешение на отправку уведомлений получено');
+            return true;
+        }
+    }
+    
+    console.log('Разрешение на отправку уведомлений не получено');
+    return false;
+}
+
+// Функция для отправки уведомлений
+function sendNotification(title, body, url = window.location.href) {
+    // Проверяем поддержку уведомлений
+    if (!('Notification' in window)) {
+        console.log('Этот браузер не поддерживает уведомления');
+        return;
+    }
+    
+    // Проверяем разрешение на отправку уведомлений
+    if (Notification.permission !== 'granted') {
+        console.log('Нет разрешения на отправку уведомлений');
+        return;
+    }
+    
+    // Отправляем уведомление через ServiceWorker если он доступен
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(title, {
+                body: body,
+                icon: 'icons/android-launchericon-192-192.png',
+                badge: 'icons/android-launchericon-72-72.png',
+                vibrate: [100, 50, 100],
+                data: {
+                    dateOfArrival: Date.now(),
+                    url: url
+                }
+            });
+        });
+    } else {
+        // Запасной вариант - используем стандартные уведомления
+        const notification = new Notification(title, {
+            body: body,
+            icon: 'icons/android-launchericon-192-192.png'
+        });
+        
+        notification.onclick = function() {
+            window.open(url);
+        };
+    }
+}
+
+// Функция проверки превышения продолжительности смены
+function checkShiftDuration() {
+    if (!currentShift || currentShift.endTime) return;
+    
+    const now = new Date();
+    
+    // Проверяем, превысила ли текущая смена запланированную продолжительность
+    if (now > currentShift.plannedEndTime) {
+        const diff = Math.round((now - currentShift.plannedEndTime) / (1000 * 60));
+        
+        // Проверяем, прошло ли достаточно времени с момента последнего уведомления
+        // (не чаще, чем раз в 30 минут)
+        const lastNotification = currentShift.lastDurationNotification || 0;
+        const timeSinceLastNotification = now.getTime() - lastNotification;
+        const notificationIntervalMs = 30 * 60 * 1000; // 30 минут в миллисекундах
+        
+        // Отправляем уведомление только если:
+        // 1. Текущее время превышает планируемое окончание на 5 минут и более
+        // 2. С момента последнего уведомления прошло не менее 30 минут или это первое уведомление
+        if (diff >= 5 && (timeSinceLastNotification >= notificationIntervalMs || lastNotification === 0)) {
+            console.log('Отправка уведомления о превышении продолжительности смены');
+            
+            const formattedTime = formatDuration(now - currentShift.plannedEndTime);
+            sendNotification(
+                'Превышение продолжительности смены',
+                `Ваша смена превысила запланированную продолжительность на ${formattedTime}`,
+                window.location.href
+            );
+            
+            // Запоминаем время последнего уведомления
+            currentShift.lastDurationNotification = now.getTime();
+            localStorage.setItem('currentShift', JSON.stringify(currentShift));
+        }
+    }
+}
+
+// Функция для обновления статуса уведомлений в интерфейсе
+function updateNotificationStatus() {
+    const statusElement = document.getElementById('notificationStatus');
+    if (!statusElement) return;
+    
+    if (!('Notification' in window)) {
+        statusElement.textContent = 'Статус уведомлений: не поддерживаются браузером';
+        statusElement.style.color = '#ff5555';
+        return;
+    }
+    
+    if (Notification.permission === 'granted') {
+        statusElement.textContent = 'Статус уведомлений: разрешены';
+        statusElement.style.color = '#4CAF50';
+    } else if (Notification.permission === 'denied') {
+        statusElement.textContent = 'Статус уведомлений: заблокированы';
+        statusElement.style.color = '#ff5555';
+    } else {
+        statusElement.textContent = 'Статус уведомлений: не запрошены';
+        statusElement.style.color = '#FFC107';
+    }
+}
+
+// Запрашиваем разрешение на отправку уведомлений при загрузке приложения
+window.addEventListener('load', () => {
+    requestNotificationPermission();
+    
+    // Устанавливаем интервал для периодической проверки превышения продолжительности смены
+    // Проверяем каждые 10 минут
+    setInterval(checkShiftDuration, 10 * 60 * 1000);
+    
+    // Обновляем статус уведомлений в интерфейсе
+    updateNotificationStatus();
+});
+
+// Добавляем обработчик для кнопки включения уведомлений
+const enableNotificationsBtn = document.getElementById('enableNotificationsBtn');
+if (enableNotificationsBtn) {
+    enableNotificationsBtn.addEventListener('click', async () => {
+        const result = await requestNotificationPermission();
+        updateNotificationStatus();
+        
+        if (result) {
+            await showAlert('Уведомления успешно включены!');
+            
+            // Проверяем превышение продолжительности смены сразу после включения уведомлений
+            checkShiftDuration();
+        } else {
+            if (Notification.permission === 'denied') {
+                await showAlert('Уведомления заблокированы в настройках браузера. Разрешите уведомления в настройках сайта.');
+            } else {
+                await showAlert('Не удалось включить уведомления.');
+            }
+        }
+    });
+}
+
+// Функция для тестирования уведомлений о превышении продолжительности смены
+async function testShiftOverdueNotification() {
+    // Проверяем, есть ли активная смена
+    if (!currentShift || currentShift.endTime) {
+        await showAlert('Для тестирования уведомлений необходимо начать смену');
+        return;
+    }
+    
+    // Временно меняем плановое время окончания смены на текущее время минус 10 минут
+    const originalPlannedEndTime = currentShift.plannedEndTime;
+    
+    const now = new Date();
+    const testEndTime = new Date(now);
+    testEndTime.setMinutes(now.getMinutes() - 10); // Устанавливаем время на 10 минут назад
+    
+    currentShift.plannedEndTime = testEndTime;
+    
+    // Запускаем проверку
+    checkShiftDuration();
+    
+    // Обновляем информацию в интерфейсе
+    updateShiftInfo();
+    
+    // Возвращаем исходное плановое время через 5 секунд
+    setTimeout(() => {
+        currentShift.plannedEndTime = originalPlannedEndTime;
+        localStorage.setItem('currentShift', JSON.stringify(currentShift));
+        updateShiftInfo();
+    }, 5000);
+    
+    await showAlert('Тестовое уведомление отправлено. Проверьте его получение.');
 }

@@ -6,6 +6,7 @@
     "display": "standalone",
     "background_color": "#666",
     "theme_color": "#666",
+    "permissions": ["notifications"],
     "icons": [
         {
             "src": "icons/android-launchericon-72-72.png",

@@ -71,4 +71,53 @@ self.addEventListener('fetch', (event) => {
                 );
             })
     );
+});
+
+// Обработка push-уведомлений
+self.addEventListener('push', (event) => {
+    if (!event.data) return;
+
+    try {
+        const data = event.data.json();
+        const options = {
+            body: data.body || 'Уведомление от приложения',
+            icon: 'icons/android-launchericon-192-192.png',
+            badge: 'icons/android-launchericon-72-72.png',
+            vibrate: [100, 50, 100],
+            data: {
+                dateOfArrival: Date.now(),
+                url: data.url || '/'
+            }
+        };
+
+        event.waitUntil(
+            self.registration.showNotification(data.title || 'Уведомление', options)
+        );
+    } catch (error) {
+        console.error('Ошибка при обработке push-уведомления:', error);
+    }
+});
+
+// Обработка клика по уведомлению
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    // Проверяем, есть ли URL для перехода
+    if (event.notification.data && event.notification.data.url) {
+        // Открываем URL, указанный в данных уведомления
+        event.waitUntil(
+            clients.matchAll({ type: 'window' }).then((clientList) => {
+                // Проверяем, есть ли уже открытое окно с нашим приложением
+                for (const client of clientList) {
+                    if (client.url.includes(self.location.origin) && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                // Если нет открытого окна, открываем новое
+                if (clients.openWindow) {
+                    return clients.openWindow(event.notification.data.url);
+                }
+            })
+        );
+    }
 }); 
