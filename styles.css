@@ -5,17 +5,16 @@
     font-family: SF Pro Rounded, SF Pro Rounded;
 }
 
-:root { /* Темно-серый */
-    --primary-dark: #220f0c;      /* Почти черный */
-    --primary-dark-header: #813022;      /* Почти черный for headers */
-    --primary-light: #8b2d2b;     /* Темно-фиолетовый */
-    --accent-color: #d85e49;      /* Темно-зеленый */
-    --deep-green: #a83e2b;        /* Глубокий зеленый */
-    --deep-green-top: #dd4e35; 
-    --text-color: #fff;
-    --text-color: #fff;
-    --text-muted: #ccc;
-    --text-faded: #aaa;
+:root { 
+    --primary-dark: #121212;      /* Глубокий темно-серый для фона */
+    --primary-dark-header: #212121;      /* Темно-серый для заголовков */
+    --primary-light: #383838;     /* Средне-серый */
+    --accent-color: #ad5c3b;      /* Приглушенный терракотовый */
+    --deep-green: #414141;        /* Темно-серый для блоков */
+    --deep-green-top: #505050;    /* Более светлый серый для верхних блоков */
+    --text-color: #e0e0e0;        /* Светло-серый для основного текста */
+    --text-muted: #a0a0a0;        /* Серый для вспомогательного текста */
+    --text-faded: #808080;        /* Темно-серый для малозначимого текста */
 }
 
 body {
@@ -144,7 +143,7 @@ button {
 /* Список заказов */
 .order-list {
     width: 100%;
-    margin-bottom: 70px;
+    margin-bottom: 140px;
     overflow-y: scroll;
     margin-top: 20px;
 }
@@ -232,7 +231,7 @@ button {
 
 #okBtn {
     position: fixed;
-    bottom: 60px;
+    bottom: 75px;
     left: 0;
     width: 100%;
     z-index: 999;
@@ -271,7 +270,6 @@ button {
     width: 100%;
     margin-top: 20px;
     overflow-y: auto;
-    max-height: calc(100vh - 150px);
     padding-bottom: 100px;
 }
 
@@ -333,7 +331,8 @@ button {
 
 .route-item {
     background-color: var(--primary-light);
-    margin: 5px 0;
+    box-shadow: 0px 0px 10px var(--primary-dark);
+    margin: 7px 0;
     border-radius: 15px;
     overflow: hidden;
 }
@@ -361,6 +360,7 @@ button {
     padding: 10px;
     margin: 5px 0;
     background-color: var(--accent-color);
+    box-shadow: 0px 0px 7px var(--primary-dark);
     border-radius: 15px;
 }
 
@@ -391,7 +391,7 @@ button {
 .modal-content {
     background-color: var(--primary-dark-header);
     margin: 15% auto;
-    padding: 20px;
+    padding: 10px;
     border-radius: 15px;
     width: 80%;
     max-width: 500px;
@@ -542,6 +542,7 @@ h2 {
     width: 100%;
     padding: 15px;
     position: absolute;
+    box-shadow: 0px -10px 10px var(--primary-dark);
     bottom: 70px;
     left: 0;
     border-radius: 15px;
@@ -600,11 +601,11 @@ h2 {
 }
 
 .start-location-info {
-    margin-top: 10px;
     padding: 10px;
     background-color: var(--deep-green);
     border-radius: 15px;
     color: var(--text-faded);
+    margin-bottom: 10px;
 }
 
 /* Стили для бокового меню */
@@ -642,7 +643,7 @@ h2 {
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px -10px 10px var(--primary-dark);
     border-top: 1px solid var(--primary-light);
     border-radius: 15px;
 }
@@ -726,7 +727,7 @@ h2 {
 }
 
 #endShiftBtn {
-    background-color: var(--primary-light);
+    background-color: var(--accent-color);
 }
 
 .shift-header {
@@ -797,7 +798,6 @@ h2 {
 .shift-info-grid {
     display: grid;
     gap: 15px;
-    padding: 10px;
 }
 
 .info-item {
@@ -863,8 +863,7 @@ h2 {
     max-width: 1200px;
     margin-top: 20px;
     overflow-y: auto;
-    height: calc(100vh - 160px);
-    margin-bottom: 80px;
+    margin-bottom: 50px;
     border-radius: 15px;
 }
 
@@ -945,6 +944,7 @@ h2 {
 
 .stats-item {
     background-color: var(--deep-green);
+    box-shadow: 0px 0px 10px var(--primary-dark);
     padding: 12px;
     border-radius: 15px;
     display: flex;
@@ -967,6 +967,7 @@ h2 {
     width: 100%;
     height: 300px;
     background-color: var(--deep-green-top);
+    box-shadow: 0px 0px 10px var(--primary-dark);
     border-radius: 15px;
     position: relative;
     padding: 15px;
@@ -1076,7 +1077,7 @@ h2 {
 
 #finishRouteBtn {
     position: fixed;
-    bottom: 60px;
+    bottom: 75px;
     left: 0;
     width: 100%;
     z-index: 999;
@@ -1144,7 +1145,7 @@ h2 {
 /* Фиксируем кнопки начала и завершения маршрута */
 #finishRouteBtn {
     position: fixed;
-    bottom: 60px;
+    bottom: 75px;
     left: 0;
     width: 100%;
     z-index: 999;
@@ -1188,6 +1189,7 @@ h2 {
     bottom: 80px;
     left: 0;
     width: 100%;
+    box-shadow: 0px -10px 10px var(--primary-dark);
     background-color: var(--primary-dark-header);
     padding: 15px;
     display: flex;
@@ -1330,8 +1332,8 @@ h2 {
 }
 
 .order-navigation-btn {
-    background-color: #FDD835;
-    color: #000;
+    background-color: var(--primary-dark);
+    color: var(--accent-color);
     border: none;
     border-radius: 20px;
     width: 36px;

@@ -3154,7 +3154,7 @@ function createDeliveryZoneSection() {
             height: 400px;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 0px 10px rgb(0, 0, 0);
         }
         .no-data-message {
             width: 100%;
@@ -3327,12 +3327,10 @@ function initStatsSectionToggles() {
         // Убеждаемся, что содержимое секции видимо по умолчанию
         content.classList.remove('hidden');
         toggle.textContent = '▲';
-        toggle.classList.remove('rotate');
         
         header.addEventListener('click', (event) => {
             content.classList.toggle('hidden');
             toggle.textContent = content.classList.contains('hidden') ? '▼' : '▲';
-            toggle.classList.toggle('rotate');
             
             // Если секция открывается и удерживается клавиша Alt, закрываем все остальные секции
             if (!content.classList.contains('hidden') && event.altKey) {
@@ -3361,7 +3359,6 @@ function closeOtherSections(currentHeader) {
             
             content.classList.add('hidden');
             toggle.textContent = '▼';
-            toggle.classList.add('rotate');
         }
     });
 }
