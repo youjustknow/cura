@@ -416,11 +416,12 @@ button {
 .modal-header {
     padding: 15px;
     border-bottom: 2px solid var(--accent-color);
+    text-align: center;
 }
 
 .modal-header h3 {
     margin: 0;
-    color: var(--accent-color);
+    color: var(--text-color);
     font-size: 20px;
 }
 
@@ -814,13 +815,13 @@ h2 {
 }
 
 .info-value {
-    color: var(--accent-color);
+    color: var(--text-color);
     font-weight: bold;
     font-size: 16px;
 }
 
 #predictedIncome {
-    color: var(--text-color);
+    color: var(--accent-color);
 }
 
 /* Стили для выбора времени смены */
@@ -1280,19 +1281,20 @@ h2 {
 
 /* Стили для отображения превышения продолжительности смены */
 .overdue {
-    color: #ff3333 !important;
+    color: var(--text-color) !important;
     font-weight: bold;
     position: relative;
+    text-align: end;
 }
 
 .overdue::after {
     content: attr(data-overdue);
     display: block;
-    color: #ff3333;
-    font-size: 0.8em;
+    color: var(--accent-color);
+    font-size: 0.9em;
     font-weight: normal;
     margin-top: 2px;
-    animation: pulse 1.5s infinite;
+    animation: pulse 0.5s infinite;
 }
 
 @keyframes pulse {
