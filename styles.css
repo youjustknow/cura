@@ -1298,3 +1298,51 @@ h2 {
     50% { opacity: 1; }
     100% { opacity: 0.7; }
 }
+
+/* Стили для кнопки Яндекс.Навигации */
+#navigateYandexMapsBtn {
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    z-index: 999;
+    border-radius: 30px;
+    background-color: #FDD835;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: none;
+    font-weight: bold;
+}
+
+#navigateYandexMapsBtn .material-icons {
+    font-size: 20px;
+}
+
+/* Стили для кнопок навигации в элементах заказов */
+.order-actions-execution {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.order-navigation-btn {
+    background-color: #FDD835;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.order-navigation-btn .material-icons {
+    font-size: 18px;
+}

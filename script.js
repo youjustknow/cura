@@ -1007,7 +1007,7 @@ function checkForUnfinishedRoute() {
                 multiplierInfo = ` (коэффициент: x${savedDemandMultiplier})`;
             }
             
-            return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}${multiplierInfo}. Восстановить?`)
+            return showConfirm(`Обнаружен незавершенный маршрут. Восстановить?`)
                 .then(result => {
                     if (result) {
                         routeStartTime = startTime;
@@ -3412,6 +3412,21 @@ function createOrderElement(order) {
         actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);
         orderElement.appendChild(actions);
+    } else {
+        // Если маршрут начат, добавляем кнопку навигации для каждого заказа
+        const navigationBtn = document.createElement('button');
+        navigationBtn.className = 'order-navigation-btn';
+        navigationBtn.innerHTML = '<span class="material-icons">directions</span>';
+        navigationBtn.title = 'Открыть в Яндекс.Картах';
+        
+        navigationBtn.addEventListener('click', () => {
+            openYandexMapsNavigation(order.address, order.coordinates);
+        });
+        
+        const orderActions = document.createElement('div');
+        orderActions.className = 'order-actions-execution';
+        orderActions.appendChild(navigationBtn);
+        orderElement.appendChild(orderActions);
     }
 
     return orderElement;
@@ -3676,4 +3691,73 @@ async function testShiftOverdueNotification() {
     }, 5000);
     
     await showAlert('Тестовое уведомление отправлено. Проверьте его получение.');
+}
+
+// Функция для открытия Яндекс.Карт с построенным маршрутом до адреса
+function openYandexMapsNavigation(address, coordinates) {
+    // Если есть координаты, используем их
+    if (coordinates) {
+        let coords;
+        if (typeof coordinates === 'string') {
+            coords = coordinates.split(',').map(Number);
+        } else if (Array.isArray(coordinates)) {
+            coords = coordinates;
+        }
+        
+        if (coords && coords.length === 2) {
+            // Строка запроса для Яндекс.Карт с координатами
+            const url = `yandexnavi://build_route_on_map?lat_to=${coords[0]}&lon_to=${coords[1]}`;
+            
+            // Проверяем, если мобильное устройство, используем схему URI для приложения
+            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                // Пробуем открыть в приложении Яндекс.Навигатор
+                window.location.href = url;
+                
+                // Даем немного времени для перехода, затем пробуем открыть в браузере
+                setTimeout(() => {
+                    window.open(`https://yandex.ru/maps/?rtext=~${coords[0]},${coords[1]}&rtt=auto`, '_blank');
+                }, 500);
+            } else {
+                // На десктопе открываем в браузере
+                window.open(`https://yandex.ru/maps/?rtext=~${coords[0]},${coords[1]}&rtt=auto`, '_blank');
+            }
+            return;
+        }
+    }
+    
+    // Если координат нет или они некорректны, используем адрес
+    if (address) {
+        const encodedAddress = encodeURIComponent(address);
+        
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            // Пробуем открыть в приложении
+            window.location.href = `yandexnavi://search?text=${encodedAddress}`;
+            
+            // Даем немного времени, затем пробуем открыть в браузере
+            setTimeout(() => {
+                window.open(`https://yandex.ru/maps/?text=${encodedAddress}`, '_blank');
+            }, 500);
+        } else {
+            // На десктопе открываем в браузере
+            window.open(`https://yandex.ru/maps/?text=${encodedAddress}`, '_blank');
+        }
+    }
+}
+
+// Обработчик для кнопки навигации через Яндекс.Карты
+const navigateYandexMapsBtn = document.getElementById('navigateYandexMapsBtn');
+if (navigateYandexMapsBtn) {
+    navigateYandexMapsBtn.addEventListener('click', () => {
+        // Если нет заказов, выходим
+        if (!orders || orders.length === 0) {
+            showAlert('Нет заказов для навигации');
+            return;
+        }
+        
+        // Берем первый заказ для навигации
+        const firstOrder = orders[0];
+        if (firstOrder) {
+            openYandexMapsNavigation(firstOrder.address, firstOrder.coordinates);
+        }
+    });
 }
