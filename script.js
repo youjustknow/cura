@@ -291,6 +291,12 @@ const totalIncomeElement = document.getElementById('totalIncome');
 
 // Функция для переключения активного состояния кнопок меню
 function setActiveMenuButton(activeButton) {
+    // Добавляем проверку, чтобы избежать ошибки при доступе до инициализации
+    if (typeof navButtons === 'undefined' || !navButtons) {
+        console.log('navButtons не инициализирована при вызове setActiveMenuButton');
+        return;
+    }
+    
     navButtons.forEach(button => {
         button.classList.remove('active');
     });
@@ -444,9 +450,13 @@ function renderRouteHistory() {
 // Функция загрузки настроек
 function loadSettings() {
     const savedSettings = localStorage.getItem('settings');
+    console.log('Сохраненные настройки из localStorage:', savedSettings);
+    
     if (savedSettings) {
         try {
             const parsed = JSON.parse(savedSettings);
+            console.log('Значение рейтинга из localStorage:', parsed.courierRating);
+            
             // Удаляем themeColor из сохраненных настроек, чтобы всегда использовать статическую палитру
             if (parsed.themeColor) {
                 delete parsed.themeColor;
@@ -464,6 +474,9 @@ function loadSettings() {
 
 // Функция сохранения настроек
 function saveSettings() {
+    const courierRatingElement = document.getElementById('courierRating');
+    console.log('Элемент рейтинга курьера:', courierRatingElement);
+    
     settings = {
         apiKey: document.getElementById('apiKey').value,
         defaultStartLocation: document.getElementById('defaultStartLocation').value,
@@ -472,7 +485,7 @@ function saveSettings() {
         pickupRate: parseFloat(document.getElementById('pickupRate').value) || defaultSettings.pickupRate,
         deliveryRate: parseFloat(document.getElementById('deliveryRate').value) || defaultSettings.deliveryRate,
         highPriceDeliveryRate: parseFloat(document.getElementById('highPriceDeliveryRate').value) || defaultSettings.highPriceDeliveryRate,
-        courierRating: parseInt(document.getElementById('courierRating').value) || defaultSettings.courierRating,
+        courierRating: courierRatingElement ? parseInt(courierRatingElement.value) : defaultSettings.courierRating,
     };
 
     localStorage.setItem('settings', JSON.stringify(settings));
@@ -494,7 +507,12 @@ function updateSettingsForm() {
     document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
     document.getElementById('themeColor').value = settings.themeColor;
     document.getElementById('apiKey').value = settings.apiKey;
-    document.getElementById('courierRating').value = settings.courierRating;
+    
+    const courierRatingElement = document.getElementById('courierRating');
+    console.log('Установка рейтинга курьера:', settings.courierRating, courierRatingElement);
+    if (courierRatingElement) {
+        courierRatingElement.value = settings.courierRating;
+    }
     
     // Обновляем статус уведомлений
     updateNotificationStatus();
@@ -1056,6 +1074,12 @@ function checkForUnfinishedRoute() {
     loadStartLocation();
     checkForUnfinishedRoute().then(restored => {
         if (!restored) {
+            // Если маршрут не восстановлен, сбрасываем множитель оплаты на значение по умолчанию
+            const demandMultiplierSelect = document.getElementById('demandMultiplier');
+            if (demandMultiplierSelect) {
+                demandMultiplierSelect.value = "1";
+            }
+            
             // Проверяем наличие незавершенных заказов
             if (!loadUnfinishedOrders()) {
                 showScreen('initial');
@@ -1319,6 +1343,13 @@ if (okBtn) {
         orders = [];
         routeStartTime = null;
         clearUnfinishedOrders(); // Очищаем незавершенные заказы при сбросе
+        
+        // Сбрасываем множитель оплаты на значение по умолчанию
+        const demandMultiplierSelect = document.getElementById('demandMultiplier');
+        if (demandMultiplierSelect) {
+            demandMultiplierSelect.value = "1";
+        }
+        
         showScreen('initial');
     });
 }
@@ -3705,18 +3736,50 @@ function openYandexMapsNavigation(address, coordinates) {
         }
         
         if (coords && coords.length === 2) {
-            // Строка запроса для Яндекс.Карт с координатами
-            const url = `yandexnavi://build_route_on_map?lat_to=${coords[0]}&lon_to=${coords[1]}`;
-            
             // Проверяем, если мобильное устройство, используем схему URI для приложения
             if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                // Пробуем открыть в приложении Яндекс.Навигатор
-                window.location.href = url;
+                // Массив ссылок для разных приложений Яндекс
+                const appUrls = [
+                    // Яндекс.Карты
+                    `yandexmaps://maps.yandex.ru/?pt=${coords[1]},${coords[0]}&z=15`,
+                    
+                    // Яндекс.Навигатор
+                    `yandexnavi://build_route_on_map?lat_to=${coords[0]}&lon_to=${coords[1]}`,
+                    
+                    // Яндекс.Такси
+                    `yandextaxi://routes?destination=${coords[0]},${coords[1]}`
+                ];
+
+                // Функция для попытки открытия следующего URL, если текущий не сработал
+                let urlIndex = 0;
                 
-                // Даем немного времени для перехода, затем пробуем открыть в браузере
-                setTimeout(() => {
-                    window.open(`https://yandex.ru/maps/?rtext=~${coords[0]},${coords[1]}&rtt=auto`, '_blank');
-                }, 500);
+                const tryNextUrl = () => {
+                    if (urlIndex >= appUrls.length) {
+                        // Если не удалось открыть ни одно приложение, открываем в браузере
+                        window.open(`https://yandex.ru/maps/?rtext=~${coords[0]},${coords[1]}&rtt=auto`, '_blank');
+                        return;
+                    }
+                    
+                    const appUrl = appUrls[urlIndex];
+                    urlIndex++;
+                    
+                    // Запоминаем текущее время
+                    const start = Date.now();
+                    
+                    // Попытка открыть приложение
+                    window.location.href = appUrl;
+                    
+                    // Проверяем, открылось ли приложение через 300мс
+                    setTimeout(() => {
+                        // Если мы все еще на странице (приложение не открылось), пробуем следующий URL
+                        if (Date.now() - start < 400) {
+                            tryNextUrl();
+                        }
+                    }, 300);
+                };
+                
+                // Начинаем попытки открытия
+                tryNextUrl();
             } else {
                 // На десктопе открываем в браузере
                 window.open(`https://yandex.ru/maps/?rtext=~${coords[0]},${coords[1]}&rtt=auto`, '_blank');
@@ -3730,13 +3793,48 @@ function openYandexMapsNavigation(address, coordinates) {
         const encodedAddress = encodeURIComponent(address);
         
         if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            // Пробуем открыть в приложении
-            window.location.href = `yandexnavi://search?text=${encodedAddress}`;
+            // Массив ссылок для разных приложений Яндекс
+            const appUrls = [
+                // Яндекс.Карты
+                `yandexmaps://maps.yandex.ru/?text=${encodedAddress}`,
+                
+                // Яндекс.Навигатор
+                `yandexnavi://search?text=${encodedAddress}`,
+                
+                // Яндекс.Такси
+                `yandextaxi://routes?destination_address=${encodedAddress}`
+            ];
+
+            // Функция для попытки открытия следующего URL, если текущий не сработал
+            let urlIndex = 0;
             
-            // Даем немного времени, затем пробуем открыть в браузере
-            setTimeout(() => {
-                window.open(`https://yandex.ru/maps/?text=${encodedAddress}`, '_blank');
-            }, 500);
+            const tryNextUrl = () => {
+                if (urlIndex >= appUrls.length) {
+                    // Если не удалось открыть ни одно приложение, открываем в браузере
+                    window.open(`https://yandex.ru/maps/?text=${encodedAddress}`, '_blank');
+                    return;
+                }
+                
+                const appUrl = appUrls[urlIndex];
+                urlIndex++;
+                
+                // Запоминаем текущее время
+                const start = Date.now();
+                
+                // Попытка открыть приложение
+                window.location.href = appUrl;
+                
+                // Проверяем, открылось ли приложение через 300мс
+                setTimeout(() => {
+                    // Если мы все еще на странице (приложение не открылось), пробуем следующий URL
+                    if (Date.now() - start < 400) {
+                        tryNextUrl();
+                    }
+                }, 300);
+            };
+            
+            // Начинаем попытки открытия
+            tryNextUrl();
         } else {
             // На десктопе открываем в браузере
             window.open(`https://yandex.ru/maps/?text=${encodedAddress}`, '_blank');
