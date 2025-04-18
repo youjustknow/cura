@@ -379,12 +379,18 @@ function renderRouteHistory() {
             const routeItem = document.createElement('div');
             routeItem.className = 'route-item';
 
+            // Добавляем информацию о коэффициенте в заголовок
+            let multiplierInfo = '';
+            if (route.demandMultiplier && route.demandMultiplier > 1) {
+                multiplierInfo = `<span class="multiplier-badge">x${route.demandMultiplier}</span>`;
+            }
+
             const routeHeader = document.createElement('div');
             routeHeader.className = 'route-header';
             routeHeader.innerHTML = `
                 <span>Маршрут #${route.id}</span>
                 <span>${route.executionTime}</span>
-                <span>${route.income}₽</span>
+                <span>${route.income }₽ ${multiplierInfo}</span>
             `;
 
             const routeDetails = document.createElement('div');
@@ -981,6 +987,7 @@ function loadRouteHistory() {
 function checkForUnfinishedRoute() {
     const savedStartTime = localStorage.getItem('currentRouteStartTime');
     const savedOrders = localStorage.getItem('currentRoute');
+    const savedDemandMultiplier = localStorage.getItem('currentRouteDemandMultiplier');
     
     if (savedStartTime) {
         const startTime = new Date(savedStartTime);
@@ -989,7 +996,12 @@ function checkForUnfinishedRoute() {
 
         // Если прошло менее 24 часов, предлагаем восстановить маршрут
         if (diff < 24 * 60 * 60 * 1000) {
-            return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}. Восстановить?`)
+            let multiplierInfo = '';
+            if (savedDemandMultiplier && parseFloat(savedDemandMultiplier) > 1) {
+                multiplierInfo = ` (коэффициент: x${savedDemandMultiplier})`;
+            }
+            
+            return showConfirm(`Обнаружен незавершенный маршрут, начатый ${startTime.toLocaleString()}${multiplierInfo}. Восстановить?`)
                 .then(result => {
                     if (result) {
                         routeStartTime = startTime;
@@ -1004,18 +1016,29 @@ function checkForUnfinishedRoute() {
                             }
                         }
                         
+                        // Восстанавливаем коэффициент в выпадающем списке
+                        if (savedDemandMultiplier) {
+                            const demandMultiplierSelect = document.getElementById('demandMultiplier');
+                            if (demandMultiplierSelect) {
+                                demandMultiplierSelect.value = savedDemandMultiplier;
+                            }
+                            console.log('Восстановлен коэффициент повышенного спроса:', savedDemandMultiplier);
+                        }
+                        
                         showScreen('routeExecution');
                         renderOrderList(); // Отображаем восстановленные заказы
                         return true;
                     } else {
                         localStorage.removeItem('currentRouteStartTime');
                         localStorage.removeItem('currentRoute');
+                        localStorage.removeItem('currentRouteDemandMultiplier');
                         return false;
                     }
                 });
         } else {
             localStorage.removeItem('currentRouteStartTime');
             localStorage.removeItem('currentRoute');
+            localStorage.removeItem('currentRouteDemandMultiplier');
         }
     }
     return Promise.resolve(false);
@@ -1184,12 +1207,17 @@ if (startRouteBtn) {
             
             setTimeout(() => {
                 routeStartTime = new Date();
-                // Добавим запись в localStorage о начале маршрута
+                
+                // Получаем коэффициент повышенного спроса
+                const demandMultiplier = parseFloat(document.getElementById('demandMultiplier').value) || 1;
+                
+                // Сохраняем информацию о маршруте в localStorage
                 localStorage.setItem('currentRouteStartTime', routeStartTime.toISOString());
-                // Сохраняем текущие заказы в localStorage
+                localStorage.setItem('currentRouteDemandMultiplier', demandMultiplier);
                 localStorage.setItem('currentRoute', JSON.stringify(orders));
+                
                 clearUnfinishedOrders(); // Очищаем сохраненные незавершенные заказы
-                console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()}`);
+                console.log(`Маршрут начат в ${routeStartTime.toLocaleTimeString()} с коэффициентом ${demandMultiplier}`);
                 
                 hideLoadingIndicator(loader);
                 showScreen('routeExecution');
@@ -1220,8 +1248,14 @@ if (finishRouteBtn) {
                 const seconds = Math.floor((diff % 60000) / 1000);
                 const formattedTime = `${hours}ч ${minutes}м ${seconds}с`;
 
-                // Расчет дохода
-                const income = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
+                // Получаем коэффициент повышенного спроса из localStorage
+                const demandMultiplier = parseFloat(localStorage.getItem('currentRouteDemandMultiplier') || 1);
+                
+                // Расчет базового дохода
+                const baseIncome = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
+                
+                // Применяем коэффициент повышенного спроса
+                const income = Math.round(baseIncome * demandMultiplier);
 
                 // Создаем объект маршрута
                 const completedRoute = {
@@ -1231,7 +1265,9 @@ if (finishRouteBtn) {
                     endTime: endTime,
                     executionTime: formattedTime,
                     executionTimeMs: diff,
+                    baseIncome: baseIncome,
                     income: income,
+                    demandMultiplier: demandMultiplier,
                     orders: [...orders],
                     // Добавляем информацию о стартовой точке
                     startLocation: startLocationData
@@ -1248,8 +1284,17 @@ if (finishRouteBtn) {
                 localStorage.setItem('routeHistory', JSON.stringify(routeHistory));
                 localStorage.removeItem('currentRouteStartTime');
                 localStorage.removeItem('currentRoute');
+                localStorage.removeItem('currentRouteDemandMultiplier');
 
+                // Обновляем информацию на экране завершения
+                const executionTimeElement = document.getElementById('executionTime');
+                const baseIncomeElement = document.getElementById('baseIncome');
+                const appliedMultiplierElement = document.getElementById('appliedMultiplier');
+                const totalIncomeElement = document.getElementById('totalIncome');
+                
                 if (executionTimeElement) executionTimeElement.textContent = formattedTime;
+                if (baseIncomeElement) baseIncomeElement.textContent = `${baseIncome}₽`;
+                if (appliedMultiplierElement) appliedMultiplierElement.textContent = `x${demandMultiplier}`;
                 if (totalIncomeElement) totalIncomeElement.textContent = `${income}₽`;
 
                 clearUnfinishedOrders(); // Очищаем незавершенные заказы после завершения маршрута
@@ -1534,12 +1579,18 @@ function createRouteElement(route) {
     const routeElement = document.createElement('div');
     routeElement.className = 'route-item';
 
+    // Добавляем информацию о коэффициенте в заголовок
+    let multiplierInfo = '';
+    if (route.demandMultiplier && route.demandMultiplier > 1) {
+        multiplierInfo = `<span class="multiplier-badge">x${route.demandMultiplier}</span>`;
+    }
+
     const routeHeader = document.createElement('div');
     routeHeader.className = 'route-header';
     routeHeader.innerHTML = `
         <span>Маршрут #${route.id}</span>
         <span>${route.executionTime}</span>
-        <span>${route.income}₽</span>
+        <span>${route.income}₽ ${multiplierInfo}</span>
     `;
 
     const routeDetails = document.createElement('div');
@@ -2881,39 +2932,6 @@ function initDeliveryZoneMap(startLocation, clientOrders) {
         zoomMargin: 30
     });
 }
-
-// Функция для создания полигона зоны доставки
-/*function createDeliveryZonePolygon(map, startCoords, orderCoords) {
-    if (!orderCoords || orderCoords.length < 3) {
-        return; // Нужно минимум 3 точки для создания полигона
-    }
-    
-    // Преобразуем координаты в формат для алгоритма выпуклой оболочки
-    const points = [];
-    points.push({x: startCoords[0], y: startCoords[1]}); // Добавляем стартовую точку
-    
-    orderCoords.forEach(coords => {
-        points.push({x: coords[0], y: coords[1]});
-    });
-    
-    // Строим выпуклую оболочку
-    const hullPoints = getConvexHull(points);
-    
-    // Преобразуем обратно в формат для Яндекс.Карт
-    const hullCoordinates = hullPoints.map(point => [point.x, point.y]);
-    
-    // Создаем и добавляем полигон на карту
-    const polygon = new ymaps.Polygon([hullCoordinates], {
-        hintContent: 'Зона доставки'
-    }, {
-        fillColor: '#ff990055', // Полупрозрачный оранжевый
-        strokeColor: '#ff6600',
-        strokeWidth: 3,
-        strokeStyle: 'solid'
-    });
-    
-    map.geoObjects.add(polygon);
-}*/
 
 // Функция для создания тепловой карты
 function createHeatmap(map, points) {

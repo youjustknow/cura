@@ -1155,3 +1155,92 @@ h2 {
     outline: none;
     border-color: var(--accent-color);
 }
+
+/* Стили для коэффициента повышенного спроса */
+.demand-multiplier-container {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    width: 100%;
+    background-color: var(--primary-dark-header);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--deep-green);
+    z-index: 900;
+}
+
+.demand-multiplier-container label {
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.demand-select {
+    width: 120px;
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid var(--deep-green);
+    background-color: var(--primary-dark);
+    color: var(--accent-color);
+    font-size: 16px;
+    font-weight: bold;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c06555'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+.demand-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+/* Стили для информации о коэффициенте повышенного спроса в истории маршрутов */
+.demand-multiplier-info {
+    background-color: var(--deep-green);
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border-left: 3px solid var(--accent-color);
+}
+
+.multiplier-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.multiplier-value {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.multiplier-details {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.base-income {
+    color: var(--text-muted);
+}
+
+.total-income {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+/* Стили для бейджа с коэффициентом */
+.multiplier-badge {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 10px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
