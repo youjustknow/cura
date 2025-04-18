@@ -66,6 +66,9 @@ let shiftTimeModal = document.getElementById('shiftTimeModal');
 let confirmShiftTimeBtn = document.getElementById('confirmShiftTimeBtn');
 let cancelShiftTimeBtn = document.getElementById('cancelShiftTimeBtn');
 
+// Переменная для хранения события установки PWA
+let deferredPrompt;
+
 // Добавляем функцию для отображения индикатора загрузки
 function showLoadingIndicator(container) {
     // Проверяем, существует ли контейнер
@@ -3403,4 +3406,59 @@ if (listAddOrderBtn) {
     listAddOrderBtn.addEventListener('click', () => {
         showScreen('orderForm');
     });
+}
+
+// Обработчик события beforeinstallprompt для сохранения события
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Предотвращаем показ стандартного диалога установки
+    e.preventDefault();
+    // Сохраняем событие, чтобы вызвать его позже
+    deferredPrompt = e;
+    
+    // Показываем кнопку установки (она скрыта по умолчанию, если PWA не доступно для установки)
+    const installAppBtn = document.getElementById('installAppBtn');
+    if (installAppBtn) {
+        installAppBtn.style.display = 'flex';
+    }
+});
+
+// Обработчик для кнопки установки приложения
+const installAppBtn = document.getElementById('installAppBtn');
+if (installAppBtn) {
+    installAppBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+            // Если событие установки недоступно
+            await showAlert('Приложение уже установлено или установка недоступна в вашем браузере');
+            return;
+        }
+        
+        // Показываем диалог установки
+        deferredPrompt.prompt();
+        
+        // Ожидаем выбора пользователя
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        // Очищаем сохраненное событие
+        deferredPrompt = null;
+        
+        if (outcome === 'accepted') {
+            await showAlert('Спасибо за установку приложения!');
+            installAppBtn.style.display = 'none';
+        }
+    });
+}
+
+// Скрываем кнопку, если приложение запущено в режиме PWA
+window.addEventListener('appinstalled', () => {
+    if (installAppBtn) {
+        installAppBtn.style.display = 'none';
+    }
+    console.log('Приложение успешно установлено');
+});
+
+// Определяем, запущено ли приложение в режиме PWA
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    if (installAppBtn) {
+        installAppBtn.style.display = 'none';
+    }
 }

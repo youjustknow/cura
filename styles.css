@@ -1018,7 +1018,7 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 10px;
+    margin: 10px 0;
 }
 
 .data-control-buttons button {
@@ -1243,4 +1243,9 @@ h2 {
     border-radius: 10px;
     margin-left: 5px;
     vertical-align: middle;
+}
+
+/* Скрываем кнопку установки по умолчанию */
+#installAppBtn {
+    display: none;
 }
