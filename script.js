@@ -1630,7 +1630,7 @@ function createRouteElement(route) {
     routeHeader.innerHTML = `
         <span>Маршрут #${route.id}</span>
         <span>${route.executionTime}</span>
-        <span>${route.income}₽ ${multiplierInfo}</span>
+        <span>${route.income }₽ ${multiplierInfo}</span>
     `;
 
     const routeDetails = document.createElement('div');
@@ -2419,7 +2419,10 @@ function renderOrdersDistributionChart(completedShifts) {
             const hourIndex = hour - 8;
             const mappedDayIndex = shift.startTime.getDay() == 0 ? 6 : shift.startTime.getDay() - 1;
 
-            processedDates[mappedDayIndex][hourIndex].add(shift.startTime.toDateString());
+            // Добавляем проверку, что hourIndex находится в допустимом диапазоне (0-14)
+            if (hourIndex >= 0 && hourIndex < 15) {
+                processedDates[mappedDayIndex][hourIndex].add(shift.startTime.toDateString());
+            }
         }
     });
 
@@ -2427,7 +2430,10 @@ function renderOrdersDistributionChart(completedShifts) {
     const averageWeekdayData = {};
     Object.keys(weekdayData).forEach(dayIndex => {
         averageWeekdayData[dayIndex] = weekdayData[dayIndex].map((total, hourIndex) => {
-            const uniqueDaysCount = processedDates[dayIndex][hourIndex].size;
+            // Добавляем проверку существования значения
+            const uniqueDaysCount = processedDates[dayIndex] && 
+                                    processedDates[dayIndex][hourIndex] ? 
+                                    processedDates[dayIndex][hourIndex].size : 0;
             return uniqueDaysCount > 0 ? Math.round((total / uniqueDaysCount) * 10) / 10 : 0;
         });
     });
