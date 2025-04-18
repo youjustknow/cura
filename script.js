@@ -241,7 +241,6 @@ let settings = { ...defaultSettings };
 const clientAddressInput = document.getElementById('clientAddress');
 const orderWeightInput = document.getElementById('orderWeight');
 const highPriceDeliveryCheckbox = document.getElementById('highPriceDelivery');
-//const addressSuggestions = document.getElementById('addressSuggestions');
 const startLocationInput = document.getElementById('startLocation');
 const startLocationSuggestions = document.getElementById('startLocationSuggestions');
 const setStartLocationBtn = document.getElementById('setStartLocationBtn');
@@ -456,11 +455,6 @@ function loadSettings() {
         try {
             const parsed = JSON.parse(savedSettings);
             console.log('Значение рейтинга из localStorage:', parsed.courierRating);
-            
-            // Удаляем themeColor из сохраненных настроек, чтобы всегда использовать статическую палитру
-            if (parsed.themeColor) {
-                delete parsed.themeColor;
-            }
             settings = { ...defaultSettings, ...parsed };
             console.log('Загружены настройки:', settings);
         } catch (error) {
@@ -505,7 +499,6 @@ function updateSettingsForm() {
     document.getElementById('pickupRate').value = settings.pickupRate;
     document.getElementById('deliveryRate').value = settings.deliveryRate;
     document.getElementById('highPriceDeliveryRate').value = settings.highPriceDeliveryRate;
-    document.getElementById('themeColor').value = settings.themeColor;
     document.getElementById('apiKey').value = settings.apiKey;
     
     const courierRatingElement = document.getElementById('courierRating');
@@ -751,62 +744,6 @@ Object.values(addOrderBtns).forEach(btn => {
         });
     }
 });
-
-// Функция для получения подсказок адресов с использованием API OpenStreetMap
-async function getAddressSuggestions(query) {
-    if (query.length < 3) return [];
-    
-    try {
-        // Добавляем задержку между запросами для соблюдения лимитов API
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`, {
-            headers: {
-                'User-Agent': 'CourierApp/1.0 (your-email@example.com)'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ошибка: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Преобразуем результаты в массив строк адресов
-        const suggestions = data.features.map(feature => {
-            const properties = feature.properties;
-            let address = '';
-            
-            if (properties.name) address += properties.name;
-            if (properties.street) {
-                if (address) address += ', ';
-                address += properties.street;
-            }
-            if (properties.housenumber) {
-                address += ' ' + properties.housenumber;
-            }
-            if (properties.city) {
-                if (address) address += ', ';
-                address += properties.city;
-            }
-            if (properties.state) {
-                if (address) address += ', ';
-                address += properties.state;
-            }
-            if (properties.country) {
-                if (address) address += ', ';
-                address += properties.country;
-            }
-            
-            return address;
-        });
-        
-        return suggestions;
-    } catch (error) {
-        console.error('Ошибка при получении подсказок адресов:', error);
-        return [];
-    }
-}
 
 // Обработчики для экрана настроек
 if (showSettingsBtn) {
