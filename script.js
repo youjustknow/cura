@@ -404,20 +404,63 @@ function renderRouteHistory() {
             const routeDetails = document.createElement('div');
             routeDetails.className = 'route-details hidden';
 
+            // Добавляем информацию о стартовой точке маршрута, если она есть
+            if (route.startLocation && route.startLocation.address) {
+                const startLocationElement = document.createElement('div');
+                startLocationElement.className = 'start-location-info';
+                startLocationElement.innerHTML = `
+                    <div class="start-location-header">Стартовая точка: ${route.startLocation.address}</div>
+                `;
+                routeDetails.appendChild(startLocationElement);
+            }
+
             // Отображаем все заказы в маршруте
             route.orders.forEach(order => {
                 const orderElement = document.createElement('div');
                 orderElement.className = 'history-order-item';
+                if (order.cancelled) {
+                    orderElement.className += ' cancelled-order';
+                }
+                
+                let startLocationInfo = '';
+                // Добавляем информацию о стартовой точке заказа, если она отличается от стартовой точки маршрута
+                if (order.startLocation && order.startLocation.address && 
+                    (!route.startLocation || order.startLocation.address !== route.startLocation.address)) {
+                    startLocationInfo = `
+                        <div class="order-start-location">
+                            <span>Старт: ${order.startLocation.address}</span>
+                        </div>
+                    `;
+                }
+                
+                // Добавляем информацию о компенсации, если заказ отменен
+                let cancellationInfo = '';
+                if (order.cancelled) {
+                    cancellationInfo = `
+                        <div class="history-price-breakdown">
+                            <div>
+                                <span class="history-price-label">Стоимость заказа: </span>
+                                <span class="history-price-value">${order.originalPrice}₽</span>
+                            </div>
+                            <div>
+                                <span class="history-cancellation-fee">Компенсация: ${order.cancellationFee}₽</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 orderElement.innerHTML = `
                     <div class="order-info">
                         <span>${order.id}</span>
                         <span>${order.address}</span>
-                        <span>${order.weight}кг</span>
                         <span>${order.price}₽</span>
                     </div>
+                    ${cancellationInfo}
                     <div class="order-distance">
-                        <span>Расстояние: ${order.distance} км</span>
+                        <span>Расстояние: ${order.distance}км</span>
+                        <span>Вес: ${order.weight}кг</span>
                     </div>
+                    ${startLocationInfo}
                 `;
                 routeDetails.appendChild(orderElement);
             });
@@ -1203,6 +1246,24 @@ if (finishRouteBtn) {
             const confirmed = await showConfirm('Вы действительно хотите завершить маршрут?');
             if (!confirmed) return;
             
+            // Проверяем, есть ли заказы в маршруте
+            if (orders.length === 0) {
+                await showAlert('Все заказы отменены. Маршрут будет завершен без доходов.');
+                
+                // Очищаем информацию о текущем маршруте
+                localStorage.removeItem('currentRouteStartTime');
+                localStorage.removeItem('currentRoute');
+                localStorage.removeItem('currentRouteDemandMultiplier');
+                
+                // Сбрасываем данные приложения
+                orders = [];
+                routeStartTime = null;
+                
+                // Возвращаемся на начальный экран
+                showScreen('initial');
+                return;
+            }
+            
             const loader = showLoadingIndicator();
             
             setTimeout(() => {
@@ -1218,11 +1279,14 @@ if (finishRouteBtn) {
                 // Получаем коэффициент повышенного спроса из localStorage
                 const demandMultiplier = parseFloat(localStorage.getItem('currentRouteDemandMultiplier') || 1);
                 
-                // Расчет базового дохода
+                // Расчет базового дохода (включая стоимость обычных заказов)
                 const baseIncome = orders.reduce((sum, order) => sum + order.price, 0) + settings.pickupRate;
                 
                 // Применяем коэффициент повышенного спроса
                 const income = Math.round(baseIncome * demandMultiplier);
+
+                // Получаем информацию о стартовой точке
+                const startLocationData = loadStartLocation();
 
                 // Создаем объект маршрута
                 const completedRoute = {
@@ -1237,7 +1301,13 @@ if (finishRouteBtn) {
                     demandMultiplier: demandMultiplier,
                     orders: [...orders],
                     // Добавляем информацию о стартовой точке
-                    startLocation: startLocationData
+                    startLocation: startLocationData,
+                    // Добавляем статистику по отмененным заказам
+                    cancelledOrdersInfo: {
+                        count: orders.filter(o => o.cancelled).length,
+                        totalFees: orders.reduce((sum, order) => 
+                            sum + (order.cancelled ? order.cancellationFee : 0), 0)
+                    }
                 };
 
                 // Добавляем маршрут в текущую смену
@@ -1586,6 +1656,9 @@ function createRouteElement(route) {
     route.orders.forEach(order => {
         const orderElement = document.createElement('div');
         orderElement.className = 'history-order-item';
+        if (order.cancelled) {
+            orderElement.className += ' cancelled-order';
+        }
         
         let startLocationInfo = '';
         // Добавляем информацию о стартовой точке заказа, если она отличается от стартовой точки маршрута
@@ -1598,15 +1671,32 @@ function createRouteElement(route) {
             `;
         }
         
+        // Добавляем информацию о компенсации, если заказ отменен
+        let cancellationInfo = '';
+        if (order.cancelled) {
+            cancellationInfo = `
+                <div class="history-price-breakdown">
+                    <div>
+                        <span class="history-price-label">Стоимость заказа: </span>
+                        <span class="history-price-value">${order.originalPrice}₽</span>
+                    </div>
+                    <div>
+                        <span class="history-cancellation-fee">Компенсация: ${order.cancellationFee}₽</span>
+                    </div>
+                </div>
+            `;
+        }
+        
         orderElement.innerHTML = `
             <div class="order-info">
                 <span>${order.id}</span>
                 <span>${order.address}</span>
-                <span>${order.weight}кг</span>
                 <span>${order.price}₽</span>
             </div>
+            ${cancellationInfo}
             <div class="order-distance">
-                <span>Расстояние: ${order.distance} км</span>
+                <span>Расстояние: ${order.distance}км</span>
+                <span>Вес: ${order.weight}кг</span>
             </div>
             ${startLocationInfo}
         `;
@@ -3327,6 +3417,9 @@ function renderOrderList() {
 function createOrderElement(order) {
     const orderElement = document.createElement('div');
     orderElement.className = 'order-item';
+    if (order.cancelled) {
+        orderElement.className += ' cancelled-order';
+    }
     orderElement.setAttribute('data-id', order.id);
 
     const header = document.createElement('div');
@@ -3349,6 +3442,27 @@ function createOrderElement(order) {
     orderElement.appendChild(data);
     orderElement.appendChild(price);
     orderElement.appendChild(distance);
+
+    // Добавляем информацию о компенсации, если заказ отменен
+    if (order.cancelled) {
+        const cancellationInfo = document.createElement('div');
+        cancellationInfo.className = 'cancellation-info';
+        cancellationInfo.innerHTML = `
+            <div class="cancellation-fee">
+                <span>Компенсация</span>
+                <span>${order.cancellationFee}₽</span>
+            </div>
+            <div class="order-price-breakdown">
+                <span>Стоимость заказа</span>
+                <span>${order.originalPrice}₽</span>
+            </div>
+            <div class="order-price-breakdown">
+                <span>Общая сумма</span>
+                <span>${order.price}₽</span>
+            </div>
+        `;
+        orderElement.appendChild(cancellationInfo);
+    }
 
     // Добавляем кнопки редактирования и удаления только если маршрут не начат
     if (!routeStartTime) {
@@ -3384,7 +3498,11 @@ function createOrderElement(order) {
         actions.appendChild(deleteBtn);
         orderElement.appendChild(actions);
     } else {
-        // Если маршрут начат, добавляем кнопку навигации для каждого заказа
+        // Если маршрут начат, добавляем кнопку навигации и кнопку отмены для каждого заказа
+        const orderActions = document.createElement('div');
+        orderActions.className = 'order-actions-execution';
+        
+        // Кнопка навигации
         const navigationBtn = document.createElement('button');
         navigationBtn.className = 'order-navigation-btn';
         navigationBtn.innerHTML = '<span class="material-icons">directions</span>';
@@ -3394,9 +3512,51 @@ function createOrderElement(order) {
             openYandexMapsNavigation(order.address, order.coordinates);
         });
         
-        const orderActions = document.createElement('div');
-        orderActions.className = 'order-actions-execution';
         orderActions.appendChild(navigationBtn);
+        
+        // Добавляем кнопку отмены заказа только если заказ еще не отменен
+        if (!order.cancelled) {
+            // Кнопка отмены заказа
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'order-cancel-btn';
+            cancelBtn.innerHTML = '<span class="material-icons">cancel</span>';
+            cancelBtn.title = 'Отменить заказ';
+            
+            cancelBtn.addEventListener('click', async () => {
+                const confirmed = await showConfirm('Клиент отменил заказ. Отметить как возвращенный в магазин?');
+                if (confirmed) {
+                    // Рассчитываем компенсацию за отмену
+                    const cancellationFee = calculateCancellationFee(parseFloat(order.distance));
+                    
+                    // Отмечаем заказ как отмененный и добавляем компенсацию к стоимости заказа
+                    const cancelledOrder = {
+                        ...order,
+                        cancelled: true,
+                        cancellationFee: cancellationFee,
+                        originalPrice: order.price,
+                        price: order.price + cancellationFee // Прибавляем компенсацию к стоимости
+                    };
+                    
+                    // Заменяем заказ в массиве на отмененный
+                    const orderIndex = orders.findIndex(o => o.id === order.id);
+                    if (orderIndex !== -1) {
+                        orders[orderIndex] = cancelledOrder;
+                    }
+                    
+                    // Обновляем информацию о маршруте в localStorage
+                    localStorage.setItem('currentRoute', JSON.stringify(orders));
+                    
+                    // Обновляем отображение заказов
+                    renderOrderList();
+                    
+                    // Показываем уведомление
+                    showAlert(`Заказ отмечен как возвращенный. Дополнительная оплата: ${cancellationFee}₽`);
+                }
+            });
+            
+            orderActions.appendChild(cancelBtn);
+        }
+        
         orderElement.appendChild(orderActions);
     }
 
@@ -3798,4 +3958,15 @@ if (navigateYandexMapsBtn) {
             openYandexMapsNavigation(firstOrder.address, firstOrder.coordinates);
         }
     });
+}
+
+// Функция для расчета компенсации при отмене заказа
+function calculateCancellationFee(distance) {
+    if (distance < 7) {
+        return 149;
+    } else if (distance >= 7 && distance < 15) {
+        return 298;
+    } else {
+        return 447;
+    }
 }
